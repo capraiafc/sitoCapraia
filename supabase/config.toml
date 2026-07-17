@@ -1,0 +1,2 @@
+[functions.send-membership-request]
+verify_jwt = false

@@ -1,0 +1,15 @@
+.operator-management { max-width: 760px; }
+.operator-management__form { display: flex; gap: .75rem; align-items: end; flex-wrap: wrap; }
+.operator-management__form label { display: grid; gap: .35rem; flex: 1 1 300px; font-size: .8rem; }
+.operator-management__form input { min-height: 42px; padding: .65rem .75rem; border: 1px solid currentColor; background: transparent; color: inherit; }
+.operator-management__form button, .operator-management__remove { min-height: 42px; padding: .65rem .9rem; border: 1px solid currentColor; background: transparent; color: inherit; cursor: pointer; }
+.operator-management__form button:disabled { opacity: .6; cursor: wait; }
+.operator-management__feedback { min-height: 1.5em; margin: 1rem 0; font-size: .9rem; }
+.operator-management__feedback[data-state="error"] { color: #a41313; }
+.operator-management__feedback[data-state="success"] { color: #0f6a36; }
+.operator-management__list { margin: 0; padding: 0; list-style: none; border-top: 1px solid currentColor; }
+.operator-management__item { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid currentColor; }
+.operator-management__item span { display: grid; gap: .2rem; }
+.operator-management__item small { opacity: .72; }
+.operator-management__remove:hover, .operator-management__remove:focus-visible { background: #a41313; border-color: #a41313; color: #fff; }
+@media (max-width: 520px) { .operator-management__item { align-items: flex-start; flex-direction: column; } }

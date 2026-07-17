@@ -1,0 +1,7 @@
+.player-carousel { overflow: hidden; }
+.player-carousel .player-grid { display: flex; grid-template-columns: none; transition: transform .55s ease; }
+.player-carousel .player-card { flex: 0 0 25%; min-width: 0; }
+.squad-controls button:disabled { opacity: .38; cursor: not-allowed; }
+@media (max-width:1024px) { .player-carousel .player-card { flex-basis:33.333333%; } }
+@media (max-width:720px) { .player-carousel .player-card { flex-basis:50%; } }
+@media (max-width:480px) { .player-carousel .player-card { flex-basis:100%; } }

@@ -1,0 +1,18 @@
+.players-admin { max-width: 900px; }
+.players-admin__form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .85rem; margin: 1rem 0; }
+.players-admin__field { display: grid; gap: .3rem; font-size: .85rem; }
+.players-admin__field--wide { grid-column: 1 / -1; }
+.players-admin__field input, .players-admin__field select, .players-admin__field textarea { min-height: 42px; padding: .6rem .7rem; font: inherit; color: inherit; border: 1px solid currentColor; background: transparent; }
+.players-admin__field textarea { min-height: 94px; resize: vertical; }
+.players-admin__check, .players-admin__form-actions, .players-admin__actions { display: flex; align-items: center; gap: .65rem; flex-wrap: wrap; }
+.players-admin__button { min-height: 40px; padding: .55rem .8rem; cursor: pointer; color: inherit; background: transparent; border: 1px solid currentColor; font: inherit; }
+.players-admin__button:disabled { opacity: .55; cursor: wait; }
+.players-admin__button--danger:hover, .players-admin__button--danger:focus-visible { color: #fff; background: #a41313; border-color: #a41313; }
+.players-admin__feedback { min-height: 1.5em; margin: 1rem 0; }
+.players-admin__feedback[data-state="error"] { color: #a41313; }
+.players-admin__feedback[data-state="success"] { color: #0f6a36; }
+.players-admin__list { margin: 0; padding: 0; list-style: none; border-top: 1px solid currentColor; }
+.players-admin__item { display: flex; gap: 1rem; justify-content: space-between; align-items: center; padding: .9rem 0; border-bottom: 1px solid currentColor; }
+.players-admin__summary { display: grid; gap: .2rem; }
+.players-admin__summary small { opacity: .72; }
+@media (max-width: 620px) { .players-admin__form { grid-template-columns: 1fr; } .players-admin__item { align-items: flex-start; flex-direction: column; } }
