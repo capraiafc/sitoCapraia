@@ -8,7 +8,7 @@ if (membershipForm) {
   const cardFieldsRoot = preview.querySelector('[data-membership-card-fields]');
   const front = document.querySelector('[data-membership-front]');
   const commonEmailField = membershipForm.querySelector('[data-membership-email-field]');
-  const commonEmailInput = commonEmailField.querySelector('input');
+  const commonEmailInput = membershipForm.querySelector('#membership-contact-email');
   const feedback = membershipForm.querySelector('[data-membership-feedback]');
   const submit = membershipForm.querySelector('button[type="submit"]');
   const requestTypeInput = membershipForm.querySelector('[name="request_type"]');
@@ -21,9 +21,10 @@ if (membershipForm) {
     feedback.hidden = !message;
   };
 
-  const currentFields = () => requestType === 'renewal'
+  const currentFields = () => (requestType === 'renewal'
     ? membershipConfig.renewalFields
-    : membershipConfig.newMemberFields;
+    : membershipConfig.newMemberFields
+  ).filter((field) => field.name !== 'email');
 
   const renderFields = () => {
     fieldsRoot.replaceChildren();

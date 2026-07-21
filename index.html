@@ -98,7 +98,7 @@
             <div class="membership-choice" role="group" aria-label="Tipo di richiesta"><button type="button" class="is-active" data-membership-type="renewal" aria-pressed="true">Rinnovo</button><button type="button" data-membership-type="new_member" aria-pressed="false">Nuovo tesserato</button></div>
             <div class="membership-front-column" data-membership-front><div class="membership-front"><img src="assets/images/tessera-socio-fronte.jpg" alt="Fronte della tessera socio Capraia FC" /></div></div>
             <div class="membership-request-column"><div class="membership-card" data-membership-preview aria-label="Retro tessera socio editabile"><div data-membership-card-fields></div></div><div class="membership-fields" data-membership-fields></div></div>
-            <div class="membership-actions"><label data-membership-email-field>Email di contatto<input required type="email" name="email" autocomplete="email" placeholder="nome@email.it" maxlength="254" /></label><label class="membership-privacy"><input required type="checkbox" name="privacy" /> <span>Ho letto e accetto l’informativa privacy e autorizzo il trattamento dei dati per la richiesta tessera.</span></label><label class="membership-honeypot" aria-hidden="true">Sito web<input tabindex="-1" autocomplete="off" name="website" /></label><button class="button button-light membership-submit" type="submit">Invia richiesta <span>→</span></button></div>
+            <div class="membership-actions"><label data-membership-email-field>Email di contatto<input id="membership-contact-email" required type="email" name="email" autocomplete="email" placeholder="nome@email.it" maxlength="254" /></label><label class="membership-privacy"><input required type="checkbox" name="privacy" /> <span>Ho letto e accetto l’informativa privacy e autorizzo il trattamento dei dati per la richiesta tessera.</span></label><label class="membership-honeypot" aria-hidden="true">Sito web<input tabindex="-1" autocomplete="off" name="website" /></label><button class="button button-light membership-submit" type="submit">Invia richiesta <span>→</span></button></div>
             <p class="membership-feedback" data-membership-feedback role="status" aria-live="polite" hidden></p>
           </form>
         </div>
@@ -167,10 +167,10 @@
     <script src="history.js"></script>
     <script src="app.js"></script>
     <script src="auth-config.js"></script>
-    <script src="membership-config.js"></script>
+    <script src="membership-config.js?v=shared-email-20260721"></script>
     <script type="module" src="auth.js"></script>
     <script type="module" src="public-data.js"></script>
     <script type="module" src="player-carousel.js"></script>
-    <script type="module" src="membership.js"></script>
+    <script type="module" src="membership.js?v=shared-email-20260721"></script>
   </body>
 </html>
