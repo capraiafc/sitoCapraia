@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="carousel.css" />
     <link rel="stylesheet" href="news-modal.css" />
     <link rel="stylesheet" href="membership.css" />
+    <link rel="stylesheet" href="club.css" />
     <style>
       /* Palette ricavata dallo stemma Capraia Football Club. */
       :root { --green:#002f86; --deep:#001a4c; --yellow:#ffd21c; --cream:#fff; --paper:#eef3ff; --coral:#f28c00; --ink:#06132f; --line:rgba(0,47,134,.18); }
@@ -55,20 +56,20 @@
   </head>
   <body>
     <a class="skip-link" href="#contenuto">Vai al contenuto</a>
-    <header class="site-header" id="top">
+    <header class="site-header">
       <a class="brand" href="#top" aria-label="Capraia Football Club, torna in alto">
         <img src="assets/images/capraia-logo.png" alt="Stemma Capraia Football Club" />
         <span>CAPRAIA <b>FOOTBALL CLUB</b></span>
       </a>
       <button class="menu-toggle" aria-expanded="false" aria-controls="main-nav"><span></span><span></span><span></span><span class="sr-only">Apri menu</span></button>
       <nav id="main-nav" aria-label="Navigazione principale">
-        <a href="#club">Il club</a><a href="#squadra">Squadra</a><a href="#partite">Partite</a><a href="#news">News</a><a href="#tessera">Tessera</a><a href="#merch">Merch</a><a href="#contatti">Contatti</a>
+        <a href="#partite">Risultati</a><a href="#tessera">Tessera</a><a href="#merch">Merch</a><a href="#squadra">Squadra</a><a href="#news">News</a><a href="#club">Il Club</a><a href="#contatti">Contatti</a>
       </nav>
       <a class="operator-link" href="admin.html" data-operator-login><span>●</span> Accedi come operatore</a>
     </header>
 
     <main id="contenuto">
-      <section class="hero" aria-labelledby="hero-title">
+      <section class="hero" id="top" aria-labelledby="hero-title">
         <div class="hero-copy">
           <img class="hero-logo" src="assets/images/capraia-logo.png" alt="Stemma Capraia Football Club" />
           <p class="eyebrow motto">UBI COR VERBERAT</p>
@@ -89,9 +90,23 @@
         </article>
       </section>
 
-      <section class="intro-section" id="club">
-        <div class="intro-image image-placeholder"><span>01</span><p>Un posto piccolo.<br />Un legame enorme.</p></div>
-        <div class="intro-copy"><p class="eyebrow">il nostro club</p><h2>Non è solo<br /><em>calcio.</em></h2><p>Capraia Football Club porta in campo passione, rispetto e spirito di comunità. Ogni allenamento e ogni partita sono una nuova occasione per costruire qualcosa insieme.</p><a class="button button-dark" href="#chi-siamo">Scopri chi siamo <span>→</span></a></div>
+      <section class="membership-section" id="tessera" aria-labelledby="membership-title">
+        <div class="membership-section__intro"><p class="eyebrow">tessera socio</p><h2 id="membership-title">Il tuo posto<br />a <em>bordo campo.</em></h2><p>Invia la richiesta di rinnovo o di nuova tessera. La segreteria riceverà un riepilogo ordinato dei dati e ti risponderà via email.</p></div>
+        <div class="membership-layout">
+          <form class="membership-form" data-membership-form novalidate>
+            <input type="hidden" name="request_type" value="renewal" />
+            <div class="membership-choice" role="group" aria-label="Tipo di richiesta"><button type="button" class="is-active" data-membership-type="renewal" aria-pressed="true">Rinnovo</button><button type="button" data-membership-type="new_member" aria-pressed="false">Nuovo tesserato</button></div>
+            <div class="membership-front-column" data-membership-front><div class="membership-front"><img src="assets/images/tessera-socio-fronte.jpg" alt="Fronte della tessera socio Capraia FC" /></div></div>
+            <div class="membership-request-column"><div class="membership-card" data-membership-preview aria-label="Retro tessera socio editabile"><div data-membership-card-fields></div></div><div class="membership-fields" data-membership-fields></div></div>
+            <div class="membership-actions"><label data-membership-email-field>Email di contatto<input required type="email" name="email" autocomplete="email" placeholder="nome@email.it" maxlength="254" /></label><label class="membership-privacy"><input required type="checkbox" name="privacy" /> <span>Ho letto e accetto l’informativa privacy e autorizzo il trattamento dei dati per la richiesta tessera.</span></label><label class="membership-honeypot" aria-hidden="true">Sito web<input tabindex="-1" autocomplete="off" name="website" /></label><button class="button button-light membership-submit" type="submit">Invia richiesta <span>→</span></button></div>
+            <p class="membership-feedback" data-membership-feedback role="status" aria-live="polite" hidden></p>
+          </form>
+        </div>
+      </section>
+
+      <section class="merch-section" id="merch" aria-labelledby="merch-title">
+        <div class="section-head"><div><p class="eyebrow">shop ufficiale</p><h2 id="merch-title">Indossa i<br /><em>nostri colori.</em></h2></div></div>
+        <div class="merch-placeholder" data-public-merch><img src="assets/images/capraia-logo.png" alt="" /><div><p class="eyebrow">catalogo in aggiornamento</p><h3>Presto qui troverai i prodotti ufficiali.</h3><p>Appena ricevo foto, disponibilità e prezzi reali, costruisco lo shop con il catalogo del club.</p></div></div>
       </section>
 
       <section class="squad-section" id="squadra" aria-labelledby="squad-title">
@@ -114,23 +129,13 @@
         </div>
       </section>
 
-      <section class="membership-section" id="tessera" aria-labelledby="membership-title">
-        <div class="membership-section__intro"><p class="eyebrow">tessera socio</p><h2 id="membership-title">Il tuo posto<br />a <em>bordo campo.</em></h2><p>Invia la richiesta di rinnovo o di nuova tessera. La segreteria riceverà un riepilogo ordinato dei dati e ti risponderà via email.</p></div>
-        <div class="membership-layout">
-          <form class="membership-form" data-membership-form novalidate>
-            <input type="hidden" name="request_type" value="renewal" />
-            <div class="membership-choice" role="group" aria-label="Tipo di richiesta"><button type="button" class="is-active" data-membership-type="renewal" aria-pressed="true">Rinnovo</button><button type="button" data-membership-type="new_member" aria-pressed="false">Nuovo tesserato</button></div>
-            <div class="membership-front-column" data-membership-front><div class="membership-front"><img src="assets/images/tessera-socio-fronte.jpg" alt="Fronte della tessera socio Capraia FC" /></div></div>
-            <div class="membership-request-column"><div class="membership-card" data-membership-preview aria-label="Retro tessera socio editabile"><div data-membership-card-fields></div></div><div class="membership-fields" data-membership-fields></div></div>
-            <div class="membership-actions"><label data-membership-email-field>Email di contatto<input required type="email" name="email" autocomplete="email" placeholder="nome@email.it" maxlength="254" /></label><label class="membership-privacy"><input required type="checkbox" name="privacy" /> <span>Ho letto e accetto l’informativa privacy e autorizzo il trattamento dei dati per la richiesta tessera.</span></label><label class="membership-honeypot" aria-hidden="true">Sito web<input tabindex="-1" autocomplete="off" name="website" /></label><button class="button button-light membership-submit" type="submit">Invia richiesta <span>→</span></button></div>
-            <p class="membership-feedback" data-membership-feedback role="status" aria-live="polite" hidden></p>
-          </form>
+      <section class="club-section" id="club" aria-labelledby="club-title">
+        <div class="club-section__gallery" aria-label="La comunità Capraia Football Club">
+          <figure class="club-section__main-photo"><img src="assets/images/club-supporters.jpg" alt="Tifosi del Capraia Football Club sugli spalti" /><figcaption><span>01</span>Sostieni la tua città,<br />il nostro calcio è questo qua.</figcaption></figure>
+          <figure class="club-section__side-photo"><img src="assets/images/club-huddle.jpg" alt="Giocatori del Capraia Football Club riuniti in campo" /></figure>
+          <p class="club-section__statement">Prima una<br />comunità.<br /><em>Poi</em> una squadra.</p>
         </div>
-      </section>
-
-      <section class="merch-section" id="merch" aria-labelledby="merch-title">
-        <div class="section-head"><div><p class="eyebrow">shop ufficiale</p><h2 id="merch-title">Indossa i<br /><em>nostri colori.</em></h2></div></div>
-        <div class="merch-placeholder" data-public-merch><img src="assets/images/capraia-logo.png" alt="" /><div><p class="eyebrow">catalogo in aggiornamento</p><h3>Presto qui troverai i prodotti ufficiali.</h3><p>Appena ricevo foto, disponibilità e prezzi reali, costruisco lo shop con il catalogo del club.</p></div></div>
+        <div class="club-section__copy"><p class="eyebrow">il nostro Club</p><h2 id="club-title">Un posto piccolo.<br /><em>Un legame enorme.</em></h2><p class="club-section__lead">Capraia Football Club nasce da un gruppo di amici, da una squadra dell’oratorio e dalla voglia di stare insieme. Oggi è una società costruita dal basso: chi gioca, chi organizza, chi cucina, chi canta sugli spalti.</p><div class="club-section__facts"><p><strong>2017</strong><span>l’inizio</span></p><p><strong>100+</strong><span>soci e socie</span></p><p><strong>1</strong><span>cuore gialloblù</span></p></div><button class="button button-dark" type="button" data-open-club onclick="document.getElementById('club-dialog').showModal()">Scopri chi siamo <span>→</span></button><a class="club-section__instagram" href="https://www.instagram.com/capraiafc/" target="_blank" rel="noopener">Dai nostri post, la nostra storia <span>↗</span></a></div>
       </section>
 
       <section class="board-section" id="bacheca"><div><p class="eyebrow">la bacheca</p><h2>Fatti <em>sentire.</em></h2><p>Lascia un messaggio alla squadra. Ogni commento viene controllato prima della pubblicazione.</p></div><form id="comment-form" class="comment-form"><label>Il tuo messaggio<textarea required name="message" maxlength="280" placeholder="Forza Capraia!"></textarea></label><div><span id="char-count">0 / 280</span><button class="button button-dark" type="submit">Invia commento <span>→</span></button></div></form></section>
@@ -140,10 +145,22 @@
 
     </main>
 
-    <footer id="contatti"><div class="footer-brand"><a class="brand" href="#top"><img src="assets/images/capraia-logo.png" alt="" /><span>CAPRAIA <b>FOOTBALL CLUB</b></span></a><p>Calcio dilettantistico, comunità e passione.</p></div><div><h3>Esplora</h3><a href="#club">Il club</a><a href="#partite">Partite</a><a href="#news">News</a><a href="#merch">Merch</a></div><div><h3>Contatti</h3><a href="mailto:capraiafc@gmail.com">capraiafc@gmail.com</a><a href="https://www.instagram.com/capraiafc/" target="_blank" rel="noopener">Instagram ↗</a><p>Capraia e Limite, Firenze</p></div><div class="footer-news"><h3>Resta con noi</h3><form id="newsletter-form"><label class="sr-only" for="newsletter-email">La tua email</label><input id="newsletter-email" required type="email" placeholder="La tua email" /><button aria-label="Iscriviti alla newsletter">→</button></form></div><div class="footer-bottom"><p>© 2026 Capraia Football Club · P.IVA da inserire</p><a href="#privacy">Privacy</a><a href="#cookie">Cookie</a></div></footer>
+    <footer id="contatti"><div class="footer-brand"><a class="brand" href="#top"><img src="assets/images/capraia-logo.png" alt="" /><span>CAPRAIA <b>FOOTBALL CLUB</b></span></a><p>Calcio dilettantistico, comunità e passione.</p></div><div><h3>Esplora</h3><a href="#club">Il Club</a><a href="#partite">Risultati</a><a href="#news">News</a><a href="#merch">Merch</a></div><div><h3>Contatti</h3><a href="mailto:capraiafc@gmail.com">capraiafc@gmail.com</a><a href="https://www.instagram.com/capraiafc/" target="_blank" rel="noopener">Instagram ↗</a><p>Capraia e Limite, Firenze</p></div><div class="footer-news"><h3>Resta con noi</h3><form id="newsletter-form"><label class="sr-only" for="newsletter-email">La tua email</label><input id="newsletter-email" required type="email" placeholder="La tua email" /><button aria-label="Iscriviti alla newsletter">→</button></form></div><div class="footer-bottom"><p>© 2026 Capraia Football Club · P.IVA da inserire</p><a href="#privacy">Privacy</a><a href="#cookie">Cookie</a></div></footer>
     <dialog class="history-modal" id="history-dialog" aria-labelledby="history-dialog-title"><div class="history-modal-shell"><div class="history-modal-top"><p class="eyebrow">capraia football club</p><button class="history-close" type="button" data-close-history aria-label="Chiudi storico">×</button></div><div id="history-dialog-content"></div></div></dialog>
     <dialog class="match-modal" id="match-dialog" aria-labelledby="match-dialog-title"><div class="match-modal-shell"><button class="history-close" type="button" data-close-match aria-label="Chiudi dettaglio partita">×</button><div id="match-dialog-content"></div></div></dialog>
     <dialog class="news-modal" id="news-dialog" aria-labelledby="news-dialog-title"><div class="news-modal__shell"><button class="history-close" type="button" data-close-news aria-label="Chiudi articolo">×</button><div id="news-dialog-content"></div></div></dialog>
+    <dialog class="club-modal" id="club-dialog" aria-labelledby="club-dialog-title">
+      <div class="club-modal__shell">
+        <button class="club-modal__close" type="button" data-close-club onclick="document.getElementById('club-dialog').close()" aria-label="Chiudi Chi siamo">×</button>
+        <header class="club-modal__hero"><img src="assets/images/club-stands.jpg" alt="Tifosi del Capraia Football Club con bandiere gialloblù" /><div><p class="eyebrow">chi siamo</p><h2 id="club-dialog-title">Una comunità<br />che fa <em>squadra.</em></h2><p>Il Capraia Football Club non è nato attorno a un tavolo di dirigenti: è nato da amici, da un campo e dalla voglia di esserci.</p></div></header>
+        <div class="club-modal__intro"><p class="club-modal__kicker">Ubi cor verberat</p><p>Prima di essere una squadra di calcio, siamo un gruppo di persone che ha scelto di costruire qualcosa insieme. La maglia è arrivata dopo: per dare un nome, dei colori e una direzione a un legame che esisteva già.</p></div>
+        <section class="club-story-block club-story-block--origins"><div><p class="eyebrow">01 · da dove veniamo</p><h3>Estate 2017.<br />Amici, oratorio,<br /><em>una scommessa.</em></h3><p>Tutto parte da una squadra dell’oratorio e da ragazzi che volevano tifare. Le prime trasferte erano un incastro di macchine, venerdì e lunedì sera, nuove amicizie e rivalità. Senza sapere dove saremmo arrivati, abbiamo cominciato a sentirci già casa.</p></div><figure><img src="assets/images/club-team.jpg" alt="La squadra del Capraia Football Club con un trofeo" /><figcaption>Ogni stagione aggiunge un pezzo di storia.</figcaption></figure></section>
+        <section class="club-story-block club-story-block--people"><figure><img src="assets/images/club-community.jpg" alt="Cena di comunità del Capraia Football Club" /></figure><div><p class="eyebrow">02 · molto oltre il campo</p><h3>Una tavolata,<br />un paese,<br /><em>cento storie.</em></h3><p>Il calcio ci riunisce, ma non è l’unica cosa che facciamo. Le cene sociali, le feste, i progetti per i bambini e il tempo regalato dagli associati sono parte della stessa idea: creare occasioni vere per incontrarsi.</p><p>Quando 126 persone di età e percorsi diversi si siedono sotto gli stessi colori, la squadra ha già vinto qualcosa.</p></div></section>
+        <section class="club-modal__roles"><p class="eyebrow">03 · tutti indispensabili</p><h3>Ci sono tanti modi<br />di indossare questa maglia.</h3><div><article><span>⚽</span><h4>Chi scende in campo</h4><p>Giocatori e staff trasformano allenamenti, sacrificio e fiducia in novanta minuti.</p></article><article><span>✦</span><h4>Chi tiene in piedi il Club</h4><p>Soci e socie organizzano, cucinano, allestiscono eventi e rendono possibile ogni stagione.</p></article><article><span>♫</span><h4>Chi canta sugli spalti</h4><p>I tifosi danno voce alla maglia: nelle domeniche belle, nelle trasferte e nei momenti più difficili.</p></article></div></section>
+        <section class="club-story-block club-story-block--pitch"><div><p class="eyebrow">04 · il campo racconta</p><h3>Delusioni, gioie<br />e una strada<br /><em>ancora lunga.</em></h3><p>Abbiamo conosciuto l’amarezza di un playoff sfumato, gli infortuni che fanno male e la fatica di ricominciare. E abbiamo conosciuto anche la gioia del campionato vinto: il risultato di chi gioca, chi organizza e chi non lascia mai solo nessuno.</p><p>Non ci interessa raccontare soltanto le vittorie. Ci interessa raccontare il modo in cui ci arriviamo: insieme.</p></div><figure><img src="assets/images/club-celebration.jpg" alt="Tifosi del Capraia Football Club in festa sugli spalti" /><figcaption>Il cuore gialloblù batte più forte quando siamo insieme.</figcaption></figure></section>
+        <section class="club-modal__closing"><img src="assets/images/club-joy.jpg" alt="Un giocatore del Capraia Football Club esulta davanti ai tifosi" /><div><p class="eyebrow">oggi e domani</p><h3>Capraia è<br /><em>aggregazione.</em></h3><p>La strada è ancora lunga, le sfide non mancano. Ma ogni volta che il campo, la tribuna e una tavolata si riempiono di gialloblù, sappiamo perché abbiamo iniziato.</p><a class="button button-light" href="https://www.instagram.com/capraiafc/" target="_blank" rel="noopener">Segui la storia su Instagram <span>↗</span></a></div></section>
+      </div>
+    </dialog>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="data/history.js"></script>
     <script src="data/match-details.js"></script>

@@ -6,6 +6,13 @@ if (newsDialog) {
   newsDialog.addEventListener('click', (event) => { if (event.target === newsDialog) newsDialog.close(); });
 }
 
+const clubDialog = $('#club-dialog');
+if (clubDialog) {
+  document.querySelectorAll('[data-open-club]').forEach((button) => button.addEventListener('click', () => { if (!clubDialog.open) clubDialog.showModal(); }));
+  clubDialog.querySelector('[data-close-club]').addEventListener('click', () => { if (clubDialog.open) clubDialog.close(); });
+  clubDialog.addEventListener('click', (event) => { if (event.target === clubDialog) clubDialog.close(); });
+}
+
 const toast = (message) => {
   const element = $('#toast');
   element.textContent = message;

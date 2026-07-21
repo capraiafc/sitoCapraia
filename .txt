@@ -1,0 +1,123 @@
+guida sito capraia 
+
+Sì: ti serve un dominio, ma non un hosting tradizionale. Il sito può stare gratuitamente su Cloudflare Pages, mentre Supabase continuerà a gestire login, database, immagini e funzioni server; Resend invierà le email.
+Budget annuale
+Servizio	Costo iniziale consigliato
+Dominio capraiafc.it	circa €10–20/anno
+Hosting sito (Cloudflare Pages)	€0
+Database, login e storage (Supabase Free)	€0
+Invio mail (Resend Free)	€0
+Totale minimo	circa €10–20/anno
+
+Cloudflare Pages offre hosting statico e SSL HTTPS gratuiti. Dettagli piano gratuito
+Supabase Free è sufficiente per iniziare, ma può mettere in pausa un progetto dopo una settimana senza attività; il piano Pro costa $25/mese se in futuro vorrai più continuità e backup. Prezzi Supabase
+Resend Free include 3.000 email/mese, massimo 100 al giorno: più che sufficiente per le richieste tessera iniziali. Prezzi Resend
+Architettura finale
+Visitatori
+    ↓
+Cloudflare Pages → sito pubblico
+    ↓
+Supabase → login Google, operatori, partite, rosa, news, merch e immagini
+    ↓
+Supabase Edge Function → Resend → capraiafc@gmail.com
+Procedura passo passo
+1. Compra il dominio
+Compra capraiafc.it, se disponibile. Puoi usare Cloudflare Registrar se consente l’acquisto del .it, oppure un registrar italiano.
+Quando lo acquisti:
+usa un’email del club, non personale;
+abilita il rinnovo automatico;
+abilita l’autenticazione a due fattori;
+conserva credenziali e dati di recupero.
+Non devi acquistare un pacchetto “hosting Linux”, FTP, WordPress o email hosting.
+2. Crea un account Cloudflare gratuito
+Vai su Cloudflare e crea l’account del club.
+Poi:
+Clicca “Add a domain”.
+Inserisci capraiafc.it.
+Scegli il piano Free.
+Cloudflare mostrerà due nameserver.
+Torna nel pannello dove hai comprato il dominio e sostituisci i nameserver con quelli indicati da Cloudflare.
+Dopo la propagazione, Cloudflare gestirà DNS e certificato HTTPS gratuitamente.
+3. Metti il progetto su GitHub
+GitHub servirà per pubblicare ogni modifica automaticamente, senza FTP.
+Crea un account GitHub del club.
+Crea un repository privato, ad esempio capraiafc-site.
+Carica la cartella del progetto.
+Dal terminale, nella cartella del progetto, potrai usare:
+git init
+git add .
+git commit -m "Prima versione sito Capraia FC"
+git branch -M main
+git remote add origin https://github.com/NOME-ACCOUNT/capraiafc-site.git
+git push -u origin main
+Non caricare mai file con password, chiavi Resend o segreti Supabase. Le chiavi pubbliche del frontend possono restare nel progetto; i segreti restano nel dashboard Supabase.
+4. Pubblica il sito su Cloudflare Pages
+Nel dashboard Cloudflare:
+Vai in “Workers & Pages”.
+“Create application”.
+“Pages”.
+“Connect to Git”.
+Collega GitHub e seleziona il repository.
+Seleziona framework “None”.
+Non inserire un build command.
+Come cartella di output seleziona la radice del progetto (/ o . in base a ciò che accetta il pannello).
+Clicca “Save and Deploy”.
+Cloudflare ti darà un indirizzo provvisorio tipo:
+capraiafc-site.pages.dev
+Provalo prima di collegare il dominio. Con l’integrazione GitHub, ogni git push pubblicherà automaticamente le modifiche. Guida Cloudflare Pages con Git
+5. Collega il dominio al sito
+Nel progetto Cloudflare Pages:
+Apri “Custom domains”.
+Aggiungi capraiafc.it.
+Aggiungi anche www.capraiafc.it.
+Scegli quale dei due deve essere il dominio principale.
+Cloudflare configurerà HTTPS automaticamente. Guida domini personalizzati per Pages
+6. Aggiorna Supabase per il dominio pubblico
+Nel pannello Supabase, vai in:
+Authentication → URL Configuration
+Imposta:
+Site URL:
+https://capraiafc.it
+Aggiungi alle Redirect URLs:
+https://capraiafc.it/admin.html
+https://www.capraiafc.it/admin.html
+http://localhost:8080/admin.html
+Così il login Google continuerà a funzionare sia in locale sia sul sito pubblicato.
+7. Aggiorna Google Authentication
+Nel progetto Google Cloud usato per il login:
+aggiungi alle “Authorized JavaScript origins”:
+https://capraiafc.it
+https://www.capraiafc.it
+lascia come redirect URI di Supabase quello già configurato:
+https://TUO-PROGETTO.supabase.co/auth/v1/callback
+Non devi creare un nuovo sistema di login: il sito continuerà a usare Google → Supabase → controllo whitelist operatori.
+8. Configura Resend con il dominio
+Per inviare le richieste tessera con un mittente professionale:
+Apri Resend.
+Aggiungi il dominio capraiafc.it oppure il sottodominio send.capraiafc.it.
+Resend ti mostrerà record DNS SPF/DKIM.
+Inseriscili in Cloudflare → DNS.
+Attendi la verifica del dominio.
+Imposta come mittente, ad esempio:
+Capraia FC <tessere@capraiafc.it>
+Poi nel dashboard Supabase, nelle variabili della Edge Function, aggiorna:
+MAIL_FROM=Capraia FC <tessere@capraiafc.it>
+ALLOWED_ORIGINS=https://capraiafc.it,https://www.capraiafc.it
+Mantieni le altre variabili già presenti, come RESEND_API_KEY, MAIL_TO e quelle della tessera.
+9. Fai questi test prima dell’apertura
+Apri https://capraiafc.it.
+Verifica la visualizzazione da desktop e telefono.
+Accedi con capraiafc@gmail.com.
+Prova un account Google non autorizzato: deve essere bloccato.
+Modifica una news o un giocatore dall’admin e verifica il sito pubblico.
+Invia una richiesta “Rinnovo”.
+Invia una richiesta “Nuovo tesserato”.
+Controlla che la mail arrivi a capraiafc@gmail.com, inclusa la cartella Spam.
+Controlla i log della Edge Function su Supabase e quelli di Resend.
+Dopo la pubblicazione
+Per modificare il sito in futuro:
+git add .
+git commit -m "Aggiorna sezione news"
+git push
+Cloudflare pubblicherà da solo la nuova versione.
+Ti consiglio di partire con il piano gratuito: paghi solo il dominio. Prima di rendere pubblico il form tessere, pubblica anche un’informativa privacy reale, perché il form raccoglie dati personali molto sensibili.
