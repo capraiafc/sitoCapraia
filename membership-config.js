@@ -19,7 +19,6 @@ window.CAPRAIA_MEMBERSHIP_CONFIG = {
     { name: 'tax_code', label: 'Codice fiscale', autocomplete: 'off', pattern: '[A-Za-z0-9]{16}', maxLength: 16, required: true },
     { name: 'gender', label: 'Sesso', type: 'radio', options: [{ value: 'Maschio', label: 'Maschio' }, { value: 'Femmina', label: 'Femmina' }], required: true },
     { name: 'residence', label: 'Residenza', description: 'Indirizzo, Città, Provincia, CAP', autocomplete: 'street-address', required: true },
-    { name: 'email', label: 'Email', type: 'email', autocomplete: 'email', maxLength: 254, required: true },
     { name: 'phone', label: 'Telefono', type: 'tel', autocomplete: 'tel', inputMode: 'tel', required: true },
     { name: 'identity_document', label: 'Documento di identità', description: 'Tipo documento e numero', required: true },
     { name: 'identity_document_expiry', label: 'Data scadenza documento', type: 'date', required: true },

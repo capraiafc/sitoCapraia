@@ -89,8 +89,8 @@ if (membershipForm) {
     preview.hidden = type !== 'renewal';
     front.hidden = type !== 'renewal';
     membershipForm.classList.toggle('is-new-member', type === 'new_member');
-    commonEmailField.hidden = type === 'new_member';
-    commonEmailInput.disabled = type === 'new_member';
+    commonEmailField.hidden = false;
+    commonEmailInput.disabled = false;
     renderFields();
     setFeedback();
   };
@@ -102,13 +102,20 @@ if (membershipForm) {
     if (!membershipForm.reportValidity()) return;
     if (membershipForm.elements.namedItem('website').value) return;
 
-    const values = Object.fromEntries(currentFields().map((field) => [field.name, valueFor(field.name)]));
+    const contactEmail = commonEmailInput.value.trim();
+    const values = {
+      ...Object.fromEntries(currentFields().map((field) => [field.name, valueFor(field.name)])),
+      email: contactEmail,
+    };
     const payload = {
       requestType,
-      email: valueFor('email'),
+      email: contactEmail,
       privacyAccepted: membershipForm.elements.namedItem('privacy').checked,
       fields: values,
-      fieldLabels: Object.fromEntries(currentFields().map((field) => [field.name, field.label])),
+      fieldLabels: {
+        ...Object.fromEntries(currentFields().map((field) => [field.name, field.label])),
+        email: 'Email di contatto',
+      },
       submissionId,
       cardSummary: requestType === 'renewal'
         ? { name: values.full_name, memberNumber: values.member_number, memberSince: values.member_since, season: membershipConfig.season }
