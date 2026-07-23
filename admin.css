@@ -19,6 +19,7 @@
 .admin-panel form { display:grid; gap:.8rem; }
 .admin-panel label { display:grid; gap:.35rem; font-size:.8rem; font-weight:700; }
 .admin-panel input,.admin-panel select,.admin-panel textarea { width:100%; padding:.7rem; border:1px solid var(--admin-line); color:var(--admin-ink); background:#fff; }
+.admin-panel input[type="checkbox"],.admin-edit-modal input[type="checkbox"] { width:auto; padding:0; }
 .admin-panel textarea { min-height:120px; resize:vertical; }
 .admin-panel button { justify-self:start; }
 .admin-list { list-style:none; padding:0; margin:1.25rem 0 0; display:grid; gap:.65rem; }

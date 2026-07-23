@@ -33,6 +33,9 @@
 
 .merch-management textarea { resize: vertical; }
 .merch-management__wide { grid-column: 1 / -1; }
+.merch-gallery-upload { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem 1rem; }
+.merch-gallery-upload small { color: rgba(24, 35, 49, .72); font-size: .78rem; }
+.merch-gallery-upload button:disabled { opacity: .45; cursor: not-allowed; }
 
 .merch-management__toggle {
   display: flex !important;
@@ -41,6 +44,16 @@
 }
 
 .merch-management__toggle input { width: 1.1rem; height: 1.1rem; }
+
+.merch-gallery-editor { padding: 1rem; border: 1px dashed rgba(24, 35, 49, 0.3); background: rgba(255, 255, 255, 0.55); }
+.merch-gallery-editor > p { margin: 0 0 .8rem; font-size: .82rem; }
+.merch-gallery-editor__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: .8rem; }
+.merch-gallery-editor__item { position: relative; display: grid !important; gap: .45rem !important; padding: .55rem; border: 2px solid var(--admin-line, #b8c9e8); background: #fff; cursor: pointer; }
+.merch-gallery-editor__item:has(input:checked) { border-color: var(--admin-yellow, #ffd21c); box-shadow: 3px 3px 0 var(--admin-yellow, #ffd21c); }
+.merch-gallery-editor__item input { width: auto; justify-self: start; }
+.merch-gallery-editor__item img { width: 100%; aspect-ratio: 1; object-fit: cover; background: #eef3ff; }
+.merch-gallery-editor__item span { font-size: .72rem; }
+.merch-gallery-editor__remove { justify-self: start; padding: 0; border: 0; color: #a32222; background: transparent; font-size: .72rem; text-decoration: underline; cursor: pointer; }
 
 .merch-management__form-actions,
 .merch-management__actions {

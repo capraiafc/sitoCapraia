@@ -11,9 +11,55 @@ if (membershipForm) {
   const commonEmailInput = membershipForm.querySelector('#membership-contact-email');
   const feedback = membershipForm.querySelector('[data-membership-feedback]');
   const submit = membershipForm.querySelector('button[type="submit"]');
+  const privacyInput = membershipForm.elements.namedItem('privacy');
+  const privacyDialog = document.querySelector('#privacy-dialog');
+  const privacyContent = privacyDialog?.querySelector('[data-privacy-content]');
+  const privacyNotice = privacyDialog?.querySelector('[data-privacy-notice]');
+  const privacyAccept = privacyDialog?.querySelector('[data-accept-privacy]');
   const requestTypeInput = membershipForm.querySelector('[name="request_type"]');
   let requestType = 'renewal';
   let submissionId = crypto.randomUUID();
+  let privacyReadToEnd = false;
+
+  const setPrivacyState = (accepted = Boolean(privacyInput?.checked)) => {
+    if (!submit || !privacyInput) return;
+    privacyInput.checked = accepted;
+    submit.disabled = !accepted;
+    submit.setAttribute('aria-disabled', String(!accepted));
+    const tooltip = submit.closest('[data-membership-submit-tooltip]');
+    if (tooltip) {
+      if (accepted) tooltip.removeAttribute('data-tooltip');
+      else tooltip.dataset.tooltip = 'Accetta la privacy prima di inviare la richiesta.';
+    }
+  };
+
+  const unlockPrivacyAcceptance = () => {
+    if (privacyReadToEnd || !privacyContent || !privacyAccept) return;
+    const reachedEnd = privacyContent.scrollTop + privacyContent.clientHeight >= privacyContent.scrollHeight - 8;
+    if (!reachedEnd) return;
+    privacyReadToEnd = true;
+    privacyAccept.disabled = false;
+    if (privacyNotice) privacyNotice.textContent = 'Hai raggiunto la fine dell’informativa: puoi accettarla.';
+  };
+
+  const openPrivacy = () => {
+    if (!privacyDialog) return;
+    privacyReadToEnd = false;
+    if (privacyAccept) privacyAccept.disabled = true;
+    if (privacyNotice) privacyNotice.textContent = 'Scorri fino alla fine dell’informativa per poterla accettare.';
+    if (!privacyDialog.open) privacyDialog.showModal();
+    window.setTimeout(unlockPrivacyAcceptance, 0);
+  };
+
+  document.querySelectorAll('[data-open-privacy]').forEach((trigger) => trigger.addEventListener('click', openPrivacy));
+  privacyContent?.addEventListener('scroll', unlockPrivacyAcceptance);
+  privacyDialog?.querySelector('[data-close-privacy]')?.addEventListener('click', () => privacyDialog.close());
+  privacyDialog?.addEventListener('click', (event) => { if (event.target === privacyDialog) privacyDialog.close(); });
+  privacyAccept?.addEventListener('click', () => {
+    setPrivacyState(true);
+    privacyDialog.close();
+    submit.focus();
+  });
 
   const setFeedback = (message = '', status = '') => {
     feedback.textContent = message;
@@ -144,10 +190,11 @@ if (membershipForm) {
     } catch (error) {
       setFeedback(error.message || 'Invio non riuscito. Controlla i dati e riprova.', 'error');
     } finally {
-      submit.disabled = false;
+      setPrivacyState();
       membershipForm.removeAttribute('aria-busy');
     }
   });
 
   setRequestType('renewal');
+  setPrivacyState(false);
 }

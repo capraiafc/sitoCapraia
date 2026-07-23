@@ -1,0 +1,18 @@
+.merch-modal { width:min(960px,calc(100% - 2rem)); max-height:calc(100vh - 2rem); padding:0; border:0; color:var(--deep); background:var(--cream); box-shadow:0 25px 70px rgba(0,26,76,.45); }
+.merch-modal::backdrop { background:rgba(0,16,45,.76); backdrop-filter:blur(6px); }
+.merch-modal__shell { position:relative; display:grid; grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr); min-height:420px; }
+.merch-modal__close { position:absolute; z-index:2; top:1rem; right:1rem; display:grid; width:40px; height:40px; place-items:center; border:1px solid #7891c5; border-radius:50%; color:var(--deep); background:rgba(255,255,255,.93); font-size:1.55rem; cursor:pointer; }
+.merch-modal__gallery { min-width:0; padding:clamp(1rem,3vw,2rem); background:#dce8ff; }
+.merch-modal__main-image { display:block; width:100%; height:min(52vh,500px); object-fit:contain; background:#fff; }
+.merch-modal__thumbnails { display:flex; gap:.65rem; margin-top:.8rem; overflow-x:auto; padding-bottom:.25rem; }
+.merch-modal__thumbnail { flex:0 0 74px; height:74px; padding:0; border:2px solid transparent; background:#fff; cursor:pointer; }
+.merch-modal__thumbnail.is-active { border-color:var(--yellow); }
+.merch-modal__thumbnail img { display:block; width:100%; height:100%; object-fit:cover; }
+.merch-modal__details { display:flex; flex-direction:column; justify-content:center; padding:clamp(2rem,5vw,4rem); }
+.merch-modal__details .eyebrow { color:var(--coral); }
+.merch-modal__details h2 { margin:.3rem 0 1rem; font-size:clamp(2.3rem,4vw,4.3rem); }
+.merch-modal__details p:not(.eyebrow) { color:#52647f; white-space:pre-line; }
+.merch-modal__price { display:block; margin:1rem 0 .5rem; font:700 1.6rem var(--serif); }
+.merch-modal__availability { font:500 .7rem var(--mono); color:#08713d; text-transform:uppercase; }.merch-modal__availability.is-unavailable { color:#ae250f; }
+.product-card { cursor:pointer; }.product-card:focus-visible { outline:3px solid var(--yellow); outline-offset:4px; }.product-card .product-details-link { display:inline-block; margin-top:.9rem; font-size:.78rem; text-decoration:underline; text-underline-offset:4px; }
+@media (max-width:720px) { .merch-modal { width:100%; max-height:100vh; }.merch-modal__shell { display:block; }.merch-modal__main-image { height:42vh; }.merch-modal__details { padding:2rem 1.4rem 2.5rem; }.merch-modal__gallery { padding:1rem; } }

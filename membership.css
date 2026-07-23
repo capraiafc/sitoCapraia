@@ -12,3 +12,28 @@
 @media (max-width:700px) { .membership-form.is-new-member .membership-request-column .membership-fields { grid-template-columns:minmax(0,520px); }.membership-form.is-new-member .membership-field--email,.membership-form.is-new-member .membership-radio { width:100%; }.membership-front-column [data-membership-email-field],.membership-request-column .membership-privacy,.membership-request-column .membership-submit { width:100%; } }
 .membership-actions { grid-column:1/-1; display:grid; gap:1rem; width:min(100%,520px); margin:0 auto; }.membership-actions [data-membership-email-field] { display:grid; gap:.45rem; color:#d9e5ff; font:500 .7rem var(--mono); text-transform:uppercase; letter-spacing:.05em; }.membership-actions [data-membership-email-field] input,.membership-field input { width:100%; height:3.75rem; padding:.8rem .85rem; color:var(--deep); border:1px solid #9cb8e7; background:var(--cream); font:400 .94rem var(--sans); text-transform:none; letter-spacing:normal; }.membership-actions .membership-privacy { width:100%; margin:0; }.membership-actions .membership-submit { width:100%; margin:0; }.membership-form.is-new-member .membership-actions { margin-top:.5rem; }.membership-form.is-new-member .membership-actions [data-membership-email-field][hidden] { display:none; }
 @media (max-width:700px) { .membership-actions { width:100%; } }
+
+.membership-privacy__link,.footer-privacy-link { padding:0; border:0; color:inherit; background:transparent; font:inherit; text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:3px; cursor:pointer; }
+.membership-privacy__link { color:var(--yellow); font-weight:700; }
+.membership-submit-wrap { position:relative; display:block; width:100%; }
+.membership-submit-wrap:has(.membership-submit:disabled)::after { content:attr(data-tooltip); position:absolute; z-index:3; right:0; bottom:calc(100% + .65rem); width:max-content; max-width:min(300px,90vw); padding:.55rem .7rem; color:var(--cream); background:var(--deep); box-shadow:4px 4px 0 rgba(0,26,76,.28); font:500 .68rem var(--mono); line-height:1.35; opacity:0; pointer-events:none; transform:translateY(4px); transition:opacity .16s,transform .16s; }
+.membership-submit-wrap:has(.membership-submit:disabled):hover::after,.membership-submit-wrap:has(.membership-submit:disabled):focus-visible::after { opacity:1; transform:translateY(0); }
+.membership-submit:disabled { cursor:not-allowed; opacity:.52; transform:none; }
+.privacy-modal { width:min(780px,calc(100% - 2rem)); max-height:calc(100vh - 2rem); padding:0; border:0; color:var(--deep); background:var(--cream); box-shadow:0 26px 80px rgba(0,26,76,.48); }
+.privacy-modal::backdrop { background:rgba(0,16,45,.76); backdrop-filter:blur(6px); }
+.privacy-modal__shell { display:grid; max-height:calc(100vh - 2rem); grid-template-rows:auto auto minmax(0,1fr) auto; }
+.privacy-modal__head { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; padding:clamp(1.4rem,4vw,2.5rem); color:var(--cream); background:var(--deep); }
+.privacy-modal__head .eyebrow { margin-bottom:.55rem; color:var(--yellow); }
+.privacy-modal__head h2 { margin:0; font-size:clamp(2.3rem,5vw,4rem); }
+.privacy-modal__head h2 em { color:var(--yellow); }
+.privacy-modal__close { display:grid; flex:0 0 auto; width:40px; height:40px; place-items:center; border:1px solid #6e90c8; border-radius:50%; color:var(--cream); background:transparent; font-size:1.6rem; cursor:pointer; }
+.privacy-modal__notice { padding:.8rem clamp(1.4rem,4vw,2.5rem); color:#684900; background:var(--yellow); font:500 .7rem var(--mono); }
+.privacy-modal__content { overflow:auto; padding:clamp(1.4rem,4vw,2.5rem); font-size:.9rem; line-height:1.65; }
+.privacy-modal__content p,.privacy-modal__content li { max-width:70ch; }
+.privacy-modal__content h3 { margin:2rem 0 .85rem; font:700 1.3rem/1.1 var(--serif); letter-spacing:-.04em; }
+.privacy-modal__content ol { padding-left:1.35rem; }
+.privacy-modal__content li + li { margin-top:.65rem; }
+.privacy-modal__content li ol { margin-top:.65rem; }
+.privacy-modal__actions { display:flex; justify-content:flex-end; padding:1rem clamp(1.4rem,4vw,2.5rem); border-top:1px solid var(--line); background:#f6f9ff; }
+.privacy-modal__actions .button:disabled { cursor:not-allowed; opacity:.48; transform:none; }
+@media (max-width:620px) { .privacy-modal { width:100%; max-height:100vh; }.privacy-modal__shell { max-height:100vh; }.privacy-modal__actions .button { width:100%; justify-content:space-between; } }
