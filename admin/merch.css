@@ -33,6 +33,8 @@
 
 .merch-management textarea { resize: vertical; }
 .merch-management__wide { grid-column: 1 / -1; }
+.merch-stock-fields { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .65rem; align-content: end; }
+.merch-stock-fields > p { grid-column: 1 / -1; margin: 0; color: var(--ink, #182331); font-size: .85rem; font-weight: 700; }
 .merch-gallery-upload { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem 1rem; }
 .merch-gallery-upload small { color: rgba(24, 35, 49, .72); font-size: .78rem; }
 .merch-gallery-upload button:disabled { opacity: .45; cursor: not-allowed; }
@@ -105,6 +107,7 @@
 
 @media (max-width: 640px) {
   .merch-management__fields { grid-template-columns: 1fr; }
+  .merch-stock-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .merch-management__item { flex-wrap: wrap; }
   .merch-management__actions { width: 100%; margin-left: 0; }
 }

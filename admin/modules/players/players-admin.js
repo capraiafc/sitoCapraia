@@ -1,4 +1,4 @@
-import '../../../auth.js';
+import '../../../auth.js?v=admin-permissions-20260729';
 import { createCollectionUi, moveFormToModal, pageItems } from '../../crud-ui.js';
 import { createPlayer, listPlayers, removePlayer, updatePlayer } from './players-service.js';
 import { addImageUploadFields, removeImage, resolveImageChange } from '../../media.js';

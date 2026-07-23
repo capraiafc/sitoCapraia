@@ -1,5 +1,5 @@
 /* Moderazione dei messaggi lasciati dai tifosi. */
-import '../auth.js';
+import '../auth.js?v=admin-permissions-20260729';
 
 (() => {
   const root = document.querySelector('[data-bacheca-management]');

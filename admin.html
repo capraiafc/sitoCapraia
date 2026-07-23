@@ -7,13 +7,21 @@
     <title>Area operatori — Capraia Football Club</title>
     <link rel="icon" href="assets/images/capraia-logo.png" type="image/png" />
     <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="admin.css" />
+    <link rel="stylesheet" href="admin.css?v=admin-auth-20260728" />
     <link rel="stylesheet" href="admin/operators.css" />
     <link rel="stylesheet" href="admin/news.css" />
     <link rel="stylesheet" href="admin/modules/players/players.css" />
     <link rel="stylesheet" href="admin/merch.css" />
   </head>
   <body class="admin-page">
+    <aside id="admin-debug-panel" class="admin-debug-panel" hidden>
+      <div>
+        <strong>Debug accesso admin</strong>
+        <button type="button" data-admin-debug-copy>Copia log</button>
+      </div>
+      <pre data-admin-debug-output></pre>
+    </aside>
+
     <main id="admin-auth-shell" class="admin-auth-shell" hidden>
       <section class="admin-auth-card" aria-live="polite">
         <a class="brand" href="index.html" aria-label="Torna al sito Capraia Football Club">
@@ -22,7 +30,7 @@
         </a>
         <div id="admin-auth-loading"><p class="eyebrow">area riservata</p><h1>Verifica<br /><em>accesso.</em></h1><p>Stiamo verificando le autorizzazioni del tuo account Google.</p></div>
         <div id="admin-auth-signed-out" hidden><p class="eyebrow">area riservata</p><h1>Accedi come<br /><em>operatore.</em></h1><p>Usa l’account Google autorizzato per accedere alla gestione del sito.</p><button class="button button-dark" type="button" data-operator-login>Accedi con Google <span>→</span></button></div>
-        <div id="admin-auth-denied" hidden><p class="eyebrow">accesso negato</p><h1>Account non<br /><em>autorizzato.</em></h1><p>Questo account Google non è presente nella lista degli operatori abilitati.</p><button class="button button-dark" type="button" data-admin-signout>Esci <span>→</span></button></div>
+        <div id="admin-auth-denied" hidden><p class="eyebrow">accesso negato</p><h1>Account non<br /><em>autorizzato.</em></h1><p>Questo account Google non è presente nella lista degli operatori abilitati.</p><p class="admin-auth-detail" data-admin-denied-detail hidden></p><button class="button button-dark" type="button" data-admin-signout>Esci <span>→</span></button></div>
         <p class="admin-auth-message" data-auth-message hidden></p>
       </section>
     </main>
@@ -35,19 +43,19 @@
       </header>
       <div class="admin-layout">
         <nav class="admin-sidebar" aria-label="Navigazione area operatori">
-          <a href="#dashboard" class="active">Dashboard</a>
-          <a href="#operatori">Operatori</a>
-          <a href="#gare">Gare e risultati</a>
-          <a href="#rosa">Rosa</a>
-          <a href="#news">News</a>
-          <a href="#sponsor">Sponsor</a>
-          <a href="#bacheca-admin">Bacheca</a>
-          <a href="#merch">Merch</a>
+          <a href="#dashboard" class="active" data-admin-area="dashboard">Dashboard</a>
+          <a href="#operatori" data-admin-area="operators">Operatori</a>
+          <a href="#gare" data-admin-area="matches">Gare e risultati</a>
+          <a href="#rosa" data-admin-area="players">Rosa</a>
+          <a href="#news" data-admin-area="news">News</a>
+          <a href="#sponsor" data-admin-area="sponsors">Sponsor</a>
+          <a href="#bacheca-admin" data-admin-area="bacheca">Bacheca</a>
+          <a href="#merch" data-admin-area="merch">Merch</a>
         </nav>
         <section class="admin-content">
-          <section id="dashboard"><p class="eyebrow">area riservata</p><h1>Dashboard<br /><em>operatori.</em></h1><p>Gestisci le informazioni pubblicate sul sito del Capraia Football Club.</p></section>
-          <section id="operatori" data-admin-module="operators"><p class="eyebrow">amministrazione</p><h2>Operatori <em>abilitati.</em></h2><div class="admin-panel operator-management" data-operator-management><form data-operator-form><label>Email Google autorizzata<input type="email" data-operator-email required autocomplete="email" placeholder="nome@gmail.com" /></label><button class="button button-dark" type="submit">Aggiungi operatore <span>→</span></button></form><p class="admin-feedback" data-operator-feedback aria-live="polite"></p><ul class="admin-list" data-operator-list></ul></div><p data-operator-denied hidden></p></section>
-          <section id="gare" data-admin-module="matches"><p class="eyebrow">calendario</p><h2>Gare e <em>risultati.</em></h2><div class="admin-panel" data-match-management><form data-match-form><label>Stagione<input name="season_id" required placeholder="2026-27" /></label><label>Giornata / fase<input name="match_day" required placeholder="1" /></label><label>Squadra casa<input name="home_team" required /></label><label>Squadra ospite<input name="away_team" required /></label><label>Competizione<input name="competition" required placeholder="Seconda Categoria Toscana" /></label><label>Data e ora<input name="kickoff_at" type="datetime-local" /></label><label>Luogo<input name="venue" /></label><label>Stato<select name="status"><option value="scheduled">In programma</option><option value="completed">Conclusa</option><option value="postponed">Rinviata</option><option value="cancelled">Annullata</option></select></label><label>Gol casa<input name="home_score" type="number" min="0" max="99" /></label><label>Gol ospite<input name="away_score" type="number" min="0" max="99" /></label><label>Arbitro<input name="referee" /></label><label>Primo tempo<input name="halftime_score" placeholder="0 — 0" /></label><label>Link fonte/tabellino<input name="source_url" type="url" placeholder="https://…" /></label><label>Eventi e marcatori (JSON)<textarea name="events_json" placeholder='[{&quot;minute&quot;:&quot;29’&quot;,&quot;type&quot;:&quot;Gol Capraia&quot;,&quot;player&quot;:&quot;Nome giocatore&quot;}]'></textarea></label><label>Note<textarea name="notes"></textarea></label><label><input name="published" type="checkbox" checked /> Pubblica sul sito</label><button class="button button-dark" type="submit"><span data-match-submit>Salva gara</span> <span>→</span></button><button type="button" data-match-cancel hidden>Annulla</button></form><p class="admin-feedback" data-match-feedback aria-live="polite"></p><ul class="admin-list" data-match-list></ul></div></section>
+          <section id="dashboard" data-admin-area="dashboard"><p class="eyebrow">area riservata</p><h1>Dashboard<br /><em>operatori.</em></h1><p>Accessi e ultime attività dell’area amministrativa.</p><div class="admin-dashboard" data-admin-dashboard></div></section>
+          <section id="operatori" data-admin-module="operators" data-admin-area="operators"><p class="eyebrow">amministrazione</p><h2>Operatori <em>abilitati.</em></h2><div class="admin-panel operator-management" data-operator-management><form data-operator-form><label>Email Google autorizzata<input type="email" data-operator-email required autocomplete="email" placeholder="nome@gmail.com" /></label><fieldset class="operator-permissions"><legend>Aree abilitate</legend><label><input name="can_matches" type="checkbox" /> Gare e risultati</label><label><input name="can_players" type="checkbox" /> Rosa</label><label><input name="can_news" type="checkbox" /> News</label><label><input name="can_sponsors" type="checkbox" /> Sponsor</label><label><input name="can_bacheca" type="checkbox" /> Bacheca</label><label><input name="can_merch" type="checkbox" /> Merch</label></fieldset><button class="button button-dark" type="submit">Aggiungi operatore <span>→</span></button></form><p class="admin-feedback" data-operator-feedback aria-live="polite"></p><ul class="admin-list" data-operator-list></ul></div><p data-operator-denied hidden></p></section>
+          <section id="gare" data-admin-module="matches" data-admin-area="matches"><p class="eyebrow">calendario</p><h2>Gare e <em>risultati.</em></h2><div class="admin-panel" data-match-management><form data-match-form><label>Stagione<input name="season_id" required placeholder="2026-27" /></label><label>Giornata / fase<input name="match_day" required placeholder="1" /></label><label>Squadra casa<input name="home_team" required /></label><label>Squadra ospite<input name="away_team" required /></label><label>Competizione<input name="competition" required placeholder="Seconda Categoria Toscana" /></label><label>Data e ora<input name="kickoff_at" type="datetime-local" /></label><label>Luogo<input name="venue" /></label><label>Stato<select name="status"><option value="scheduled">In programma</option><option value="completed">Conclusa</option><option value="postponed">Rinviata</option><option value="cancelled">Annullata</option></select></label><label>Gol casa<input name="home_score" type="number" min="0" max="99" /></label><label>Gol ospite<input name="away_score" type="number" min="0" max="99" /></label><label>Arbitro<input name="referee" /></label><label>Primo tempo<input name="halftime_score" placeholder="0 — 0" /></label><label>Link fonte/tabellino<input name="source_url" type="url" placeholder="https://…" /></label><label>Eventi e marcatori (JSON)<textarea name="events_json" placeholder='[{&quot;minute&quot;:&quot;29’&quot;,&quot;type&quot;:&quot;Gol Capraia&quot;,&quot;player&quot;:&quot;Nome giocatore&quot;}]'></textarea></label><label>Note<textarea name="notes"></textarea></label><label><input name="published" type="checkbox" checked /> Pubblica sul sito</label><button class="button button-dark" type="submit"><span data-match-submit>Salva gara</span> <span>→</span></button><button type="button" data-match-cancel hidden>Annulla</button></form><p class="admin-feedback" data-match-feedback aria-live="polite"></p><ul class="admin-list" data-match-list></ul></div></section>
           <section id="rosa" data-admin-module="players"><p class="eyebrow">gestione squadra</p><h2>Gestione <em>rosa.</em></h2><div class="admin-panel players-admin" data-player-management><form data-player-form><h3 data-player-form-title>Aggiungi giocatore</h3><label>Nome<input name="first_name" required maxlength="80" /></label><label>Cognome<input name="last_name" required maxlength="80" /></label><label>Numero maglia<input name="squad_number" type="number" min="1" max="99" /></label><label>Ruolo<select name="position"><option value="portiere">Portiere</option><option value="difensore">Difensore</option><option value="centrocampista">Centrocampista</option><option value="attaccante">Attaccante</option><option value="staff">Staff</option></select></label><label>Stato<select name="status"><option value="active">In rosa</option><option value="injured">Infortunato</option><option value="unavailable">Indisponibile</option><option value="staff">Staff</option><option value="former">Ex rosa</option></select></label><label>Anno di nascita<input name="birth_year" type="number" min="1900" max="2100" /></label><label>Immagine (URL HTTPS)<input name="image_url" type="url" /></label><label>Bio<textarea name="bio" maxlength="2000"></textarea></label><label><input name="published" type="checkbox" checked /> Pubblica nella rosa</label><button class="button button-dark" type="submit">Aggiungi alla rosa <span>→</span></button><button type="button" data-player-cancel hidden>Annulla</button></form><p class="admin-feedback" data-player-feedback aria-live="polite"></p><p data-player-empty>Nessun giocatore inserito.</p><ul class="admin-list" data-player-list></ul></div><p data-player-denied hidden>Accesso negato.</p></section>
           <section id="news" data-admin-module="news"><p class="eyebrow">editoriale</p><h2>Gestione <em>news.</em></h2><div class="admin-panel news-management" data-news-management><form data-news-form><label>Titolo<input name="title" required maxlength="180" /></label><label>Estratto<textarea name="excerpt" maxlength="500"></textarea></label><label>Categoria<input name="category" value="Club" maxlength="80" /></label><fieldset><legend>Tipo di contenuto</legend><label><input type="radio" name="content_type" value="original" checked /> News originale</label><label><input type="radio" name="content_type" value="external" /> Articolo segnalato</label></fieldset><div data-news-original-fields><label>Testo news<textarea name="body" maxlength="20000"></textarea></label></div><div data-news-external-fields hidden><label>Link articolo<input name="external_url" type="url" /></label><label>Fonte<input name="source_name" maxlength="120" /></label><label>Etichetta fonte<input name="source_label" maxlength="120" placeholder="Leggi l'articolo" /></label></div><label>Immagine (URL HTTPS)<input name="cover_image_url" type="url" /></label><label><input name="published" type="checkbox" /> Pubblica subito</label><button class="button button-dark" type="submit"><span data-news-submit-label>Crea news</span> <span>→</span></button><button type="button" data-news-cancel hidden>Annulla</button></form><p class="admin-feedback" data-news-feedback aria-live="polite"></p><ul class="admin-list" data-news-list></ul></div></section>
           <section id="sponsor" data-admin-module="sponsors"><p class="eyebrow">partnership</p><h2>I nostri <em>sponsor.</em></h2><p>Indica il contributo annuale e scegli se rendere ogni sponsor visibile nel footer e negli aggiornamenti del sito.</p><div class="admin-panel sponsor-management" data-sponsor-management><form data-sponsor-form><label>Nome sponsor<input name="name" required maxlength="160" /></label><label>Contributo annuale (€)<input name="annual_amount" required type="number" min="0" step="0.01" value="0" /></label><label>Ordine di visualizzazione<input name="sort_order" type="number" min="0" step="1" value="0" /></label><label>Logo (URL o percorso locale)<input name="logo_url" maxlength="500" placeholder="https://… oppure assets/sponsors/…" /></label><label>Riquadro logo<select name="logo_background"><option value="yellow-white">Giallo con bordo bianco</option><option value="blue-yellow" selected>Blu con bordo giallo</option></select></label><label><input name="active" type="checkbox" checked /> Sponsor attivo: mostrato sul sito</label><button class="button button-dark" type="submit"><span data-sponsor-submit>Aggiungi sponsor</span> <span>→</span></button><button type="button" data-sponsor-cancel hidden>Annulla</button></form><p class="admin-feedback" data-sponsor-feedback aria-live="polite"></p><ul class="admin-list" data-sponsor-list></ul></div></section>
@@ -58,14 +66,15 @@
     </main>
 
     <script src="auth-config.js"></script>
-    <script type="module" src="auth.js"></script>
-    <script type="module" src="admin.js"></script>
-    <script type="module" src="admin/operators.js"></script>
-    <script type="module" src="admin/news.js"></script>
-    <script type="module" src="admin/sponsors.js"></script>
-    <script type="module" src="admin/bacheca.js"></script>
-    <script type="module" src="admin/modules/players/players-admin.js"></script>
-    <script type="module" src="admin/merch.js"></script>
-    <script type="module" src="admin/matches.js"></script>
+    <script type="module" src="auth.js?v=admin-permissions-20260729"></script>
+    <script type="module" src="admin.js?v=admin-permissions-20260730"></script>
+    <script type="module" src="admin/dashboard.js?v=admin-permissions-20260729"></script>
+    <script type="module" src="admin/operators.js?v=admin-permissions-20260731"></script>
+    <script type="module" src="admin/news.js?v=admin-permissions-20260729"></script>
+    <script type="module" src="admin/sponsors.js?v=admin-permissions-20260729"></script>
+    <script type="module" src="admin/bacheca.js?v=admin-permissions-20260729"></script>
+    <script type="module" src="admin/modules/players/players-admin.js?v=admin-permissions-20260729"></script>
+    <script type="module" src="admin/merch.js?v=admin-permissions-20260729"></script>
+    <script type="module" src="admin/matches.js?v=admin-permissions-20260729"></script>
   </body>
 </html>

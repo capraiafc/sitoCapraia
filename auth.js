@@ -54,16 +54,44 @@ async function getCurrentAccess({ refresh = false } = {}) {
     const session = await getSession();
     if (!session?.user) return { user: null, isOperator: false, reason: 'signed-out' };
 
-    const { data, error } = await supabase.rpc('is_current_operator');
+    // L'account della società non deve mai dipendere da una configurazione
+    // incompleta di RLS o dalle funzioni dei permessi sul database.
+    const isSuperUser = String(session.user.email || '').trim().toLowerCase() === 'capraiafc@gmail.com';
+    const superUserPermissions = {
+      is_operator: true,
+      is_super_user: true,
+      can_matches: true,
+      can_players: true,
+      can_news: true,
+      can_sponsors: true,
+      can_bacheca: true,
+      can_merch: true,
+    };
+
+    const { data, error } = await supabase.rpc('current_admin_permissions');
     if (error) {
       console.error('Impossibile verificare il ruolo operatore.', error);
+      if (isSuperUser) {
+        return {
+          user: session.user,
+          isOperator: true,
+          isSuperUser: true,
+          permissions: superUserPermissions,
+          reason: null,
+        };
+      }
       return { user: session.user, isOperator: false, reason: 'verification-error' };
     }
 
+    const permissions = isSuperUser ? { ...data, ...superUserPermissions } : (data || {});
+    const isOperator = isSuperUser || data?.is_operator === true;
+
     return {
       user: session.user,
-      isOperator: data === true,
-      reason: data === true ? null : 'not-authorized',
+      isOperator,
+      isSuperUser: isSuperUser || data?.is_super_user === true,
+      permissions,
+      reason: isOperator ? null : 'not-authorized',
     };
   })();
 
@@ -88,7 +116,11 @@ async function signInWithGoogle() {
     return { error: new Error('Supabase non configurato') };
   }
 
-  const redirectTo = new URL('admin.html', window.location.href).href;
+  const redirectUrl = new URL('admin.html', window.location.href);
+  if (new URLSearchParams(window.location.search).get('debug') === '1') {
+    redirectUrl.searchParams.set('debug', '1');
+  }
+  const redirectTo = redirectUrl.href;
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: { redirectTo },

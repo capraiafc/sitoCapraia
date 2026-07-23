@@ -40,7 +40,11 @@ as $$
   );
 $$;
 
-create or replace function public.list_operator_emails()
+-- Nei database già aggiornati la funzione può avere colonne aggiuntive:
+-- la eliminiamo prima di ripristinare questa versione storica della migration.
+drop function if exists public.list_operator_emails();
+
+create function public.list_operator_emails()
 returns table (
   email text,
   role text,

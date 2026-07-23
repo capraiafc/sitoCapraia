@@ -22,6 +22,18 @@ La funzione verifica comunque l'origine consentita, i dati obbligatori, la
 privacy e usa una chiave di idempotenza di Resend per evitare che un retry
 generi due email.
 
+## Richieste merch
+
+La disponibilità del merchandising è gestita dalla migration `202607230012_merch_stock_and_orders.sql`.
+Dopo averla applicata, distribuisci anche la funzione che invia la mail a `capraiafc@gmail.com`:
+
+```powershell
+supabase functions deploy send-merch-request --no-verify-jwt
+```
+
+Usa gli stessi secret `RESEND_API_KEY`, `MAIL_FROM` e `ALLOWED_ORIGINS`; opzionalmente
+puoi impostare `MERCH_MAIL_TO` (per default usa `MAIL_TO`).
+
 ## Campi nuovo tesserato
 
 I campi sono centralizzati in `membership-config.js` e vengono inclusi nel

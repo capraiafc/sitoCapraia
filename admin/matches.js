@@ -1,5 +1,5 @@
 /* Operator match editor. Writes are enforced again by Supabase RLS. */
-import '../auth.js';
+import '../auth.js?v=admin-permissions-20260729';
 import { createCollectionUi, moveFormToModal, pageItems } from './crud-ui.js';
 
 (() => {

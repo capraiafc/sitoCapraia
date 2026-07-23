@@ -1,0 +1,7 @@
+.merch-order-confirm { width:min(580px,calc(100% - 2rem)); padding:0; border:0; color:var(--deep); background:var(--yellow); box-shadow:12px 12px 0 rgba(0,26,76,.38); }
+.merch-order-confirm::backdrop { background:rgba(0,16,45,.72); backdrop-filter:blur(5px); }
+.merch-order-confirm__content { position:relative; padding:clamp(2rem,6vw,3.3rem); }
+.merch-order-confirm p { margin:0; font-size:.9rem; line-height:1.5; }
+.merch-order-confirm p + p { margin-top:.8rem; }
+.merch-order-confirm h2 { margin:.3rem 0 1.2rem; font-size:clamp(2rem,5vw,3.3rem); }
+.merch-order-confirm button { position:absolute; top:1rem; right:1rem; display:grid; width:34px; height:34px; place-items:center; border:1px solid var(--deep); border-radius:50%; color:var(--deep); background:transparent; font-size:1.35rem; line-height:1; cursor:pointer; }

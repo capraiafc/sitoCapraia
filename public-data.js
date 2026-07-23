@@ -9,6 +9,7 @@ const isCapraia = (team) => String(team ?? '').toLocaleLowerCase('it').includes(
 let visibleNews = new Map();
 let activeNews = null;
 let visibleMerch = new Map();
+let upcomingHomeMatch = null;
 
 const safeSponsorLogo = (value) => {
   const url = String(value ?? '').trim();
@@ -73,6 +74,8 @@ function openNewsModal(item) {
 }
 
 document.addEventListener('click', (event) => {
+  const closeMerchConfirmation = event.target.closest('[data-close-merch-confirmation]');
+  if (closeMerchConfirmation) { event.preventDefault(); document.querySelector('#merch-order-confirm')?.close(); return; }
   const closeMerch = event.target.closest('[data-close-merch]');
   if (closeMerch) { event.preventDefault(); document.querySelector('#merch-dialog')?.close(); return; }
   const thumbnail = event.target.closest('[data-merch-photo]');
@@ -150,17 +153,78 @@ function merchImages(product) {
   return [...new Set(images)];
 }
 
+const merchSizes = (product) => product.size_mode === 'one_size'
+  ? [{ value: 'ONE_SIZE', label: 'Taglia unica', stock: Number(product.one_size_stock || 0) }]
+  : [['S', 'stock_s'], ['M', 'stock_m'], ['L', 'stock_l'], ['XL', 'stock_xl'], ['XXL', 'stock_xxl']]
+    .map(([label, key]) => ({ value: label, label, stock: Number(product[key] || 0) }));
+const merchStock = (product) => merchSizes(product).reduce((total, size) => total + size.stock, 0);
+const merchSoldOut = (product) => !product.available || merchStock(product) < 1;
+const merchCardLabel = (product) => {
+  if (merchSoldOut(product)) return 'Sold-out';
+  if (product.size_mode === 'one_size') return 'Taglia unica';
+  return `Taglie: ${merchSizes(product).filter((size) => size.stock > 0).map((size) => size.label).join(' · ')}`;
+};
+
 function openMerchModal(product) {
   const dialog = document.querySelector('#merch-dialog');
   const root = document.querySelector('#merch-dialog-content');
   if (!dialog || !root || !product) return;
-  const images = merchImages(product); const main = images[0];
+  const images = merchImages(product); const main = images[0]; const sizes = merchSizes(product).filter((size) => size.stock > 0); const soldOut = merchSoldOut(product);
   const euro = new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' });
-  root.innerHTML = `<div class="merch-modal__shell"><button class="merch-modal__close" type="button" data-close-merch aria-label="Chiudi prodotto">×</button><section class="merch-modal__gallery">${main ? `<img class="merch-modal__main-image" src="${escapeHtml(main)}" alt="${escapeHtml(product.name)}" data-merch-main-image />` : '<div class="merch-modal__main-image merch-fallback">CAPRAIA FC</div>'}${images.length > 1 ? `<div class="merch-modal__thumbnails" aria-label="Altre foto del prodotto">${images.map((image, index) => `<button class="merch-modal__thumbnail${index === 0 ? ' is-active' : ''}" type="button" data-merch-photo="${escapeHtml(image)}" aria-label="Mostra foto ${index + 1}"><img src="${escapeHtml(image)}" alt="" /></button>`).join('')}</div>` : ''}</section><section class="merch-modal__details"><p class="eyebrow">merch ufficiale</p><h2 id="merch-dialog-title">${escapeHtml(product.name)}</h2><p>${escapeHtml(product.description || 'Dettagli del prodotto in aggiornamento.')}</p><strong class="merch-modal__price">${euro.format(Number(product.price))}</strong><span class="merch-modal__availability${product.available ? '' : ' is-unavailable'}">${product.available ? 'Disponibile' : 'Non disponibile'}</span></section></div>`;
+  const sizeControl = product.size_mode === 'one_size'
+    ? `<input type="hidden" name="size" value="ONE_SIZE" /><p class="merch-order__single-size">Taglia unica · ${sizes[0]?.stock || 0} pezzi disponibili</p>`
+    : `<label>Taglia<select name="size" required>${sizes.map((size) => `<option value="${size.value}" data-stock="${size.stock}">${size.label} · ${size.stock} disponibili</option>`).join('')}</select></label>`;
+  const order = soldOut ? '<p class="merch-order__soldout">Sold-out</p>' : `<form class="merch-order" data-merch-order><h3>Richiedi il prodotto</h3>${sizeControl}<label>Quantità<input name="quantity" type="number" min="1" max="${sizes[0]?.stock || 1}" value="1" required /></label><label>Nome e cognome<input name="customer_name" autocomplete="name" maxlength="160" required /></label><label>Email<input name="customer_email" type="email" autocomplete="email" maxlength="254" required /></label><label>Telefono<input name="customer_phone" type="tel" autocomplete="tel" maxlength="60" required /></label><label class="merch-order__privacy"><input name="privacy" type="checkbox" required /> Ho letto l’informativa privacy.</label><button class="button button-dark" type="submit">Invia richiesta <span>→</span></button><p class="merch-order__feedback" data-merch-order-feedback role="status" aria-live="polite"></p></form>`;
+  root.innerHTML = `<div class="merch-modal__shell"><button class="merch-modal__close" type="button" data-close-merch aria-label="Chiudi prodotto">×</button><section class="merch-modal__gallery">${main ? `<img class="merch-modal__main-image" src="${escapeHtml(main)}" alt="${escapeHtml(product.name)}" data-merch-main-image />` : '<div class="merch-modal__main-image merch-fallback">CAPRAIA FC</div>'}${images.length > 1 ? `<div class="merch-modal__thumbnails" aria-label="Altre foto del prodotto">${images.map((image, index) => `<button class="merch-modal__thumbnail${index === 0 ? ' is-active' : ''}" type="button" data-merch-photo="${escapeHtml(image)}" aria-label="Mostra foto ${index + 1}"><img src="${escapeHtml(image)}" alt="" /></button>`).join('')}</div>` : ''}</section><section class="merch-modal__details"><p class="eyebrow">merch ufficiale</p><h2 id="merch-dialog-title">${escapeHtml(product.name)}</h2><p>${escapeHtml(product.description || 'Dettagli del prodotto in aggiornamento.')}</p><strong class="merch-modal__price">${euro.format(Number(product.price))}</strong><span class="merch-modal__availability${soldOut ? ' is-unavailable' : ''}">${soldOut ? 'Sold-out' : 'Disponibile'}</span>${order}</section></div>`;
+  const orderForm = root.querySelector('[data-merch-order]');
+  orderForm?.addEventListener('change', (event) => {
+    if (event.target.name !== 'size') return;
+    const selected = event.target.selectedOptions?.[0]; const stock = Number(selected?.dataset.stock || 1); const quantity = orderForm.elements.quantity;
+    quantity.max = stock; if (Number(quantity.value) > stock) quantity.value = stock;
+  });
+  orderForm?.addEventListener('submit', (event) => submitMerchOrder(event, product));
   if (!dialog.open) dialog.showModal();
 }
 
+async function submitMerchOrder(event, product) {
+  event.preventDefault();
+  const form = event.currentTarget; if (!form.reportValidity()) return;
+  const feedback = form.querySelector('[data-merch-order-feedback]'); const submit = form.querySelector('[type="submit"]');
+  const values = Object.fromEntries(new FormData(form)); const selected = merchSizes(product).find((size) => size.value === values.size);
+  const quantity = Number(values.quantity);
+  if (!selected || !Number.isInteger(quantity) || quantity < 1 || quantity > selected.stock) { feedback.textContent = 'La quantità selezionata non è disponibile.'; return; }
+  submit.disabled = true; form.setAttribute('aria-busy', 'true'); feedback.textContent = 'Invio della richiesta in corso…';
+  try {
+    const response = await fetch(`${window.CAPRAIA_SUPABASE_URL}/functions/v1/send-merch-request`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', apikey: window.CAPRAIA_SUPABASE_ANON_KEY, Authorization: `Bearer ${window.CAPRAIA_SUPABASE_ANON_KEY}` },
+      body: JSON.stringify({ requestId: crypto.randomUUID(), productId: product.id, size: values.size, quantity, customerName: values.customer_name, customerEmail: values.customer_email, customerPhone: values.customer_phone, privacyAccepted: values.privacy === 'on' }),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.message || 'Non è stato possibile inviare la richiesta.');
+    feedback.textContent = 'Richiesta inviata. Ti contatteremo presto via email.'; feedback.dataset.state = 'success'; submit.disabled = true;
+    await loadPublicContent().catch((loadError) => console.error('Unable to refresh merch stock', loadError));
+    document.querySelector('#merch-dialog')?.close();
+    document.querySelector('#top')?.scrollIntoView({ behavior: 'auto', block: 'start' });
+    showMerchOrderConfirmation();
+  } catch (error) { feedback.textContent = error.message || 'Invio non riuscito. Riprova tra poco.'; feedback.dataset.state = 'error'; submit.disabled = false; }
+  finally { form.removeAttribute('aria-busy'); }
+}
+
+function showMerchOrderConfirmation() {
+  const dialog = document.querySelector('#merch-order-confirm');
+  const content = dialog?.querySelector('[data-merch-order-confirm-content]');
+  if (!dialog || !content) return;
+  const matchNote = upcomingHomeMatch
+    ? `<p>In alternativa, puoi ritirare alla biglietteria durante la prossima partita in casa: <strong>${escapeHtml(upcomingHomeMatch.home_team)} — ${escapeHtml(upcomingHomeMatch.away_team)}</strong>, ${escapeHtml(formatDate(upcomingHomeMatch.kickoff_at, { day: '2-digit', month: 'long', year: 'numeric' }))}.</p>`
+    : '';
+  content.innerHTML = `<div class="merch-order-confirm__content"><button type="button" data-close-merch-confirmation aria-label="Chiudi conferma">×</button><p class="eyebrow">ordine ricevuto</p><h2 id="merch-order-confirm-title">Grazie per il tuo <em>ordine.</em></h2><p>Ti contatteremo presto per confermare tutti i dettagli.</p><p>Puoi ritirare il prodotto presso la nostra sede: <strong>Circolo ARCI Capraia, Via Salvador Allende 152, Capraia Fiorentina.</strong></p>${matchNote}</div>`;
+  dialog.showModal();
+}
+
 document.querySelector('#merch-dialog')?.addEventListener('click', (event) => {
+  if (event.target === event.currentTarget) event.currentTarget.close();
+});
+document.querySelector('#merch-order-confirm')?.addEventListener('click', (event) => {
   if (event.target === event.currentTarget) event.currentTarget.close();
 });
 
@@ -225,7 +289,8 @@ function renderMerch(products) {
     const visual = image
       ? `<img class="product-image product-photo" src="${escapeHtml(image)}" alt="${escapeHtml(product.name)}" loading="lazy" />`
       : '<div class="product-image merch-fallback"><span>CAPRAIA FC</span></div>';
-    return `<article class="product-card" data-merch-open="${escapeHtml(product.id)}" role="button" tabindex="0">${visual}<h3>${escapeHtml(product.name)}</h3><strong class="product-price">${euro.format(Number(product.price))}</strong><span class="product-availability ${product.available ? 'is-available' : ''}">${product.available ? 'Disponibile' : 'Non disponibile'}</span><span class="product-details-link">Scopri il prodotto →</span></article>`;
+    const soldOut = merchSoldOut(product);
+    return `<article class="product-card" data-merch-open="${escapeHtml(product.id)}" role="button" tabindex="0">${visual}<h3>${escapeHtml(product.name)}</h3><strong class="product-price">${euro.format(Number(product.price))}</strong><span class="product-availability ${soldOut ? '' : 'is-available'}">${escapeHtml(merchCardLabel(product))}</span></article>`;
   }).join('');
 }
 
@@ -235,7 +300,7 @@ async function loadPublicContent() {
   const [players, news, merch, matches] = await Promise.all([
     client.from('players').select('id, first_name, last_name, display_name, squad_number, position, image_url').eq('published', true).order('position').order('squad_number', { nullsFirst: false }),
     client.from('news').select('id, title, excerpt, content_type, body, external_url, source_label, cover_image_url, category, published_at, created_at').eq('published', true).order('published_at', { ascending: false }).order('created_at', { ascending: false }),
-    client.from('merch_products').select('id, name, price, description, image_url, available, merch_product_images(id, image_url, sort_order, is_primary)').eq('published', true).order('created_at', { ascending: false }),
+    client.from('merch_products').select('id, name, price, description, image_url, available, size_mode, stock_s, stock_m, stock_l, stock_xl, stock_xxl, one_size_stock, merch_product_images(id, image_url, sort_order, is_primary)').eq('published', true).order('created_at', { ascending: false }),
     client.from('matches').select('id, legacy_key, season_id, match_day, home_team, away_team, kickoff_at, venue, competition, phase, status, home_score, away_score, referee, halftime_score, notes, source_url, extra_info, published').eq('published', true).order('kickoff_at', { ascending: false, nullsFirst: false }),
   ]);
   const responses = [players, news, merch, matches];
@@ -245,6 +310,9 @@ async function loadPublicContent() {
   renderNews(news.data || []);
   renderMerch(merch.data || []);
   const rows = matches.data || [];
+  upcomingHomeMatch = rows
+    .filter((match) => match.kickoff_at && new Date(match.kickoff_at).getTime() >= Date.now() && isCapraia(match.home_team) && match.status !== 'cancelled')
+    .sort((left, right) => new Date(left.kickoff_at) - new Date(right.kickoff_at))[0] || null;
   const latest = rows.find((match) => match.status === 'completed') || rows[0] || null;
   const latestTicker = renderLatestMatch(latest);
   const [sponsors, messages] = await Promise.all([
