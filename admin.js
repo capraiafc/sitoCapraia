@@ -91,9 +91,28 @@ function applyAreaPermissions(access) {
     if (section) section.hidden = !visible;
   });
   document.querySelectorAll('.admin-sidebar [data-admin-area]').forEach((link) => link.classList.remove('active'));
-  const firstLink = document.querySelector('.admin-sidebar [data-admin-area]:not([hidden])');
-  if (firstLink) firstLink.classList.add('active');
+  const hashLink = window.location.hash
+    ? document.querySelector(`.admin-sidebar a[href="${window.location.hash}"]:not([hidden])`)
+    : null;
+  const initialLink = hashLink || document.querySelector('.admin-sidebar [data-admin-area]:not([hidden])');
+  if (initialLink) activateAdminLink(initialLink);
 }
+
+function activateAdminLink(link) {
+  if (!link || link.hidden) return;
+  document.querySelectorAll('.admin-sidebar [data-admin-area]').forEach((item) => item.classList.toggle('active', item === link));
+  link.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+
+document.querySelector('.admin-sidebar')?.addEventListener('click', (event) => {
+  const link = event.target.closest('a[data-admin-area]');
+  if (link) activateAdminLink(link);
+});
+
+window.addEventListener('hashchange', () => {
+  const link = document.querySelector(`.admin-sidebar a[href="${window.location.hash}"]:not([hidden])`);
+  if (link) activateAdminLink(link);
+});
 
 async function initialiseAdmin(version) {
   const loading = byId('admin-auth-loading');
