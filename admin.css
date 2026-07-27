@@ -82,6 +82,10 @@
   .admin-panel input[type="file"],.admin-edit-modal input[type="file"] { max-width:100%; padding:.55rem; }
   .admin-panel .button,.admin-edit-modal .button { width:100%; justify-content:space-between; }
   .operator-permissions { grid-template-columns:1fr 1fr; gap:.7rem .45rem; }
+  .admin-list .operator-management__item { width:100%; min-width:0; max-width:100%; align-items:stretch; flex-flow:column nowrap; overflow:hidden; }
+  .admin-list .operator-management__details,.admin-list .operator-management__permissions { width:100%; min-width:0; max-width:100%; margin:0; overflow:hidden; }
+  .admin-list .operator-management__details { contain:inline-size; }
+  .admin-list .operator-management__details > * { display:block; min-width:0; max-width:100%; white-space:normal; overflow-wrap:anywhere; word-break:break-word; }
   .operator-management__permissions { display:grid; width:100%; grid-template-columns:1fr 1fr; }
   .operator-management__save,.operator-management__remove { min-height:42px; padding:.45rem .2rem; }
   .admin-collection-toolbar { margin:1rem 0; }

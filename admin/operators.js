@@ -62,6 +62,7 @@ import { pageItems } from './crud-ui.js';
       item.className = 'operator-management__item';
 
       const details = document.createElement('span');
+      details.className = 'operator-management__details';
       const email = document.createElement('strong');
       const date = document.createElement('small');
       email.textContent = operator.email;
