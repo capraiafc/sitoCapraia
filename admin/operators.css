@@ -7,9 +7,11 @@
 .operator-management__feedback { min-height: 1.5em; margin: 1rem 0; font-size: .9rem; }
 .operator-management__feedback[data-state="error"] { color: #a41313; }
 .operator-management__feedback[data-state="success"] { color: #0f6a36; }
+.operator-management__toolbar { justify-content: flex-end; }
 .operator-management__list { margin: 0; padding: 0; list-style: none; border-top: 1px solid currentColor; }
 .operator-management__item { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid currentColor; }
 .operator-management__item span { display: grid; gap: .2rem; }
 .operator-management__item small { opacity: .72; }
 .operator-management__remove:hover, .operator-management__remove:focus-visible { background: #a41313; border-color: #a41313; color: #fff; }
+.operator-management__empty { padding: 1rem 0; color: rgba(24, 35, 49, .72); }
 @media (max-width: 520px) { .operator-management__item { align-items: flex-start; flex-direction: column; } }

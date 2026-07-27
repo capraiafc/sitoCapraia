@@ -1,5 +1,6 @@
 /* Operator management. Authentication is provided by the common auth module. */
 import '../auth.js?v=admin-permissions-20260729';
+import { pageItems } from './crud-ui.js';
 (function initOperatorManagement() {
   'use strict';
 
@@ -11,6 +12,17 @@ import '../auth.js?v=admin-permissions-20260729';
   const list = root.querySelector('[data-operator-list]');
   const feedback = root.querySelector('[data-operator-feedback]');
   const submit = form.querySelector('button[type="submit"]');
+  const toolbar = document.createElement('div');
+  toolbar.className = 'admin-collection-toolbar operator-management__toolbar';
+  toolbar.innerHTML = '<label class="admin-collection-search">Cerca operatore<input type="search" data-operator-search placeholder="Email o nome giocatore…" autocomplete="off" /></label>';
+  const search = toolbar.querySelector('[data-operator-search]');
+  const pagination = document.createElement('nav');
+  pagination.className = 'admin-pagination';
+  pagination.setAttribute('aria-label', 'Paginazione operatori');
+  list.before(toolbar);
+  list.after(pagination);
+  let operators = [];
+  let page = 1;
   const permissionFields = [
     ['can_matches', 'Gare e risultati'], ['can_players', 'Rosa'], ['can_news', 'News'], ['can_sponsors', 'Sponsor'], ['can_bacheca', 'Bacheca'], ['can_merch', 'Merch'],
   ];
@@ -22,9 +34,30 @@ import '../auth.js?v=admin-permissions-20260729';
 
   const getClient = () => window.CapraiaAuth && window.CapraiaAuth.supabase;
 
-  const render = (operators) => {
+  const renderPagination = (totalItems) => {
+    const totalPages = Math.max(1, Math.ceil(totalItems / 10));
+    page = Math.min(Math.max(1, page), totalPages);
+    pagination.replaceChildren();
+    if (totalItems <= 10) return;
+    const previous = document.createElement('button');
+    previous.type = 'button'; previous.textContent = '← Precedente'; previous.disabled = page === 1;
+    const summary = document.createElement('span'); summary.textContent = `Pagina ${page} di ${totalPages}`;
+    const next = document.createElement('button');
+    next.type = 'button'; next.textContent = 'Successiva →'; next.disabled = page === totalPages;
+    previous.addEventListener('click', () => { page -= 1; render(); });
+    next.addEventListener('click', () => { page += 1; render(); });
+    pagination.append(previous, summary, next);
+  };
+
+  const render = () => {
+    const view = pageItems(operators, search.value, page, (operator, query) => [
+      operator.email,
+      operator.player_name,
+      operator.role,
+    ].join(' ').toLocaleLowerCase('it').includes(query));
+    page = view.page;
     list.replaceChildren();
-    operators.forEach((operator) => {
+    view.items.forEach((operator) => {
       const item = document.createElement('li');
       item.className = 'operator-management__item';
 
@@ -34,7 +67,9 @@ import '../auth.js?v=admin-permissions-20260729';
       email.textContent = operator.email;
       date.textContent = operator.email === 'capraiafc@gmail.com'
         ? 'Super user · accesso completo'
-        : `Operatore · abilitato dal ${new Intl.DateTimeFormat('it-IT', { dateStyle: 'medium' }).format(new Date(operator.created_at))}`;
+        : operator.player_id
+          ? `Calciatore · solo scheda di ${operator.player_name || 'giocatore collegato'}`
+          : `Operatore · abilitato dal ${new Intl.DateTimeFormat('it-IT', { dateStyle: 'medium' }).format(new Date(operator.created_at))}`;
       details.append(email, date);
 
       const permissions = document.createElement('div');
@@ -62,6 +97,13 @@ import '../auth.js?v=admin-permissions-20260729';
       if (operator.email !== 'capraiafc@gmail.com') item.append(save, remove);
       list.append(item);
     });
+    if (!view.items.length) {
+      const empty = document.createElement('li');
+      empty.className = 'operator-management__empty';
+      empty.textContent = 'Nessun operatore trovato.';
+      list.append(empty);
+    }
+    renderPagination(view.filtered.length);
   };
 
   const load = async () => {
@@ -69,15 +111,17 @@ import '../auth.js?v=admin-permissions-20260729';
     if (!client) throw new Error('Configurazione autenticazione non disponibile.');
     const { data, error } = await client.rpc('list_operator_emails');
     if (error) throw error;
-    const operators = data || [];
+    operators = data || [];
     const permissionKeys = permissionFields.map(([key]) => key);
     const missingPermissionColumns = operators.some((operator) =>
       permissionKeys.some((key) => typeof operator[key] !== 'boolean'));
     if (missingPermissionColumns) {
       throw new Error('La funzione list_operator_emails su Supabase non restituisce ancora i booleani dei permessi.');
     }
-    render(operators);
+    render();
   };
+
+  search.addEventListener('input', () => { page = 1; render(); });
 
   const setBusy = async (operation) => {
     submit.disabled = true;
@@ -124,6 +168,7 @@ import '../auth.js?v=admin-permissions-20260729';
       const { error } = await getClient().rpc('add_operator', { operator_email: email, p_can_matches: permissions.can_matches, p_can_players: permissions.can_players, p_can_news: permissions.can_news, p_can_sponsors: permissions.can_sponsors, p_can_bacheca: permissions.can_bacheca, p_can_merch: permissions.can_merch });
       if (error) throw error;
       form.reset();
+      page = 1;
       await load();
       setFeedback('Operatore aggiunto e abilitato al prossimo accesso.', 'success');
     }).catch((error) => setFeedback(error.message || 'Non è stato possibile aggiungere l’operatore.', 'error'));

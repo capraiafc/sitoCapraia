@@ -142,6 +142,9 @@ Le correzioni più recenti per operatori e permessi sono:
 - `202607230014_fix_operator_permissions_insert.sql`
 - `202607230015_cleanup_legacy_operator_functions.sql`
 - `202607230016_restore_operator_permission_listing.sql`
+- `202607270017_player_private_data_and_medical_reminders.sql`
+- `202607270018_player_self_service_and_medical_documents.sql`
+- `202607270019_player_email_operator_sync.sql`
 
 L'ultima migrazione fa sì che `list_operator_emails()` restituisca anche i
 booleani necessari per mostrare correttamente i checkbox nella pagina
@@ -153,6 +156,7 @@ Il progetto contiene due funzioni:
 
 - `send-membership-request`
 - `send-merch-request`
+- `send-medical-reminders`
 
 Configura in Supabase i secret:
 
@@ -162,6 +166,8 @@ Configura in Supabase i secret:
 - `MERCH_MAIL_TO` facoltativo; in assenza viene usato `MAIL_TO`
 - `ALLOWED_ORIGINS`
 - `NEW_MEMBER_REQUIRED_FIELDS`
+- `MEDICAL_REMINDER_MAIL_TO`
+- `MEDICAL_REMINDER_CRON_SECRET`
 
 `MAIL_TO` deve essere impostato a `capraiafc@gmail.com`.
 
@@ -170,6 +176,7 @@ Distribuisci le funzioni:
 ```powershell
 npx supabase functions deploy send-membership-request --no-verify-jwt
 npx supabase functions deploy send-merch-request --no-verify-jwt
+npx supabase functions deploy send-medical-reminders --no-verify-jwt
 ```
 
 La chiave Resend rimane esclusivamente nei secret server-side.
@@ -228,5 +235,7 @@ della pubblicazione:
 - [Gestione merch](docs/merch-management.md)
 - [Gestione news](docs/admin-news.md)
 - [Gestione giocatori](docs/player-management.md)
+- [Reminder visite mediche](docs/player-medical-reminders.md)
+- [Attivazione scheda personale calciatori](docs/player-self-service-setup.md)
 - [Richieste tessera](docs/membership-requests.md)
 - [Piano operativo](docs/operating-plan.md)

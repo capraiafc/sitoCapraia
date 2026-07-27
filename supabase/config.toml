@@ -1,2 +1,5 @@
 [functions.send-membership-request]
 verify_jwt = false
+
+[functions.send-medical-reminders]
+verify_jwt = false

@@ -1,2 +1,5 @@
 
 node_modules/
+
+# Import locali con dati personali: non pubblicare nel repository.
+supabase/private/

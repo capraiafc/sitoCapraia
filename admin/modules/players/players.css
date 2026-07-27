@@ -15,4 +15,35 @@
 .players-admin__item { display: flex; gap: 1rem; justify-content: space-between; align-items: center; padding: .9rem 0; border-bottom: 1px solid currentColor; }
 .players-admin__summary { display: grid; gap: .2rem; }
 .players-admin__summary small { opacity: .72; }
-@media (max-width: 620px) { .players-admin__form { grid-template-columns: 1fr; } .players-admin__item { align-items: flex-start; flex-direction: column; } }
+.players-self-service-intro { max-width:720px; padding:.85rem 1rem; border-left:5px solid var(--admin-yellow); background:#fff; }
+.players-medical-upload { display:grid; gap:.35rem; }
+.players-medical-upload small { color:#52647f; font-size:.7rem; }
+.players-medical-current { display:flex; align-items:center; justify-content:space-between; gap:.8rem; padding:.75rem; border:1px solid var(--admin-line); background:#f5f8ff; }
+.players-medical-current span { overflow-wrap:anywhere; font:700 .7rem var(--mono); }
+.players-admin--self-service { max-width:720px; }
+.players-admin--self-service .admin-collection-toolbar { justify-content:flex-end; }
+.players-admin--self-service .players-admin__item { padding:1.2rem; border:1px solid var(--admin-line); background:#fff; }
+.players-admin--self-service .players-admin__actions { margin-top:.4rem; }
+.players-insights { display:grid; gap:1rem; margin:1.5rem 0; }
+.players-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.8rem; }
+.players-kpi,.players-insights__card { padding:1rem; border:1px solid var(--admin-line); background:#fff; }
+.players-kpi { display:grid; gap:.25rem; }
+.players-kpi span { color:#52647f; font:700 .68rem var(--mono); text-transform:uppercase; letter-spacing:.05em; }
+.players-kpi strong { color:var(--admin-deep); font:700 clamp(1.6rem,3vw,2.4rem) var(--serif); }
+.players-kpi small { color:#52647f; font-size:.7rem; }
+.players-insights__grid { display:grid; grid-template-columns:1.25fr 1fr 1fr; gap:.8rem; }
+.players-insights__card h3 { margin:0 0 1rem; color:var(--admin-deep); font:700 1.25rem var(--serif); }
+.players-medical ol { display:grid; gap:.55rem; margin:0; padding:0; list-style:none; }
+.players-medical li { display:grid; grid-template-columns:minmax(110px,1fr) auto minmax(70px,.8fr) auto; align-items:center; gap:.65rem; padding:.55rem .65rem; border-left:5px solid #2f7d53; background:#f5f8ff; font-size:.72rem; }
+.players-medical li[data-state="warning"] { border-left-color:#e8a600; }
+.players-medical li[data-state="critical"],.players-medical li[data-state="expired"] { border-left-color:#b32222; }
+.players-medical li i { display:block; width:var(--medical-urgency); height:.65rem; background:#2f7d53; }
+.players-medical li[data-state="warning"] i { background:#e8a600; }
+.players-medical li[data-state="critical"] i,.players-medical li[data-state="expired"] i { background:#b32222; }
+.players-medical li span { justify-self:end; font:700 .65rem var(--mono); }
+.players-bars { display:grid; gap:.65rem; }
+.players-bars__row { display:grid; grid-template-columns:minmax(72px,1fr) minmax(70px,1.5fr) auto; align-items:center; gap:.55rem; font-size:.7rem; }
+.players-bars__row i { display:block; width:var(--bar-size); min-width:0; height:.7rem; background:linear-gradient(90deg,var(--admin-blue),var(--admin-yellow)); }
+.players-bars__row b { font:700 .75rem var(--mono); }
+@media (max-width: 900px) { .players-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); }.players-insights__grid { grid-template-columns:1fr 1fr; }.players-medical { grid-column:1 / -1; } }
+@media (max-width: 620px) { .players-admin__form { grid-template-columns:1fr; }.players-admin__item { align-items:flex-start; flex-direction:column; }.players-medical-current { align-items:flex-start; flex-direction:column; }.players-kpis,.players-insights__grid { grid-template-columns:1fr; }.players-medical { grid-column:auto; }.players-medical li { grid-template-columns:1fr auto; }.players-medical li i,.players-medical li span { grid-column:1 / -1; justify-self:start; }.players-medical li i { min-width:6%; } }
