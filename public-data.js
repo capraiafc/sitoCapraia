@@ -239,11 +239,10 @@ function renderPlayers(players) {
   }
   grid.innerHTML = players.map((player, index) => {
     const image = safeUrl(player.image_url);
-    const number = player.squad_number ? String(player.squad_number).padStart(2, '0') : '—';
     const visual = image
       ? `<img class="player-photo" src="${escapeHtml(image)}" alt="${escapeHtml(player.display_name)}" loading="lazy" />`
       : '<div class="player-silhouette" aria-hidden="true"></div>';
-    return `<article class="player-card p${(index % 4) + 1}"><div class="shirt-number">${escapeHtml(number)}</div>${visual}<p>${escapeHtml(positionLabels[player.position] || player.position)}</p><h3>${escapeHtml(player.first_name)}<br />${escapeHtml(player.last_name)}</h3></article>`;
+    return `<article class="player-card p${(index % 4) + 1}">${visual}<p>${escapeHtml(positionLabels[player.position] || player.position)}</p><h3>${escapeHtml(player.first_name)}<br />${escapeHtml(player.last_name)}</h3></article>`;
   }).join('');
   if (note) note.hidden = true;
   window.CapraiaPlayerCarousel?.refresh();
