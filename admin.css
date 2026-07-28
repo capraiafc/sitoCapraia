@@ -29,7 +29,7 @@
 .admin-panel textarea { min-height:120px; resize:vertical; }
 .admin-panel button { justify-self:start; }
 .operator-permissions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.55rem .8rem; padding:.8rem; border:1px solid var(--admin-line); }
-.operator-permissions legend { padding:0 .3rem; font:700 .72rem var(--mono); text-transform:uppercase; letter-spacing:.05em; }.operator-permissions label,.operator-management__permissions label { display:flex; align-items:center; gap:.35rem; font-size:.76rem; font-weight:500; }.operator-management__item { align-items:flex-start !important; flex-wrap:wrap; }.operator-management__permissions { display:flex; flex:1 1 100%; flex-wrap:wrap; gap:.45rem .8rem; color:#52647f; font-size:.76rem; }.operator-management__save,.operator-management__remove { border:0; background:transparent; color:var(--admin-deep); cursor:pointer; text-decoration:underline; }.operator-management__remove { color:#ae250f; }
+.operator-permissions legend { padding:0 .3rem; font:700 .72rem var(--mono); text-transform:uppercase; letter-spacing:.05em; }.operator-permissions label { display:flex; align-items:center; gap:.35rem; font-size:.76rem; font-weight:500; }
 .admin-dashboard { display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); gap:1.2rem; margin-top:2rem; }.admin-dashboard__card { padding:1.2rem; border:1px solid var(--admin-line); background:#fff; }.admin-dashboard__card h3 { margin:0; color:var(--admin-deep); font:700 1.45rem var(--serif); letter-spacing:-.04em; }.admin-dashboard__card>p { margin:.35rem 0 1rem; color:#52647f; font-size:.8rem; }.admin-dashboard__actions>div { display:flex; align-items:center; justify-content:space-between; gap:1rem; }.admin-dashboard__actions ol { display:grid; gap:.75rem; margin:1rem 0 0; padding:0; list-style:none; }.admin-dashboard__actions li { display:grid; gap:.2rem; padding-top:.75rem; border-top:1px solid var(--admin-line); font-size:.8rem; }.admin-dashboard__actions time { color:#52647f; font:500 .65rem var(--mono); }.admin-login-chart { display:grid; gap:.75rem; margin-top:1.2rem; }.admin-login-chart__row { display:grid; grid-template-columns:minmax(100px,1fr) minmax(80px,2fr) auto; align-items:center; gap:.7rem; font-size:.75rem; }.admin-login-chart__row span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }.admin-login-chart__row i { display:block; height:.72rem; background:linear-gradient(90deg,var(--admin-blue),var(--admin-yellow)); width:var(--bar-width); min-width:5%; }.admin-login-chart__row b { font:700 .85rem var(--mono); }
 .admin-list { list-style:none; padding:0; margin:1.25rem 0 0; display:grid; gap:.65rem; }
 .admin-list li { display:flex; justify-content:space-between; gap:1rem; align-items:center; padding:.85rem; background:#fff; border:1px solid var(--admin-line); }
@@ -82,12 +82,6 @@
   .admin-panel input[type="file"],.admin-edit-modal input[type="file"] { max-width:100%; padding:.55rem; }
   .admin-panel .button,.admin-edit-modal .button { width:100%; justify-content:space-between; }
   .operator-permissions { grid-template-columns:1fr 1fr; gap:.7rem .45rem; }
-  .admin-list .operator-management__item { width:100%; min-width:0; max-width:100%; align-items:stretch; flex-flow:column nowrap; overflow:hidden; }
-  .admin-list .operator-management__details,.admin-list .operator-management__permissions { width:100%; min-width:0; max-width:100%; margin:0; overflow:hidden; }
-  .admin-list .operator-management__details { contain:inline-size; }
-  .admin-list .operator-management__details > * { display:block; min-width:0; max-width:100%; white-space:normal; overflow-wrap:anywhere; word-break:break-word; }
-  .operator-management__permissions { display:grid; width:100%; grid-template-columns:1fr 1fr; }
-  .operator-management__save,.operator-management__remove { min-height:42px; padding:.45rem .2rem; }
   .admin-collection-toolbar { margin:1rem 0; }
   .admin-pagination { flex-wrap:wrap; gap:.5rem; }
   .admin-pagination button { min-height:42px; flex:1 1 95px; }
@@ -114,5 +108,5 @@
 @media (max-width:360px) {
   .admin-header .brand span { display:none; }
   #admin-user-email { max-width:52vw; }
-  .operator-permissions,.operator-management__permissions { grid-template-columns:1fr; }
+  .operator-permissions { grid-template-columns:1fr; }
 }

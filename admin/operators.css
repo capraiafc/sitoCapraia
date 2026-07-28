@@ -1,4 +1,4 @@
-.operator-management { width: 100%; max-width: 760px; min-width: 0; overflow: hidden; }
+.operator-management { width: 100%; max-width: 920px; min-width: 0; }
 .operator-management__form { display: flex; gap: .75rem; align-items: end; flex-wrap: wrap; }
 .operator-management__form label { display: grid; gap: .35rem; flex: 1 1 300px; font-size: .8rem; }
 .operator-management__form input { min-height: 42px; padding: .65rem .75rem; border: 1px solid currentColor; background: transparent; color: inherit; }
@@ -8,17 +8,24 @@
 .operator-management__feedback[data-state="error"] { color: #a41313; }
 .operator-management__feedback[data-state="success"] { color: #0f6a36; }
 .operator-management__toolbar { justify-content: flex-end; }
-.operator-management__list { margin: 0; padding: 0; list-style: none; border-top: 1px solid currentColor; }
-.operator-management__item { display: flex; width: 100%; min-width: 0; max-width: 100%; justify-content: space-between; align-items: center; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid currentColor; overflow: hidden; }
-.operator-management__details { display: grid; min-width: 0; max-width: 100%; gap: .2rem; overflow: hidden; contain: inline-size; }
+.operator-management__list { margin: 0; padding: 0; list-style: none; }
+.operator-management__item { display: grid !important; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "details actions" "permissions permissions"; width: 100%; min-width: 0; max-width: 100%; align-items: start !important; gap: .8rem 1rem; padding: 1rem !important; border: 1px solid var(--admin-line); overflow: visible; }
+.operator-management__details { grid-area: details; display: grid; min-width: 0; gap: .2rem; }
 .operator-management__details strong,.operator-management__details small { display:block; min-width:0; max-width:100%; white-space:normal; overflow-wrap:anywhere; word-break:break-word; }
 .operator-management__item small { opacity: .72; }
+.operator-management__permissions { grid-area: permissions; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); width:100%; min-width:0; gap:.55rem .8rem; padding:.75rem; border:1px solid var(--admin-line); background:#f6f8fd; color:#52647f; font-size:.76rem; }
+.operator-management__permissions label { display:flex; min-width:0; align-items:center; gap:.45rem; font-size:.76rem; font-weight:500; }
+.operator-management__permissions input { flex:0 0 auto; width:16px !important; height:16px; margin:0; padding:0; }
+.operator-management__actions { grid-area:actions; display:flex; flex-wrap:wrap; justify-content:flex-end; align-items:center; gap:.5rem .8rem; }
+.operator-management__save,.operator-management__remove { min-height:36px; padding:.35rem .15rem; border:0; background:transparent; color:var(--admin-deep); cursor:pointer; text-decoration:underline; font-size:.78rem; }
+.operator-management__remove { color:#ae250f; }
 .operator-management__remove:hover, .operator-management__remove:focus-visible { background: #a41313; border-color: #a41313; color: #fff; }
 .operator-management__empty { padding: 1rem 0; color: rgba(24, 35, 49, .72); }
-@media (max-width: 520px) {
-  .operator-management__item { align-items: stretch; flex-direction: column; flex-wrap: nowrap; }
-  .operator-management__details,.operator-management__permissions { width: 100%; min-width: 0; max-width: 100%; overflow:hidden; }
-  .operator-management__permissions { box-sizing: border-box; overflow: hidden; }
-  .operator-management__permissions label { min-width: 0; overflow-wrap: anywhere; }
-  .operator-management__permissions input { flex: 0 0 auto; }
+@media (max-width: 620px) {
+  .operator-management__item { grid-template-columns:minmax(0,1fr); grid-template-areas:"details" "permissions" "actions"; gap:.75rem; padding:.85rem !important; }
+  .operator-management__permissions { grid-template-columns:repeat(2,minmax(0,1fr)); padding:.65rem; }
+  .operator-management__actions { justify-content:flex-start; }
+}
+@media (max-width: 360px) {
+  .operator-management__permissions { grid-template-columns:minmax(0,1fr); }
 }

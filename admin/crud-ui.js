@@ -15,6 +15,7 @@ export function createCollectionUi({ root, list, addLabel, searchPlaceholder }) 
   return {
     add,
     search,
+    pagination,
     renderPagination({ page, totalItems, onPageChange }) {
       const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
       const current = Math.min(Math.max(1, page), totalPages);

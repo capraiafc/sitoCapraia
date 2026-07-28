@@ -1,5 +1,5 @@
 import '../../../auth.js?v=admin-permissions-20260729';
-import { createCollectionUi, moveFormToModal, pageItems } from '../../crud-ui.js';
+import { createCollectionUi, moveFormToModal, PAGE_SIZE } from '../../crud-ui.js?v=player-navigation-20260728';
 import {
   createPlayer, listPlayers, removePlayer, updateOwnPlayerProfile, updatePlayer, withdrawOwnPlayer,
 } from './players-service.js?v=player-self-service-20260727';
@@ -7,6 +7,7 @@ import { addImageUploadFields, removeImage, resolveImageChange } from '../../med
 import {
   downloadMedicalDocument, removeMedicalDocument, uploadMedicalDocument, validateMedicalDocument,
 } from './medical-documents.js?v=player-self-service-20260727';
+import { getPlayerListView } from './players-list-state.js?v=player-navigation-20260728';
 
 const positions = { portiere: 'Portiere', difensore: 'Difensore', centrocampista: 'Centrocampista', attaccante: 'Attaccante', staff: 'Staff' };
 const statuses = { active: 'In rosa', injured: 'Infortunato', unavailable: 'Indisponibile', staff: 'Staff', former: 'Ex rosa' };
@@ -168,6 +169,7 @@ function start(root) {
   let players = [];
   let editingId = null;
   let page = 1;
+  let searchQuery = '';
   let access = null;
   let selfService = false;
 
@@ -232,14 +234,27 @@ function start(root) {
     return item;
   };
 
+  const renderPagination = (totalItems) => {
+    const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+    page = Math.min(Math.max(1, page), totalPages);
+    collection.pagination.replaceChildren();
+    if (totalItems <= PAGE_SIZE) return;
+    const previous = document.createElement('button');
+    previous.type = 'button'; previous.textContent = '← Precedente'; previous.disabled = page === 1; previous.dataset.playerPage = String(page - 1);
+    const summary = document.createElement('span'); summary.textContent = `${totalItems} giocatori · Pagina ${page} di ${totalPages}`;
+    const next = document.createElement('button');
+    next.type = 'button'; next.textContent = 'Successiva →'; next.disabled = page === totalPages; next.dataset.playerPage = String(page + 1);
+    collection.pagination.append(previous, summary, next);
+  };
+
   const render = () => {
     if (!selfService) renderPlayerDashboard(dashboard, players);
-    const view = pageItems(players, collection.search.value, page, (player, query) => [player.display_name, player.first_name, player.last_name, player.position, player.status, player.squad_number, player.kit_size, player.email].join(' ').toLocaleLowerCase('it').includes(query));
+    const view = getPlayerListView(players, searchQuery, page, PAGE_SIZE);
     page = view.page;
     list.replaceChildren(...view.items.map(row));
     if (!view.items.length) { const item = document.createElement('li'); item.textContent = 'Nessun giocatore trovato.'; list.append(item); }
     if (empty) empty.hidden = true;
-    collection.renderPagination({ page, totalItems: view.filtered.length, onPageChange(next) { page = next; render(); } });
+    renderPagination(view.filtered.length);
   };
 
   const load = async () => {
@@ -263,7 +278,14 @@ function start(root) {
   };
 
   collection.add.addEventListener('click', () => { reset(); modal.open('Inserisci nuovo giocatore'); });
-  collection.search.addEventListener('input', () => { page = 1; render(); });
+  collection.search.addEventListener('input', (event) => { searchQuery = event.currentTarget.value; page = 1; render(); });
+  collection.pagination.addEventListener('click', (event) => {
+    const button = event.target.closest('button[data-player-page]');
+    if (!button || button.disabled) return;
+    page = Number(button.dataset.playerPage);
+    render();
+    list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
   cancel.addEventListener('click', () => { reset(); modal.close(); });
   downloadCurrentMedical.addEventListener('click', () => {
     const player = players.find((item) => item.id === editingId);

@@ -95,7 +95,12 @@ import { pageItems } from './crud-ui.js';
       const save = document.createElement('button'); save.type = 'button'; save.className = 'operator-management__save'; save.textContent = 'Salva diritti'; save.dataset.operatorAction = 'save'; save.dataset.operatorEmail = operator.email;
 
       item.append(details, permissions);
-      if (operator.email !== 'capraiafc@gmail.com') item.append(save, remove);
+      if (operator.email !== 'capraiafc@gmail.com') {
+        const actions = document.createElement('div');
+        actions.className = 'operator-management__actions';
+        actions.append(save, remove);
+        item.append(actions);
+      }
       list.append(item);
     });
     if (!view.items.length) {
