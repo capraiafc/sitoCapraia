@@ -169,6 +169,7 @@ function start(root) {
   let players = [];
   let editingId = null;
   let page = 1;
+  let navigationLocked = false;
   let access = null;
   let selfService = false;
 
@@ -237,20 +238,24 @@ function start(root) {
     const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
     page = Math.min(Math.max(1, page), totalPages);
     collection.pagination.replaceChildren();
+    const changePage = (nextPage) => {
+      if (navigationLocked || nextPage < 1 || nextPage > totalPages || nextPage === page) return;
+      navigationLocked = true;
+      page = nextPage;
+      render();
+      window.setTimeout(() => {
+        navigationLocked = false;
+        renderPagination(totalItems);
+      }, 350);
+    };
     const previous = document.createElement('button');
-    previous.type = 'button'; previous.textContent = '← Precedente'; previous.disabled = page === 1;
-    previous.addEventListener('click', () => {
-      if (page <= 1) return;
-      page -= 1; render(); list.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+    previous.type = 'button'; previous.textContent = '← Precedente'; previous.disabled = navigationLocked || page === 1;
+    previous.addEventListener('click', () => changePage(page - 1));
     const summary = document.createElement('span');
     summary.textContent = `${totalItems} ${totalItems === 1 ? 'giocatore' : 'giocatori'} · Pagina ${page} di ${totalPages}`;
     const next = document.createElement('button');
-    next.type = 'button'; next.textContent = 'Successiva →'; next.disabled = page === totalPages;
-    next.addEventListener('click', () => {
-      if (page >= totalPages) return;
-      page += 1; render(); list.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+    next.type = 'button'; next.textContent = 'Successiva →'; next.disabled = navigationLocked || page === totalPages;
+    next.addEventListener('click', () => changePage(page + 1));
     collection.pagination.append(previous, summary, next);
   };
 
@@ -285,7 +290,7 @@ function start(root) {
   };
 
   collection.add.addEventListener('click', () => { reset(); modal.open('Inserisci nuovo giocatore'); });
-  const updateSearch = () => { page = 1; render(); };
+  const updateSearch = () => { navigationLocked = false; page = 1; render(); };
   collection.search.addEventListener('input', updateSearch);
   collection.search.addEventListener('search', updateSearch);
   collection.search.addEventListener('change', updateSearch);
