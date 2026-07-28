@@ -48,7 +48,14 @@ export async function removeMedicalDocument(path) {
 export async function downloadMedicalDocument(path, filename) {
   if (!path) throw new Error('Documento della visita non presente.');
   const { data, error } = await client().storage.from(BUCKET).download(path);
-  if (error) throw error;
+  if (error) {
+    const status = Number(error.statusCode || error.status || 0);
+    const missing = status === 404 || /(?:object\s+)?not[ _-]?found/i.test(error.message || '');
+    if (missing) {
+      throw new Error('Il documento non è più presente nell’archivio. Apri “Modifica”, caricalo nuovamente e salva la scheda.');
+    }
+    throw new Error(error.message || 'Non è stato possibile scaricare il documento della visita.');
+  }
   const objectUrl = URL.createObjectURL(data);
   const link = document.createElement('a');
   link.href = objectUrl;

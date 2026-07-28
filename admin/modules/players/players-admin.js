@@ -6,7 +6,7 @@ import {
 import { addImageUploadFields, removeImage, resolveImageChange } from '../../media.js';
 import {
   downloadMedicalDocument, removeMedicalDocument, uploadMedicalDocument, validateMedicalDocument,
-} from './medical-documents.js?v=player-self-service-20260727';
+} from './medical-documents.js?v=medical-download-20260728';
 import { getPlayerListView } from './players-list-state.js?v=player-navigation-20260728';
 
 const positions = { portiere: 'Portiere', difensore: 'Difensore', centrocampista: 'Centrocampista', attaccante: 'Attaccante', staff: 'Staff' };
@@ -306,6 +306,7 @@ function start(root) {
   form.addEventListener('submit', async (event) => {
     event.preventDefault(); busy(true);
     let uploadedMedical = null;
+    let uploadedMedicalPersisted = false;
     try {
       const wasEditing = Boolean(editingId);
       const currentPlayer = players.find((item) => item.id === editingId) || null;
@@ -336,8 +337,10 @@ function start(root) {
       if (selfService) {
         if (!wasEditing) throw new Error('Scheda personale non disponibile.');
         await updateOwnPlayerProfile(payload);
+        uploadedMedicalPersisted = Boolean(uploadedMedical);
       } else if (wasEditing) {
         await updatePlayer(editingId, payload);
+        uploadedMedicalPersisted = Boolean(uploadedMedical);
       } else {
         const created = await createPlayer(payload);
         if (medicalFile) {
@@ -350,6 +353,7 @@ function start(root) {
             medical_document_size: uploadedMedical.size,
             medical_document_uploaded_at: new Date().toISOString(),
           });
+          uploadedMedicalPersisted = true;
         }
       }
 
@@ -361,7 +365,12 @@ function start(root) {
       }
       await load(); reset(); modal.close(); say(wasEditing ? 'Giocatore aggiornato.' : 'Giocatore aggiunto alla rosa.', 'success');
     } catch (error) {
-      if (uploadedMedical?.path) await removeMedicalDocument(uploadedMedical.path).catch(() => {});
+      // Elimina il nuovo file soltanto se il salvataggio nel database non è
+      // riuscito. Dopo la persistenza, eventuali errori di refresh non devono
+      // lasciare la scheda collegata a un oggetto appena cancellato.
+      if (uploadedMedical?.path && !uploadedMedicalPersisted) {
+        await removeMedicalDocument(uploadedMedical.path).catch(() => {});
+      }
       say(error.message || 'Non è stato possibile salvare il giocatore.', 'error');
     } finally { busy(false); }
   });
