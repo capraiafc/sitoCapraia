@@ -221,7 +221,9 @@ function start(root) {
     const contact = document.createElement('small'); contact.textContent = player.email || 'Email non inserita';
     summary.append(name, meta, contact);
     if (player.medical_document_name) {
-      const document = document.createElement('small'); document.textContent = `Documento: ${player.medical_document_name}`; summary.append(document);
+      const documentLabel = document.createElement('small');
+      documentLabel.textContent = `Documento: ${player.medical_document_name}`;
+      summary.append(documentLabel);
     }
     const actions = document.createElement('div'); actions.className = 'players-admin__actions';
     const availableActions = selfService
