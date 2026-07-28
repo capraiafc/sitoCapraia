@@ -169,7 +169,6 @@ function start(root) {
   let players = [];
   let editingId = null;
   let page = 1;
-  let searchQuery = '';
   let access = null;
   let selfService = false;
 
@@ -238,18 +237,26 @@ function start(root) {
     const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
     page = Math.min(Math.max(1, page), totalPages);
     collection.pagination.replaceChildren();
-    if (totalItems <= PAGE_SIZE) return;
     const previous = document.createElement('button');
-    previous.type = 'button'; previous.textContent = '← Precedente'; previous.disabled = page === 1; previous.dataset.playerPage = String(page - 1);
-    const summary = document.createElement('span'); summary.textContent = `${totalItems} giocatori · Pagina ${page} di ${totalPages}`;
+    previous.type = 'button'; previous.textContent = '← Precedente'; previous.disabled = page === 1;
+    previous.addEventListener('click', () => {
+      if (page <= 1) return;
+      page -= 1; render(); list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    const summary = document.createElement('span');
+    summary.textContent = `${totalItems} ${totalItems === 1 ? 'giocatore' : 'giocatori'} · Pagina ${page} di ${totalPages}`;
     const next = document.createElement('button');
-    next.type = 'button'; next.textContent = 'Successiva →'; next.disabled = page === totalPages; next.dataset.playerPage = String(page + 1);
+    next.type = 'button'; next.textContent = 'Successiva →'; next.disabled = page === totalPages;
+    next.addEventListener('click', () => {
+      if (page >= totalPages) return;
+      page += 1; render(); list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
     collection.pagination.append(previous, summary, next);
   };
 
   const render = () => {
     if (!selfService) renderPlayerDashboard(dashboard, players);
-    const view = getPlayerListView(players, searchQuery, page, PAGE_SIZE);
+    const view = getPlayerListView(players, collection.search.value, page, PAGE_SIZE);
     page = view.page;
     list.replaceChildren(...view.items.map(row));
     if (!view.items.length) { const item = document.createElement('li'); item.textContent = 'Nessun giocatore trovato.'; list.append(item); }
@@ -278,14 +285,10 @@ function start(root) {
   };
 
   collection.add.addEventListener('click', () => { reset(); modal.open('Inserisci nuovo giocatore'); });
-  collection.search.addEventListener('input', (event) => { searchQuery = event.currentTarget.value; page = 1; render(); });
-  collection.pagination.addEventListener('click', (event) => {
-    const button = event.target.closest('button[data-player-page]');
-    if (!button || button.disabled) return;
-    page = Number(button.dataset.playerPage);
-    render();
-    list.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
+  const updateSearch = () => { page = 1; render(); };
+  collection.search.addEventListener('input', updateSearch);
+  collection.search.addEventListener('search', updateSearch);
+  collection.search.addEventListener('change', updateSearch);
   cancel.addEventListener('click', () => { reset(); modal.close(); });
   downloadCurrentMedical.addEventListener('click', () => {
     const player = players.find((item) => item.id === editingId);
