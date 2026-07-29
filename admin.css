@@ -36,8 +36,43 @@
 .admin-list small { display:block; color:#52647f; margin-top:.2rem; }
 .admin-feedback { min-height:1.3rem; font-size:.82rem; }
 .admin-feedback[data-state="error"] { color:#ae250f; }.admin-feedback[data-state="success"] { color:#08713d; }
+.sponsor-dashboard { display:grid; grid-template-columns:1.25fr 1fr 1fr; gap:1rem; margin:1.5rem 0; }
+.sponsor-dashboard__card { min-width:0; padding:1.1rem; border:1px solid var(--admin-line); background:#fff; }
+.sponsor-dashboard__card h3 { margin:0; color:var(--admin-deep); font:700 1.35rem var(--serif); letter-spacing:-.035em; }
+.sponsor-dashboard__card > p { margin:.3rem 0 1rem; color:#52647f; font-size:.76rem; }
+.sponsor-dashboard__warning { border-color:#e5a100; box-shadow:inset 5px 0 0 #e5a100; background:#fff9e8; }
+.sponsor-dashboard__ok { box-shadow:inset 5px 0 0 #258558; }
+.sponsor-dashboard__empty { margin:0; color:#52647f; font-size:.76rem; }
+.sponsor-season-totals,.sponsor-top-list,.sponsor-warning-list { display:grid; gap:.65rem; margin:0; padding:0; list-style:none; }
+.sponsor-season-totals__row { display:grid; grid-template-columns:auto minmax(55px,1fr) auto; align-items:center; gap:.55rem; font-size:.7rem; }
+.sponsor-season-totals__row span { font:700 .65rem var(--mono); }
+.sponsor-season-totals__row i { display:block; width:var(--sponsor-bar); height:.7rem; background:linear-gradient(90deg,var(--admin-blue),var(--admin-yellow)); }
+.sponsor-season-totals__row strong,.sponsor-top-list strong { font:700 .72rem var(--mono); }
+.sponsor-top-list { counter-reset:sponsor-rank; }
+.sponsor-top-list li { counter-increment:sponsor-rank; display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:.55rem; padding-bottom:.55rem; border-bottom:1px solid var(--admin-line); font-size:.76rem; }
+.sponsor-top-list li::before { content:counter(sponsor-rank); display:grid; place-items:center; width:24px; height:24px; background:var(--admin-yellow); color:var(--admin-deep); font:700 .68rem var(--mono); }
+.sponsor-warning-list { font-size:.75rem; }
+.sponsor-warning-list li::before { content:"⚠"; margin-right:.4rem; color:#a96300; }
+.sponsor-detail-modal { overflow-y:auto; }
+.sponsor-detail-modal__body { display:grid; grid-template-columns:1fr 1fr; gap:1rem; padding:1.25rem; }
+.sponsor-detail-modal__body section { min-width:0; padding:1rem; border:1px solid var(--admin-line); }
+.sponsor-detail-modal__body h3 { margin:0 0 .9rem; color:var(--admin-deep); font:700 1.15rem var(--serif); }
+.sponsor-detail-modal__body form { padding:0; }
+.sponsor-detail-history { grid-column:1 / -1; }
+.sponsor-detail-history > div { display:flex; align-items:baseline; justify-content:space-between; gap:1rem; }
+.sponsor-detail-history > div > strong { color:var(--admin-blue); font:700 .75rem var(--mono); }
+.sponsor-detail-history > .sponsor-detail-season-summary { display:flex; justify-content:flex-start; flex-wrap:wrap; gap:.45rem; margin:0 0 .8rem; }
+.sponsor-detail-season-summary span { padding:.35rem .5rem; background:var(--admin-yellow); color:var(--admin-deep); font:700 .64rem var(--mono); }
+.sponsor-detail-history ul { display:grid; gap:.5rem; margin:0; padding:0; list-style:none; }
+.sponsor-detail-history li { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.7rem; background:var(--admin-paper); }
+.sponsor-detail-history li span { display:grid; gap:.15rem; }
+.sponsor-detail-history li small { color:#52647f; font-size:.68rem; }
+.sponsor-detail-history li button { border:1px solid #b64a3b; padding:.4rem .55rem; background:#fff; color:#8b1f12; cursor:pointer; }
+.sponsor-payment-empty { color:#52647f; font-size:.76rem; }
+.sponsor-detail-modal__body > .admin-feedback { grid-column:1 / -1; margin:0; }
 .admin-collection-toolbar { display:flex; align-items:end; justify-content:space-between; gap:1rem; margin:1.2rem 0; }.admin-collection-search { display:grid; gap:.35rem; min-width:min(100%,290px); font:700 .72rem var(--mono); text-transform:uppercase; letter-spacing:.05em; }.admin-collection-search input { width:100%; padding:.65rem .75rem; border:1px solid var(--admin-line); background:#fff; color:var(--admin-ink); font:400 .85rem var(--sans); text-transform:none; letter-spacing:normal; }.admin-pagination { display:flex; align-items:center; justify-content:flex-end; gap:.8rem; margin-top:1rem; font-size:.78rem; }.admin-pagination button { border:1px solid var(--admin-line); padding:.5rem .65rem; background:#fff; color:var(--admin-ink); cursor:pointer; }.admin-pagination button:disabled { cursor:not-allowed; opacity:.45; }.admin-edit-modal { width:min(760px,calc(100% - 2rem)); max-height:calc(100vh - 2rem); padding:0; border:0; background:#fff; color:var(--admin-ink); box-shadow:0 22px 70px rgba(0,26,76,.38); }.admin-edit-modal::backdrop { background:rgba(0,26,76,.7); backdrop-filter:blur(4px); }.admin-edit-modal__head { position:sticky; top:0; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1.1rem 1.25rem; background:var(--admin-deep); color:#fff; }.admin-edit-modal__head h2 { margin:0; color:#fff; font-size:1.55rem; }.admin-edit-modal__close { width:38px; height:38px; border:1px solid #7891c5; border-radius:50%; background:transparent; color:#fff; font-size:1.5rem; cursor:pointer; }.admin-edit-modal form { display:grid; gap:.8rem; padding:1.25rem; }.admin-edit-modal label { display:grid; gap:.35rem; font-size:.8rem; font-weight:700; }.admin-edit-modal input,.admin-edit-modal select,.admin-edit-modal textarea { width:100%; padding:.7rem; border:1px solid var(--admin-line); color:var(--admin-ink); background:#fff; }.admin-edit-modal textarea { min-height:120px; resize:vertical; }
-@media (max-width:760px) { .admin-layout { grid-template-columns:1fr; }.admin-sidebar { grid-template-columns:repeat(2,1fr); padding:.7rem; }.admin-content { padding:1.5rem; }.admin-list li { align-items:flex-start; flex-direction:column; }.admin-dashboard { grid-template-columns:1fr; }.operator-permissions { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width:900px) { .sponsor-dashboard { grid-template-columns:1fr 1fr; }.sponsor-dashboard__card:first-child { grid-column:1 / -1; } }
+@media (max-width:760px) { .admin-layout { grid-template-columns:1fr; }.admin-sidebar { grid-template-columns:repeat(2,1fr); padding:.7rem; }.admin-content { padding:1.5rem; }.admin-list li { align-items:flex-start; flex-direction:column; }.admin-dashboard { grid-template-columns:1fr; }.operator-permissions { grid-template-columns:repeat(2,minmax(0,1fr)); }.sponsor-detail-modal__body { grid-template-columns:1fr; }.sponsor-detail-history { grid-column:auto; } }
 @media (max-width:620px) { .admin-collection-toolbar { align-items:stretch; flex-direction:column; }.admin-collection-toolbar .button { justify-content:space-between; }.admin-collection-search { min-width:0; }.admin-pagination { justify-content:space-between; }.admin-edit-modal { width:100%; max-height:100vh; }.admin-edit-modal__head { padding:.9rem 1rem; }.admin-edit-modal form { padding:1rem; } }
 
 /* Area operatori: adattamento completo per tablet e telefoni. */
@@ -103,6 +138,12 @@
   .admin-edit-modal form { padding:.85rem; }
   .admin-login-notice { inset:.75rem .75rem auto; right:.75rem; }
   .admin-debug-panel { right:6px; bottom:6px; width:calc(100vw - 12px); }
+  .sponsor-dashboard { grid-template-columns:1fr; }
+  .sponsor-dashboard__card:first-child { grid-column:auto; }
+  .sponsor-season-totals__row { grid-template-columns:auto minmax(35px,1fr) auto; }
+  .sponsor-detail-modal__body { padding:.75rem; }
+  .sponsor-detail-modal__body section { padding:.8rem; }
+  .sponsor-detail-history > div { align-items:flex-start; flex-direction:column; gap:.15rem; }
 }
 
 @media (max-width:360px) {
