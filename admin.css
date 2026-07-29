@@ -57,6 +57,9 @@
 .sponsor-detail-modal__body { display:grid; grid-template-columns:1fr 1fr; gap:1rem; padding:1.25rem; }
 .sponsor-detail-modal__body section { min-width:0; padding:1rem; border:1px solid var(--admin-line); }
 .sponsor-detail-modal__body h3 { margin:0 0 .9rem; color:var(--admin-deep); font:700 1.15rem var(--serif); }
+.sponsor-detail-contact__head { display:flex; align-items:flex-start; justify-content:space-between; gap:.75rem; }
+.sponsor-logo-download { border:0; padding:0; background:transparent; color:var(--admin-blue); text-decoration:underline; text-underline-offset:4px; cursor:pointer; font-size:.72rem; white-space:nowrap; }
+.sponsor-logo-download:disabled { opacity:.5; cursor:wait; }
 .sponsor-detail-modal__body form { padding:0; }
 .sponsor-detail-history { grid-column:1 / -1; }
 .sponsor-detail-history > div { display:flex; align-items:baseline; justify-content:space-between; gap:1rem; }

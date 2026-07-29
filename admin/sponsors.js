@@ -25,7 +25,10 @@ import { addImageUploadFields, removeImage, resolveImageChange } from './media.j
     </div>
     <div class="sponsor-detail-modal__body">
       <section class="sponsor-detail-contact">
-        <h3>Contatto</h3>
+        <div class="sponsor-detail-contact__head">
+          <h3>Contatto</h3>
+          <button type="button" class="sponsor-logo-download" data-sponsor-logo-download hidden>Scarica logo ↓</button>
+        </div>
         <form data-sponsor-contact-form>
           <label>Email di contatto<input name="contact_email" type="email" maxlength="254" autocomplete="email" placeholder="referente@azienda.it" /></label>
           <button class="button button-dark" type="submit">Salva contatto <span>→</span></button>
@@ -54,6 +57,7 @@ import { addImageUploadFields, removeImage, resolveImageChange } from './media.j
   const paymentTotal = detailModal.querySelector('[data-sponsor-payment-total]');
   const paymentSeasons = detailModal.querySelector('[data-sponsor-payment-seasons]');
   const detailFeedback = detailModal.querySelector('[data-sponsor-detail-feedback]');
+  const logoDownload = detailModal.querySelector('[data-sponsor-logo-download]');
   let sponsors = [];
   let payments = [];
   let editingId = null;
@@ -80,6 +84,34 @@ import { addImageUploadFields, removeImage, resolveImageChange } from './media.j
   const sum = (items) => items.reduce((total, payment) => total + Number(payment.amount || 0), 0);
   const seasonSum = (sponsorId, seasonKey) => sum(paymentsFor(sponsorId).filter((payment) => season(payment.payment_date).key === seasonKey));
   const displayDate = (value) => dateFormatter.format(new Date(`${value}T12:00:00`));
+  const safeFilename = (value) => String(value || 'sponsor')
+    .normalize('NFKD')
+    .replace(/[^a-zA-Z0-9._-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 100) || 'sponsor';
+  const logoExtension = (url, mimeType = '') => {
+    const pathname = new URL(url, window.location.href).pathname;
+    const pathExtension = pathname.match(/\.([a-zA-Z0-9]{2,5})$/)?.[1]?.toLowerCase();
+    if (pathExtension) return pathExtension === 'jpeg' ? 'jpg' : pathExtension;
+    if (mimeType === 'image/png') return 'png';
+    if (mimeType === 'image/svg+xml') return 'svg';
+    if (mimeType === 'image/webp') return 'webp';
+    return 'jpg';
+  };
+  const downloadLogo = async (sponsor) => {
+    const logoUrl = String(sponsor?.logo_url || '').trim();
+    if (!logoUrl) throw new Error('Logo non presente per questo sponsor.');
+    const resolvedUrl = new URL(logoUrl, window.location.href).href;
+    const response = await fetch(resolvedUrl);
+    if (!response.ok) throw new Error('Non è stato possibile recuperare il logo.');
+    const blob = await response.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = objectUrl;
+    link.download = `${safeFilename(sponsor.name)}-logo.${logoExtension(resolvedUrl, blob.type)}`;
+    document.body.append(link); link.click(); link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+  };
 
   const reset = () => {
     editingId = null;
@@ -255,6 +287,7 @@ import { addImageUploadFields, removeImage, resolveImageChange } from './media.j
     detailId = sponsor.id;
     detailModal.querySelector('[data-sponsor-detail-title]').textContent = sponsor.name;
     contactForm.elements.contact_email.value = sponsor.contact_email || '';
+    logoDownload.hidden = !String(sponsor.logo_url || '').trim();
     paymentForm.elements.payment_date.value = today();
     paymentForm.elements.amount.value = '';
     sayDetail(message, message ? 'success' : 'info');
@@ -271,6 +304,13 @@ import { addImageUploadFields, removeImage, resolveImageChange } from './media.j
   collection.search.addEventListener('input', () => { page = 1; render(); });
   cancel.addEventListener('click', () => { reset(); editModal.close(); });
   detailModal.querySelector('[data-sponsor-detail-close]').addEventListener('click', () => detailModal.close());
+  logoDownload.addEventListener('click', () => {
+    const sponsor = sponsors.find((item) => item.id === detailId);
+    logoDownload.disabled = true;
+    downloadLogo(sponsor)
+      .catch((error) => sayDetail(error.message || 'Non è stato possibile scaricare il logo.', 'error'))
+      .finally(() => { logoDownload.disabled = false; });
+  });
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
