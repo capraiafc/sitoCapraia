@@ -95,6 +95,19 @@ import { addImageUploadFields, removeImage, resolveImageChange } from './media.j
     sponsorOperators.forEach((operator) => select.add(new Option(operatorLabel(operator), operator.operator_email)));
     select.value = selectedEmail || '';
   };
+  const refreshSponsorOperators = async (selectedEmail, requestedSponsorId) => {
+    const select = contactForm.elements.assigned_operator_email;
+    select.disabled = true;
+    try {
+      const { data, error } = await client().rpc('list_sponsor_operator_candidates');
+      if (error) throw error;
+      if (detailId !== requestedSponsorId) return;
+      sponsorOperators = data || [];
+      renderOperatorOptions(selectedEmail);
+    } finally {
+      if (detailId === requestedSponsorId) select.disabled = false;
+    }
+  };
   const safeFilename = (value) => String(value || 'sponsor')
     .normalize('NFKD')
     .replace(/[^a-zA-Z0-9._-]+/g, '-')
@@ -310,6 +323,8 @@ import { addImageUploadFields, removeImage, resolveImageChange } from './media.j
     sayDetail(message, message ? 'success' : 'info');
     renderPaymentHistory(sponsor);
     if (!detailModal.open) detailModal.showModal();
+    refreshSponsorOperators(sponsor.assigned_operator_email, sponsor.id)
+      .catch((error) => sayDetail(error.message || 'Non è stato possibile aggiornare l’elenco degli operatori.', 'error'));
   };
 
   const busy = async (operation) => {
