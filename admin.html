@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="admin.css?v=sponsor-listino-20260729" />
     <link rel="stylesheet" href="admin/operators.css?v=operator-layout-20260728" />
     <link rel="stylesheet" href="admin/news.css" />
-    <link rel="stylesheet" href="admin/modules/players/players.css?v=player-self-service-20260727" />
+    <link rel="stylesheet" href="admin/modules/players/players.css?v=medical-request-download-20260729" />
     <link rel="stylesheet" href="admin/merch.css" />
   </head>
   <body class="admin-page">
@@ -59,7 +59,10 @@
           <section id="rosa" data-admin-module="players">
             <p class="eyebrow">gestione squadra</p>
             <h2>Gestione <em>rosa.</em></h2>
-            <p class="players-self-service-intro" data-player-self-service-intro hidden>Qui puoi aggiornare la tua taglia e la visita medica. Gli altri dati della rosa restano gestiti dalla società.</p>
+            <div class="players-self-service-intro" data-player-self-service-intro hidden>
+              <p>Qui puoi aggiornare la tua taglia e la visita medica. Gli altri dati della rosa restano gestiti dalla società.</p>
+              <a class="button button-dark" href="assets/documents/richiesta-visita-medica.pdf" download="Richiesta-visita-medica.pdf">Richiesta visita medica <span>↓</span></a>
+            </div>
             <div class="players-insights" data-player-dashboard aria-live="polite"></div>
             <div class="admin-panel players-admin" data-player-management>
               <form data-player-form>

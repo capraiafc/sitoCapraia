@@ -15,7 +15,9 @@
 .players-admin__item { display: flex; gap: 1rem; justify-content: space-between; align-items: center; padding: .9rem 0; border-bottom: 1px solid currentColor; }
 .players-admin__summary { display: grid; gap: .2rem; }
 .players-admin__summary small { opacity: .72; }
-.players-self-service-intro { max-width:720px; padding:.85rem 1rem; border-left:5px solid var(--admin-yellow); background:#fff; }
+.players-self-service-intro { display:grid; max-width:720px; gap:.8rem; padding:.85rem 1rem; border-left:5px solid var(--admin-yellow); background:#fff; }
+.players-self-service-intro p { margin:0; }
+.players-self-service-intro .button { width:max-content; max-width:100%; justify-content:space-between; }
 .players-medical-upload { display:grid; gap:.35rem; }
 .players-medical-upload small { color:#52647f; font-size:.7rem; }
 .players-medical-current { display:flex; align-items:center; justify-content:space-between; gap:.8rem; padding:.75rem; border:1px solid var(--admin-line); background:#f5f8ff; }
