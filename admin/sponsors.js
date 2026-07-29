@@ -31,6 +31,7 @@ import { addImageUploadFields, removeImage, resolveImageChange } from './media.j
         </div>
         <form data-sponsor-contact-form>
           <label>Email di contatto<input name="contact_email" type="email" maxlength="254" autocomplete="email" placeholder="referente@azienda.it" /></label>
+          <label>Responsabile rapporti<select name="assigned_operator_email"><option value="">Nessun responsabile assegnato</option></select></label>
           <button class="button button-dark" type="submit">Salva contatto <span>→</span></button>
         </form>
       </section>
@@ -60,6 +61,7 @@ import { addImageUploadFields, removeImage, resolveImageChange } from './media.j
   const logoDownload = detailModal.querySelector('[data-sponsor-logo-download]');
   let sponsors = [];
   let payments = [];
+  let sponsorOperators = [];
   let editingId = null;
   let detailId = null;
   let page = 1;
@@ -84,6 +86,15 @@ import { addImageUploadFields, removeImage, resolveImageChange } from './media.j
   const sum = (items) => items.reduce((total, payment) => total + Number(payment.amount || 0), 0);
   const seasonSum = (sponsorId, seasonKey) => sum(paymentsFor(sponsorId).filter((payment) => season(payment.payment_date).key === seasonKey));
   const displayDate = (value) => dateFormatter.format(new Date(`${value}T12:00:00`));
+  const operatorLabel = (operator) => operator.operator_name && operator.operator_name !== operator.operator_email
+    ? `${operator.operator_name} · ${operator.operator_email}`
+    : operator.operator_email;
+  const renderOperatorOptions = (selectedEmail = '') => {
+    const select = contactForm.elements.assigned_operator_email;
+    select.replaceChildren(new Option('Nessun responsabile assegnato', ''));
+    sponsorOperators.forEach((operator) => select.add(new Option(operatorLabel(operator), operator.operator_email)));
+    select.value = selectedEmail || '';
+  };
   const safeFilename = (value) => String(value || 'sponsor')
     .normalize('NFKD')
     .replace(/[^a-zA-Z0-9._-]+/g, '-')
@@ -211,16 +222,21 @@ import { addImageUploadFields, removeImage, resolveImageChange } from './media.j
   };
 
   const load = async () => {
-    const [sponsorResponse, contactResponse, paymentResponse] = await Promise.all([
+    const [sponsorResponse, contactResponse, paymentResponse, operatorResponse] = await Promise.all([
       client().from('sponsors').select('*').order('sort_order').order('name'),
-      client().from('sponsor_private_details').select('sponsor_id, contact_email'),
+      client().from('sponsor_private_details').select('sponsor_id, contact_email, assigned_operator_email'),
       client().from('sponsor_payments').select('id, sponsor_id, payment_date, amount, created_at').order('payment_date', { ascending: false }).order('created_at', { ascending: false }),
+      client().rpc('list_sponsor_operator_candidates'),
     ]);
-    const failed = [sponsorResponse, contactResponse, paymentResponse].find((response) => response.error);
+    const failed = [sponsorResponse, contactResponse, paymentResponse, operatorResponse].find((response) => response.error);
     if (failed) throw failed.error;
-    const contacts = new Map((contactResponse.data || []).map((detail) => [detail.sponsor_id, detail.contact_email || '']));
-    sponsors = (sponsorResponse.data || []).map((sponsor) => ({ ...sponsor, contact_email: contacts.get(sponsor.id) || '' }));
+    const contacts = new Map((contactResponse.data || []).map((detail) => [detail.sponsor_id, detail]));
+    sponsors = (sponsorResponse.data || []).map((sponsor) => {
+      const details = contacts.get(sponsor.id);
+      return { ...sponsor, contact_email: details?.contact_email || '', assigned_operator_email: details?.assigned_operator_email || '' };
+    });
     payments = paymentResponse.data || [];
+    sponsorOperators = operatorResponse.data || [];
     render();
   };
 
@@ -287,6 +303,7 @@ import { addImageUploadFields, removeImage, resolveImageChange } from './media.j
     detailId = sponsor.id;
     detailModal.querySelector('[data-sponsor-detail-title]').textContent = sponsor.name;
     contactForm.elements.contact_email.value = sponsor.contact_email || '';
+    renderOperatorOptions(sponsor.assigned_operator_email);
     logoDownload.hidden = !String(sponsor.logo_url || '').trim();
     paymentForm.elements.payment_date.value = today();
     paymentForm.elements.amount.value = '';
@@ -335,7 +352,8 @@ import { addImageUploadFields, removeImage, resolveImageChange } from './media.j
       const sponsor = sponsors.find((item) => item.id === detailId);
       if (!sponsor) throw new Error('Sponsor non disponibile.');
       const contactEmail = contactForm.elements.contact_email.value.trim().toLocaleLowerCase('it') || null;
-      const { error } = await client().from('sponsor_private_details').upsert({ sponsor_id: sponsor.id, contact_email: contactEmail }, { onConflict: 'sponsor_id' });
+      const assignedOperatorEmail = contactForm.elements.assigned_operator_email.value || null;
+      const { error } = await client().from('sponsor_private_details').upsert({ sponsor_id: sponsor.id, contact_email: contactEmail, assigned_operator_email: assignedOperatorEmail }, { onConflict: 'sponsor_id' });
       if (error) throw error;
       await load(); openDetail(sponsors.find((item) => item.id === detailId), 'Contatto aggiornato.');
     }).catch((error) => sayDetail(error.message || 'Non è stato possibile aggiornare il contatto.', 'error'));
