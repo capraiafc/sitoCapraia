@@ -2,6 +2,7 @@
 -- iscrizione. I rinnovi successivi conservano sempre il dato già presente.
 
 drop function if exists public.renew_member(uuid, numeric, text, uuid);
+drop function if exists public.renew_member(uuid, numeric, text, uuid, date);
 
 create function public.renew_member(
   p_member_id uuid,

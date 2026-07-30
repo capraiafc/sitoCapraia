@@ -3,6 +3,9 @@ import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') || '').split(',').map((value) => value.trim()).filter(Boolean);
+const PDF_WIDTH = 1011;
+const PDF_HEIGHT = 639;
+const encoder = new TextEncoder();
 
 class RequestError extends Error {
   constructor(message: string, readonly status = 400) { super(message); }
@@ -29,6 +32,83 @@ function currentSeason() {
   const value = Object.fromEntries(parts.filter(({ type }) => type !== 'literal').map(({ type, value }) => [type, value]));
   const year = Number(value.year); const month = Number(value.month); const startYear = month >= 7 ? year : year - 1;
   return `${startYear}-${startYear + 1}`;
+}
+
+function pdfText(value: unknown) {
+  // PDF con stringhe UTF-16BE: i nomi con accenti restano leggibili.
+  let hex = 'FEFF';
+  for (const unit of String(value ?? '')) hex += unit.charCodeAt(0).toString(16).padStart(4, '0');
+  return `<${hex}>`;
+}
+
+function joinBytes(parts: Uint8Array[]) {
+  const result = new Uint8Array(parts.reduce((size, part) => size + part.length, 0));
+  let offset = 0;
+  for (const part of parts) { result.set(part, offset); offset += part.length; }
+  return result;
+}
+
+function pdfObject(number: number, value: string) {
+  return encoder.encode(`${number} 0 obj\n${value}\nendobj\n`);
+}
+
+function pdfStream(number: number, dictionary: string, content: Uint8Array) {
+  return joinBytes([encoder.encode(`${number} 0 obj\n${dictionary}\nstream\n`), content, encoder.encode('\nendstream\nendobj\n')]);
+}
+
+function base64(bytes: Uint8Array) {
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
+  }
+  return btoa(binary);
+}
+
+function centeredPdfText(value: string, centerX: number, baselineY: number, preferredSize: number, maxWidth: number) {
+  const characters = Math.max([...value].length, 1);
+  const size = Math.max(13, Math.min(preferredSize, maxWidth / (characters * 0.57)));
+  const estimatedWidth = characters * size * 0.52;
+  const x = Math.max(0, centerX - (estimatedWidth / 2));
+  return `BT /F1 ${size.toFixed(2)} Tf 0.024 0.075 0.184 rg 1 0 0 1 ${x.toFixed(2)} ${baselineY} Tm ${pdfText(value)} Tj ET`;
+}
+
+function membershipCardPdf(front: Uint8Array, back: Uint8Array, name: string, cardNumber: string, memberSince: string) {
+  const frontContents = encoder.encode(`q\n${PDF_WIDTH} 0 0 ${PDF_HEIGHT} 0 0 cm\n/Front Do\nQ\n`);
+  const backContents = encoder.encode([
+    'q', `${PDF_WIDTH} 0 0 ${PDF_HEIGHT} 0 0 cm`, '/Back Do', 'Q',
+    // Le coordinate corrispondono ai tre riquadri bianchi del template.
+    centeredPdfText(name, 316, 549, 27, 450),
+    centeredPdfText(cardNumber, 216, 178, 25, 250),
+    centeredPdfText(memberSince, 482, 178, 20, 135),
+  ].join('\n'));
+  const objects = [
+    pdfObject(1, '<< /Type /Catalog /Pages 2 0 R >>'),
+    pdfObject(2, '<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>'),
+    pdfObject(3, `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PDF_WIDTH} ${PDF_HEIGHT}] /Resources << /XObject << /Front 5 0 R >> >> /Contents 6 0 R >>`),
+    pdfObject(4, `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PDF_WIDTH} ${PDF_HEIGHT}] /Resources << /XObject << /Back 7 0 R >> /Font << /F1 9 0 R >> >> /Contents 8 0 R >>`),
+    pdfStream(5, `<< /Type /XObject /Subtype /Image /Width ${PDF_WIDTH} /Height ${PDF_HEIGHT} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${front.length} >>`, front),
+    pdfStream(6, `<< /Length ${frontContents.length} >>`, frontContents),
+    pdfStream(7, `<< /Type /XObject /Subtype /Image /Width ${PDF_WIDTH} /Height ${PDF_HEIGHT} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${back.length} >>`, back),
+    pdfStream(8, `<< /Length ${backContents.length} >>`, backContents),
+    pdfObject(9, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'),
+  ];
+  const header = encoder.encode('%PDF-1.4\n%\xFF\xFF\xFF\xFF\n');
+  const offsets: number[] = [0];
+  let cursor = header.length;
+  for (const object of objects) { offsets.push(cursor); cursor += object.length; }
+  const xrefOffset = cursor;
+  const xref = `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n${offsets.slice(1).map((offset) => `${String(offset).padStart(10, '0')} 00000 n \n`).join('')}trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`;
+  return joinBytes([header, ...objects, encoder.encode(xref)]);
+}
+
+async function fetchCardImage(url: string) {
+  const response = await fetch(url);
+  const image = new Uint8Array(await response.arrayBuffer());
+  if (!response.ok || image.length === 0 || image[0] !== 0xff || image[1] !== 0xd8) {
+    throw new RequestError('Non è stato possibile preparare il PDF della tessera.', 502);
+  }
+  return image;
 }
 
 async function rest(path: string, options: RequestInit = {}) {
@@ -78,18 +158,15 @@ serve(async (request) => {
     const resendKey = Deno.env.get('RESEND_API_KEY'); const from = Deno.env.get('MAIL_FROM'); const siteUrl = (Deno.env.get('MEMBERSHIP_SITE_URL') || '').replace(/\/+$/, '');
     if (!resendKey || !from || !siteUrl) throw new RequestError('Il servizio email tessere non è ancora configurato.', 503);
     const name = `${String(member.first_name || '').trim()} ${String(member.last_name || '').trim()}`.trim() || 'Socio Capraia FC';
-    const cardNumber = String(member.card_number ?? '—'); const memberSince = String(member.member_since ?? '—'); const amount = Number(member.renewal_total);
+    const cardNumber = String(member.card_number ?? '—'); const memberSince = /^\d{4}-\d{2}-\d{2}$/.test(String(member.member_since || '')) ? String(member.member_since).slice(0, 4) : '—'; const amount = Number(member.renewal_total);
     const amountLabel = Number.isFinite(amount) ? new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(amount) : '—';
     const frontCard = `${siteUrl}/assets/images/tessera-socio-fronte.jpg`; const backCard = `${siteUrl}/assets/images/tessera-socio-template.jpg`;
-    const memberCard = `<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" background="${escapeHtml(backCard)}" style="width:600px;max-width:100%;height:380px;border-collapse:collapse;background:#002f86 url('${escapeHtml(backCard)}') center/cover no-repeat"><tbody>
-      <tr><td height="42" style="height:42px;font-size:0;line-height:0">&nbsp;</td></tr>
-      <tr><td style="padding-left:42px"><table role="presentation" width="312" cellpadding="0" cellspacing="0" border="0"><tr><td height="39" align="center" valign="middle" style="height:39px;padding:0 12px;overflow:hidden;color:#06132f;font-family:Arial,sans-serif;font-size:16px;font-weight:700;line-height:39px;white-space:nowrap">${escapeHtml(name)}</td></tr></table></td></tr>
-      <tr><td height="154" style="height:154px;font-size:0;line-height:0">&nbsp;</td></tr>
-      <tr><td style="padding-left:42px"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td width="187" height="40" align="center" valign="middle" style="width:187px;height:40px;padding:0 8px;overflow:hidden;color:#06132f;font-family:Arial,sans-serif;font-size:16px;font-weight:700;line-height:40px;white-space:nowrap">${escapeHtml(cardNumber)}</td><td width="18" style="width:18px">&nbsp;</td><td width="87" height="40" align="center" valign="middle" style="width:87px;height:40px;padding:0 6px;overflow:hidden;color:#06132f;font-family:Arial,sans-serif;font-size:14px;font-weight:700;line-height:40px;white-space:nowrap">${escapeHtml(memberSince)}</td></tr></table></td></tr>
-    </tbody></table>`;
+    const [frontImage, backImage] = await Promise.all([fetchCardImage(frontCard), fetchCardImage(backCard)]);
+    const cardPdf = membershipCardPdf(frontImage, backImage, name, cardNumber, memberSince);
     const emailResponse = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json', 'User-Agent': 'capraiafc-member-renewal/1.0', 'Idempotency-Key': `member-renewal/${requestId}` }, body: JSON.stringify({
       from, to: [recipient], subject: `Tessera Capraia FC rinnovata · stagione ${season}`,
-      html: `<h1>Grazie per aver scelto Capraia FC</h1><p>Ciao <strong>${escapeHtml(name)}</strong>, il tuo tesseramento per la stagione <strong>${escapeHtml(season)}</strong> è stato rinnovato con successo.</p><table role="presentation" cellpadding="8" style="border-collapse:collapse"><tbody><tr><th align="left">Metodo di pagamento</th><td>${escapeHtml(member.payment_method)}</td></tr><tr><th align="left">Totale rinnovo</th><td>${escapeHtml(amountLabel)}</td></tr></tbody></table><h2>La tua tessera</h2><p><img src="${escapeHtml(frontCard)}" alt="Fronte tessera Capraia FC" width="500" style="max-width:100%;height:auto;display:block" /></p>${memberCard}<p>Ti aspettiamo al campo. Forza Capraia!</p>`,
+      html: `<h1>Grazie per aver scelto Capraia FC</h1><p>Ciao <strong>${escapeHtml(name)}</strong>, il tuo tesseramento per la stagione <strong>${escapeHtml(season)}</strong> è stato rinnovato con successo.</p><table role="presentation" cellpadding="8" style="border-collapse:collapse"><tbody><tr><th align="left">Metodo di pagamento</th><td>${escapeHtml(member.payment_method)}</td></tr><tr><th align="left">Totale rinnovo</th><td>${escapeHtml(amountLabel)}</td></tr></tbody></table><p>In allegato trovi il fac-simile in PDF della tua tessera Capraia FC.</p><h2>Ritiro della tessera fisica</h2><p>Puoi ritirarla in biglietteria quando giochiamo in casa oppure, su richiesta, presso il Circolo ARCI di Capraia Fiorentina, in Via Salvador Allende 152.</p><p>Ti aspettiamo al campo. Forza Capraia!</p>`,
+      attachments: [{ filename: `tessera-capraia-fc-${cardNumber}-${season}.pdf`, content: base64(cardPdf) }],
     }) });
     if (!emailResponse.ok) { console.error('Resend member renewal email error', await emailResponse.text()); throw new RequestError('Invio email momentaneamente non disponibile.', 502); }
     return Response.json({ ok: true }, { status: 200, headers: cors });

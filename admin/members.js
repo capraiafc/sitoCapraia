@@ -2,7 +2,7 @@ import '../auth.js?v=members-20260730';
 import { PAGE_SIZE, pageItems } from './crud-ui.js?v=member-navigation-20260730';
 import {
   createMember, listMembers, renewMember, resendRenewalEmail,
-} from './members-service.js?v=membership-since-20260730';
+} from './members-service.js?v=membership-year-20260730';
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -28,6 +28,11 @@ function formatDate(value) {
   if (!value) return '—';
   const parsed = new Date(`${value}T00:00:00`);
   return Number.isNaN(parsed.getTime()) ? '—' : date.format(parsed);
+}
+
+function formatMembershipYear(value) {
+  const match = String(value || '').match(/^(\d{4})-/);
+  return match ? match[1] : '—';
 }
 
 function ageFor(value) {
@@ -191,7 +196,7 @@ function genderName(value) {
     $('[data-member-detail-name]', detailModal).textContent = displayName(member);
     $('[data-member-detail-card-number]', detailModal).textContent = text(member.card_number);
     $('[data-member-detail-email]', detailModal).textContent = text(member.email, 'Email non indicata');
-    $('[data-member-detail-since]', detailModal).textContent = formatDate(member.member_since);
+    $('[data-member-detail-since]', detailModal).textContent = formatMembershipYear(member.member_since);
     const fieldValues = {
       'birth-date': formatDate(member.birth_date), 'birth-place': text(member.birth_place), nationality: text(member.nationality),
       gender: genderName(member.gender), phone: text(member.phone), 'tax-code': text(member.tax_code), residence: text(member.residence),
@@ -215,7 +220,7 @@ function genderName(value) {
     const missingSince = !member.member_since;
     sinceField.hidden = !missingSince;
     sinceInput.required = missingSince;
-    sinceInput.value = member.member_since || '';
+    sinceInput.value = formatMembershipYear(member.member_since) === '—' ? '' : formatMembershipYear(member.member_since);
   }
 
   async function load() {
@@ -229,7 +234,7 @@ function genderName(value) {
   root.addEventListener('click', (event) => {
     const add = event.target.closest('[data-member-add]');
     if (add) {
-      createForm.reset(); createForm.elements.member_since.value = new Date().toISOString().slice(0, 10);
+      createForm.reset(); createForm.elements.member_since.value = String(new Date().getFullYear());
       $('[data-member-create-feedback]', createModal).textContent = '';
       openModal(createModal, add); return;
     }

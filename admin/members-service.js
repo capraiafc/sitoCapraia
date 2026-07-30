@@ -50,6 +50,20 @@ function optionalDate(value, label) {
   return normalized;
 }
 
+// Nel database conserviamo una data, ma per la tessera è significativo solo
+// l'anno di prima iscrizione. Il primo gennaio è un valore tecnico, mai
+// mostrato al socio.
+function optionalMembershipYear(value, label) {
+  const normalized = optionalText(value);
+  if (!normalized) return null;
+  const year = Number(normalized);
+  const currentYear = new Date().getFullYear();
+  if (!/^\d{4}$/.test(normalized) || year < 1900 || year > currentYear) {
+    throw new Error(`${label} non valido: inserisci un anno di quattro cifre.`);
+  }
+  return `${normalized}-01-01`;
+}
+
 function uuid(value, label) {
   const normalized = String(value ?? '').trim();
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(normalized)) {
@@ -86,6 +100,8 @@ export function toMemberDetailsPayload(values) {
     if (field === 'email') {
       const email = optionalText(value);
       payload.email = email ? email.toLowerCase() : null;
+    } else if (field === 'member_since') {
+      payload.member_since = optionalMembershipYear(value, 'Socio dal');
     } else {
       payload[field] = optionalText(value);
     }
@@ -131,7 +147,7 @@ export async function renewMember(memberId, { amount, paymentMethod, memberSince
   const total = Number(amount);
   if (!Number.isFinite(total) || total < 0 || total > 100000) throw new Error('Importo rinnovo non valido.');
   const method = requiredText(paymentMethod, 'Metodo di pagamento', 120);
-  const since = optionalDate(memberSince, 'Data socio dal');
+  const since = optionalMembershipYear(memberSince, 'Socio dal');
   const operationId = uuid(requestId, 'Codice rinnovo');
   const { data, error } = await client().rpc('renew_member', {
     p_member_id: id,
