@@ -1,0 +1,104 @@
+.members-heading { display:flex; align-items:end; justify-content:space-between; gap:1rem; }
+.members-heading > div > p:last-child { max-width:650px; margin-bottom:0; }
+.members-season { flex:0 0 auto; margin:0 0 .55rem; padding:.45rem .65rem; background:var(--admin-yellow); color:var(--admin-deep); font:700 .67rem var(--mono); text-transform:uppercase; letter-spacing:.04em; }
+
+.members-dashboard { display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:.8rem; margin:1.5rem 0 .8rem; }
+.members-kpi,.members-insight-card { min-width:0; padding:1.1rem; border:1px solid var(--admin-line); background:#fff; }
+.members-kpi { display:grid; align-content:start; gap:.3rem; min-height:144px; }
+.members-kpi--revenue { border-left:6px solid var(--admin-yellow); background:var(--admin-deep); color:#fff; }
+.members-kpi__label { color:#52647f; font:700 .66rem var(--mono); text-transform:uppercase; letter-spacing:.06em; }
+.members-kpi--revenue .members-kpi__label,.members-kpi--revenue small { color:#cbd8f2; }
+.members-kpi strong { color:var(--admin-deep); font:700 clamp(1.9rem,4vw,3rem)/1 var(--serif); letter-spacing:-.05em; }
+.members-kpi--revenue strong { color:var(--admin-yellow); }
+.members-kpi small { margin-top:auto; color:#52647f; font-size:.72rem; }
+
+.members-insights { display:grid; grid-template-columns:1.25fr .9fr; gap:.8rem; margin-bottom:1.5rem; }
+.members-insight-card__head { display:flex; align-items:baseline; justify-content:space-between; gap:.75rem; margin-bottom:1.05rem; }
+.members-insight-card h3 { margin:0; color:var(--admin-deep); font:700 1.35rem var(--serif); letter-spacing:-.04em; }
+.members-insight-card__head span { color:#52647f; font:700 .65rem var(--mono); text-align:right; text-transform:uppercase; letter-spacing:.03em; }
+.members-bars { display:grid; gap:.65rem; min-height:72px; }
+.members-bars:empty::after { content:'Nessun dato anagrafico disponibile.'; align-self:center; color:#52647f; font-size:.76rem; }
+.members-bars__row { display:grid; grid-template-columns:minmax(82px,1fr) minmax(75px,2fr) auto; align-items:center; gap:.55rem; font-size:.74rem; }
+.members-bars__row i { display:block; width:var(--members-bar-size,0%); min-width:0; height:.68rem; background:linear-gradient(90deg,var(--admin-blue),var(--admin-yellow)); }
+.members-bars__row b { font:700 .75rem var(--mono); }
+.members-gender { display:grid; grid-template-columns:116px 1fr; align-items:center; gap:1rem; min-height:72px; }
+.members-gender__ring { display:grid; place-items:center; width:104px; aspect-ratio:1; border-radius:50%; background:conic-gradient(var(--admin-blue) var(--members-gender-main,0%), var(--admin-yellow) 0); }
+.members-gender__ring::before { content:''; grid-area:1 / 1; width:72px; aspect-ratio:1; border-radius:50%; background:#fff; }
+.members-gender__ring strong { z-index:1; grid-area:1 / 1; color:var(--admin-deep); font:700 .95rem var(--mono); }
+.members-gender__legend { display:grid; gap:.5rem; margin:0; padding:0; list-style:none; font-size:.76rem; }
+.members-gender__legend li { display:flex; align-items:center; justify-content:space-between; gap:.5rem; }
+.members-gender__legend li span { display:flex; align-items:center; gap:.45rem; }
+.members-gender__legend i { display:block; width:9px; height:9px; background:var(--member-gender-color,var(--admin-blue)); }
+.members-gender__legend b { font:700 .72rem var(--mono); }
+
+.members-management { max-width:1000px; }
+.members-list-head { display:flex; align-items:end; justify-content:space-between; gap:1rem; }
+.members-list-head h3 { margin:0; color:var(--admin-deep); font:700 1.55rem var(--serif); letter-spacing:-.04em; }
+.members-list-head p { margin:.25rem 0 0; color:#52647f; font-size:.78rem; }
+.members-list-head .button { white-space:nowrap; }
+.members-toolbar { display:flex; align-items:end; justify-content:space-between; gap:1rem; margin:1.25rem 0 .9rem; }
+.members-toolbar .admin-collection-search { min-width:min(100%,350px); }
+.members-list-summary { margin:0; color:#52647f; font:700 .66rem var(--mono); text-align:right; text-transform:uppercase; letter-spacing:.04em; }
+.members-list { display:grid; gap:.55rem; margin:0; padding:0; list-style:none; }
+.members-list__button { display:grid; grid-template-columns:auto minmax(0,1fr) max-content auto; align-items:center; width:100%; gap:.75rem; padding:.85rem 1rem; border:1px solid var(--admin-line); background:#fff; color:var(--admin-ink); text-align:left; cursor:pointer; transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease; }
+.members-list__button:hover { border-color:var(--admin-blue); box-shadow:4px 4px 0 rgba(0,47,134,.12); transform:translate(-1px,-1px); }
+.members-list__button:focus-visible,.members-list-head .button:focus-visible { outline:3px solid var(--admin-yellow); outline-offset:3px; }
+.members-renewal-dot { display:block; width:11px; height:11px; border-radius:50%; background:#a41313; box-shadow:0 0 0 3px #f8e1e1; }
+.members-renewal-dot[data-state="renewed"] { background:#18834b; box-shadow:0 0 0 3px #dff1e6; }
+.members-list__identity { display:grid; min-width:0; gap:.16rem; }
+.members-list__identity strong { overflow:hidden; color:var(--admin-deep); font:700 1rem var(--serif); text-overflow:ellipsis; white-space:nowrap; }
+.members-list__identity small { color:#52647f; font:700 .65rem var(--mono); text-transform:uppercase; letter-spacing:.045em; }
+.members-list__status { padding:.3rem .45rem; background:#fff0ef; color:#a41313; font:700 .62rem var(--mono); text-transform:uppercase; letter-spacing:.04em; }
+.members-list__status[data-state="renewed"] { background:#e4f5ea; color:#12643a; }
+.members-list__open { color:var(--admin-blue); font:700 1.55rem/1 var(--serif); }
+.members-empty { margin:1rem 0 0; padding:1rem; border:1px dashed var(--admin-line); color:#52647f; text-align:center; font-size:.8rem; }
+
+.members-modal { overflow-y:auto; }
+.members-modal__eyebrow { margin:0 0 .1rem; color:var(--admin-yellow); font:700 .61rem var(--mono); text-transform:uppercase; letter-spacing:.08em; }
+.members-modal__body { display:grid; gap:1rem; padding:1.25rem; }
+.members-profile-card { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:1rem; padding:1rem; border-left:6px solid var(--admin-yellow); background:var(--admin-deep); color:#fff; }
+.members-profile-card__number { display:grid; gap:.1rem; min-width:78px; padding-right:1rem; border-right:1px solid #6682bc; }
+.members-profile-card__number span,.members-profile-card__since { margin:0; color:#cbd8f2; font:700 .62rem var(--mono); text-transform:uppercase; letter-spacing:.05em; }
+.members-profile-card__number strong { color:var(--admin-yellow); font:700 1.5rem var(--serif); }
+.members-profile-card__name { margin:0; color:#fff; font:700 1.5rem var(--serif); }
+.members-profile-card__name + p { margin:.15rem 0 0; overflow-wrap:anywhere; color:#cbd8f2; font-size:.78rem; }
+.members-profile-card__since { display:grid; gap:.2rem; text-align:right; }
+.members-profile-card__since strong { color:#fff; font:700 .82rem var(--mono); }
+.members-detail-section { padding:1rem; border:1px solid var(--admin-line); }
+.members-detail-section__head,.members-renewal-panel__head { display:flex; align-items:baseline; justify-content:space-between; gap:1rem; margin-bottom:.9rem; }
+.members-detail-section h3,.members-renewal-panel h3 { margin:0; color:var(--admin-deep); font:700 1.3rem var(--serif); letter-spacing:-.035em; }
+.members-detail-section__head > span { padding:.3rem .45rem; background:var(--admin-paper); color:var(--admin-blue); font:700 .61rem var(--mono); text-transform:uppercase; letter-spacing:.04em; }
+.members-details-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.85rem .65rem; margin:0; }
+.members-details-grid div { min-width:0; }
+.members-details-grid dt { margin-bottom:.2rem; color:#52647f; font:700 .6rem var(--mono); text-transform:uppercase; letter-spacing:.055em; }
+.members-details-grid dd { margin:0; overflow-wrap:anywhere; font-size:.8rem; }
+.members-additional-details { margin-top:.85rem; padding-top:.85rem; border-top:1px solid var(--admin-line); }
+.members-renewal-panel { padding:1rem; border:1px solid #e9c852; background:#fffdf3; }
+.members-renewal-panel .eyebrow { margin:0 0 .22rem; color:#866000; font-size:.62rem; }
+.members-renewal-badge { padding:.35rem .5rem; background:#fff0ef; color:#a41313; font:700 .62rem var(--mono); text-transform:uppercase; letter-spacing:.04em; }
+.members-renewal-badge[data-state="renewed"] { background:#e4f5ea; color:#12643a; }
+.members-renewal-panel [data-member-renewal-pending] > p { margin:.15rem 0 .85rem; color:#52647f; font-size:.78rem; }
+.members-renewal-form { display:grid; grid-template-columns:1fr 1.35fr; gap:.75rem; align-items:end; }
+.members-renewal-form label,.members-create-form label { display:grid; gap:.35rem; min-width:0; font-size:.76rem; font-weight:700; }
+.members-renewal-form input,.members-create-form input,.members-create-form select,.members-create-form textarea { width:100%; padding:.7rem; border:1px solid var(--admin-line); background:#fff; color:var(--admin-ink); font:inherit; }
+.members-renewal-form .members-check { display:flex; align-items:center; gap:.45rem; grid-column:1 / -1; }
+.members-renewal-form .members-check input,.members-create-options input[type="checkbox"] { width:auto; }
+.members-renewal-form .button { grid-column:1 / -1; }
+.members-renewed-state { padding:.85rem 1rem; border-left:5px solid #218453; background:#e8f7ed; color:#0c5931; }
+.members-renewed-state strong { font:700 1rem var(--serif); }
+.members-renewed-state p { margin:.25rem 0 0; font-size:.78rem; }
+
+.members-create-form { display:grid; gap:1rem; padding:1.25rem; }
+.members-create-form__intro { margin:0; padding:.75rem .85rem; border-left:4px solid var(--admin-yellow); background:var(--admin-paper); font-size:.78rem; }
+.members-form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.8rem; }
+.members-form-grid__wide { grid-column:1 / -1; }
+.members-create-form textarea { min-height:92px; resize:vertical; }
+.members-create-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.7rem; margin:0; padding:.85rem; border:1px solid var(--admin-line); }
+.members-create-options legend { padding:0 .25rem; color:var(--admin-blue); font:700 .66rem var(--mono); text-transform:uppercase; letter-spacing:.05em; }
+.members-create-options label:not(:first-of-type) { display:flex; align-items:center; gap:.45rem; }
+.members-create-options label:first-of-type { grid-column:1 / -1; }
+.members-create-form__actions { display:flex; align-items:center; gap:.85rem; flex-wrap:wrap; }
+
+@media (max-width:900px) { .members-dashboard { grid-template-columns:repeat(3,minmax(0,1fr)); }.members-insights { grid-template-columns:1fr 1fr; }.members-details-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width:700px) { .members-heading,.members-list-head,.members-toolbar { align-items:stretch; flex-direction:column; }.members-season { align-self:flex-start; margin:0; }.members-dashboard { grid-template-columns:1fr; }.members-kpi { min-height:116px; }.members-insights { grid-template-columns:1fr; }.members-list-summary { text-align:left; }.members-list__button { grid-template-columns:auto minmax(0,1fr) auto; }.members-list__status { grid-column:2; justify-self:start; }.members-list__open { grid-column:3; grid-row:1 / span 2; }.members-profile-card { grid-template-columns:auto minmax(0,1fr); }.members-profile-card__since { grid-column:1 / -1; text-align:left; }.members-details-grid { grid-template-columns:1fr 1fr; }.members-renewal-form { grid-template-columns:1fr; }.members-renewal-form .members-check,.members-renewal-form .button { grid-column:auto; } }
+@media (max-width:520px) { .members-kpi,.members-insight-card { padding:.9rem; }.members-insight-card__head { align-items:flex-start; flex-direction:column; gap:.25rem; }.members-insight-card__head span { text-align:left; }.members-gender { grid-template-columns:94px 1fr; }.members-gender__ring { width:90px; }.members-gender__ring::before { width:62px; }.members-list__button { padding:.8rem; }.members-list__status { font-size:.58rem; }.members-modal__body,.members-create-form { padding:1rem; }.members-profile-card { align-items:start; gap:.75rem; padding:.85rem; }.members-profile-card__number { min-width:62px; padding-right:.65rem; }.members-profile-card__name { font-size:1.25rem; }.members-details-grid,.members-form-grid,.members-create-options { grid-template-columns:1fr; }.members-create-options label:first-of-type { grid-column:auto; }.members-create-form__actions { align-items:stretch; flex-direction:column; }.members-create-form__actions .link-button { align-self:center; } }

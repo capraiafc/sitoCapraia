@@ -1,5 +1,5 @@
 /* News management. */
-import '../auth.js?v=admin-permissions-20260729';
+import '../auth.js?v=members-20260730';
 import { createCollectionUi, moveFormToModal, pageItems } from './crud-ui.js';
 import { addImageUploadFields, removeImage, resolveImageChange } from './media.js';
 

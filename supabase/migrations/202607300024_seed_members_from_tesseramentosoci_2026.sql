@@ -1,0 +1,1 @@
+npx supabase functions deploy send-member-renewal-email --no-verify-jwt

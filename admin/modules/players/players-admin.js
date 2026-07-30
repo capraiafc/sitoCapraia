@@ -1,4 +1,4 @@
-import '../../../auth.js?v=admin-permissions-20260729';
+import '../../../auth.js?v=members-20260730';
 import { createCollectionUi, moveFormToModal, PAGE_SIZE } from '../../crud-ui.js?v=player-navigation-20260728';
 import {
   createPlayer, listPlayers, removePlayer, updateOwnPlayerProfile, updatePlayer, withdrawOwnPlayer,

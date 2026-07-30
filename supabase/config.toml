@@ -3,3 +3,6 @@ verify_jwt = false
 
 [functions.send-medical-reminders]
 verify_jwt = false
+
+[functions.send-member-renewal-email]
+verify_jwt = false

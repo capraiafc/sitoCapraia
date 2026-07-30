@@ -1,4 +1,4 @@
-import '../auth.js?v=admin-permissions-20260729';
+import '../auth.js?v=members-20260730';
 
 (() => {
   const root = document.querySelector('[data-admin-dashboard]');

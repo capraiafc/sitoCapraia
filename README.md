@@ -35,6 +35,7 @@ Comprende:
 - Gestione operatori e permessi per singola area.
 - Gare e risultati.
 - Rosa.
+- Tesserati: anagrafiche private, rinnovi, incassi e statistiche.
 - News.
 - Sponsor.
 - Moderazione bacheca.
@@ -46,6 +47,7 @@ i booleani:
 
 - `can_matches`
 - `can_players`
+- `can_members`
 - `can_news`
 - `can_sponsors`
 - `can_bacheca`
@@ -157,6 +159,7 @@ Il progetto contiene due funzioni:
 - `send-membership-request`
 - `send-merch-request`
 - `send-medical-reminders`
+- `send-member-renewal-email`
 
 Configura in Supabase i secret:
 
@@ -168,6 +171,7 @@ Configura in Supabase i secret:
 - `NEW_MEMBER_REQUIRED_FIELDS`
 - `MEDICAL_REMINDER_MAIL_TO`
 - `MEDICAL_REMINDER_CRON_SECRET`
+- `MEMBERSHIP_SITE_URL` (URL pubblico del sito, per l'email di rinnovo)
 
 `MAIL_TO` deve essere impostato a `capraiafc@gmail.com`.
 
@@ -177,6 +181,7 @@ Distribuisci le funzioni:
 npx supabase functions deploy send-membership-request --no-verify-jwt
 npx supabase functions deploy send-merch-request --no-verify-jwt
 npx supabase functions deploy send-medical-reminders --no-verify-jwt
+npx supabase functions deploy send-member-renewal-email --no-verify-jwt
 ```
 
 La chiave Resend rimane esclusivamente nei secret server-side.

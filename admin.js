@@ -1,6 +1,6 @@
 // Importa esplicitamente l'autenticazione: gli altri moduli non devono
 // provare a leggere window.CapraiaAuth prima che sia stata inizializzata.
-import './auth.js?v=admin-permissions-20260729';
+import './auth.js?v=members-20260730';
 
 const byId = (id) => document.getElementById(id);
 let authCheckVersion = 0;
@@ -69,7 +69,7 @@ debugStep('Script admin caricato', {
 });
 
 const sectionIds = {
-  dashboard: 'dashboard', operators: 'operatori', matches: 'gare', players: 'rosa', news: 'news', sponsors: 'sponsor', bacheca: 'bacheca-admin', merch: 'merch',
+  dashboard: 'dashboard', operators: 'operatori', matches: 'gare', players: 'rosa', members: 'tesserati', news: 'news', sponsors: 'sponsor', bacheca: 'bacheca-admin', merch: 'merch',
 };
 
 function applyAreaPermissions(access) {
@@ -77,12 +77,17 @@ function applyAreaPermissions(access) {
   const permissionKeys = {
     matches: 'can_matches',
     players: 'can_players',
+    members: 'can_members',
     news: 'can_news',
     sponsors: 'can_sponsors',
     bacheca: 'can_bacheca',
     merch: 'can_merch',
   };
-  const allowed = (area) => access.isSuperUser || Boolean(permissionKeys[area] && permissions[permissionKeys[area]]);
+  // Le migrazioni storiche espongono le aree sia come `matches` sia come
+  // `can_matches`; supportiamo entrambi i contratti durante l'aggiornamento.
+  const allowed = (area) => access.isSuperUser || Boolean(
+    permissionKeys[area] && (permissions[permissionKeys[area]] ?? permissions[area]),
+  );
   Object.entries(sectionIds).forEach(([area, id]) => {
     const visible = allowed(area);
     const link = document.querySelector(`.admin-sidebar [data-admin-area="${area}"]`);

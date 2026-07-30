@@ -1,5 +1,5 @@
 /* Catalogo merch con galleria immagini e foto principale. */
-import '../auth.js?v=admin-permissions-20260729';
+import '../auth.js?v=members-20260730';
 import { createCollectionUi, moveFormToModal, pageItems } from './crud-ui.js';
 import { removeImage, uploadImage } from './media.js';
 

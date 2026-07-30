@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="admin/operators.css?v=operator-layout-20260728" />
     <link rel="stylesheet" href="admin/news.css" />
     <link rel="stylesheet" href="admin/modules/players/players.css?v=medical-request-download-20260729" />
+    <link rel="stylesheet" href="admin/members.css?v=membership-ui-20260730" />
     <link rel="stylesheet" href="admin/merch.css" />
   </head>
   <body class="admin-page">
@@ -47,6 +48,7 @@
           <a href="#operatori" data-admin-area="operators">Operatori</a>
           <a href="#gare" data-admin-area="matches">Gare e risultati</a>
           <a href="#rosa" data-admin-area="players">Rosa</a>
+          <a href="#tesserati" data-admin-area="members">Tesserati</a>
           <a href="#news" data-admin-area="news">News</a>
           <a href="#sponsor" data-admin-area="sponsors">Sponsor</a>
           <a href="#bacheca-admin" data-admin-area="bacheca">Bacheca</a>
@@ -54,7 +56,7 @@
         </nav>
         <section class="admin-content">
           <section id="dashboard" data-admin-area="dashboard"><p class="eyebrow">area riservata</p><h1>Dashboard<br /><em>operatori.</em></h1><p>Accessi e ultime attività dell’area amministrativa.</p><div class="admin-dashboard" data-admin-dashboard></div></section>
-          <section id="operatori" data-admin-module="operators" data-admin-area="operators"><p class="eyebrow">amministrazione</p><h2>Operatori <em>abilitati.</em></h2><div class="admin-panel operator-management" data-operator-management><form data-operator-form><label>Email Google autorizzata<input type="email" data-operator-email required autocomplete="email" placeholder="nome@gmail.com" /></label><fieldset class="operator-permissions"><legend>Aree abilitate</legend><label><input name="can_matches" type="checkbox" /> Gare e risultati</label><label><input name="can_players" type="checkbox" /> Rosa</label><label><input name="can_news" type="checkbox" /> News</label><label><input name="can_sponsors" type="checkbox" /> Sponsor</label><label><input name="can_bacheca" type="checkbox" /> Bacheca</label><label><input name="can_merch" type="checkbox" /> Merch</label></fieldset><button class="button button-dark" type="submit">Aggiungi operatore <span>→</span></button></form><p class="admin-feedback" data-operator-feedback aria-live="polite"></p><ul class="admin-list" data-operator-list></ul></div><p data-operator-denied hidden></p></section>
+          <section id="operatori" data-admin-module="operators" data-admin-area="operators"><p class="eyebrow">amministrazione</p><h2>Operatori <em>abilitati.</em></h2><div class="admin-panel operator-management" data-operator-management><form data-operator-form><label>Email Google autorizzata<input type="email" data-operator-email required autocomplete="email" placeholder="nome@gmail.com" /></label><fieldset class="operator-permissions"><legend>Aree abilitate</legend><label><input name="can_matches" type="checkbox" /> Gare e risultati</label><label><input name="can_players" type="checkbox" /> Rosa</label><label><input name="can_members" type="checkbox" /> Tesserati</label><label><input name="can_news" type="checkbox" /> News</label><label><input name="can_sponsors" type="checkbox" /> Sponsor</label><label><input name="can_bacheca" type="checkbox" /> Bacheca</label><label><input name="can_merch" type="checkbox" /> Merch</label></fieldset><button class="button button-dark" type="submit">Aggiungi operatore <span>→</span></button></form><p class="admin-feedback" data-operator-feedback aria-live="polite"></p><ul class="admin-list" data-operator-list></ul></div><p data-operator-denied hidden></p></section>
           <section id="gare" data-admin-module="matches" data-admin-area="matches"><p class="eyebrow">calendario</p><h2>Gare e <em>risultati.</em></h2><div class="admin-panel" data-match-management><form data-match-form><label>Stagione<input name="season_id" required placeholder="2026-27" /></label><label>Giornata / fase<input name="match_day" required placeholder="1" /></label><label>Squadra casa<input name="home_team" required /></label><label>Squadra ospite<input name="away_team" required /></label><label>Competizione<input name="competition" required placeholder="Seconda Categoria Toscana" /></label><label>Data e ora<input name="kickoff_at" type="datetime-local" /></label><label>Luogo<input name="venue" /></label><label>Stato<select name="status"><option value="scheduled">In programma</option><option value="completed">Conclusa</option><option value="postponed">Rinviata</option><option value="cancelled">Annullata</option></select></label><label>Gol casa<input name="home_score" type="number" min="0" max="99" /></label><label>Gol ospite<input name="away_score" type="number" min="0" max="99" /></label><label>Arbitro<input name="referee" /></label><label>Primo tempo<input name="halftime_score" placeholder="0 — 0" /></label><label>Link fonte/tabellino<input name="source_url" type="url" placeholder="https://…" /></label><label>Eventi e marcatori (JSON)<textarea name="events_json" placeholder='[{&quot;minute&quot;:&quot;29’&quot;,&quot;type&quot;:&quot;Gol Capraia&quot;,&quot;player&quot;:&quot;Nome giocatore&quot;}]'></textarea></label><label>Note<textarea name="notes"></textarea></label><label><input name="published" type="checkbox" checked /> Pubblica sul sito</label><button class="button button-dark" type="submit"><span data-match-submit>Salva gara</span> <span>→</span></button><button type="button" data-match-cancel hidden>Annulla</button></form><p class="admin-feedback" data-match-feedback aria-live="polite"></p><ul class="admin-list" data-match-list></ul></div></section>
           <section id="rosa" data-admin-module="players">
             <p class="eyebrow">gestione squadra</p>
@@ -89,6 +91,77 @@
               <ul class="admin-list" data-player-list></ul>
             </div>
             <p data-player-denied hidden>Accesso negato.</p>
+          </section>
+          <section id="tesserati" data-admin-module="members" data-admin-area="members">
+            <div class="members-heading">
+              <div>
+                <p class="eyebrow">tesseramento</p>
+                <h2>I nostri <em>tesserati.</em></h2>
+                <p>Gestisci anagrafiche, rinnovi e la situazione della stagione in corso.</p>
+              </div>
+              <p class="members-season" data-members-current-season>Stagione in corso · —</p>
+            </div>
+
+            <div class="members-dashboard" data-members-dashboard aria-live="polite">
+              <article class="members-kpi members-kpi--revenue">
+                <span class="members-kpi__label">Incassi stagione</span>
+                <strong data-members-total-revenue>—</strong>
+                <small data-members-revenue-note>Importi dei rinnovi registrati</small>
+              </article>
+              <article class="members-kpi">
+                <span class="members-kpi__label">Tesserati</span>
+                <strong data-members-total-count>—</strong>
+                <small data-members-renewed-count>— rinnovati per la stagione</small>
+              </article>
+              <article class="members-kpi">
+                <span class="members-kpi__label">Rinnovi</span>
+                <strong data-members-renewal-rate>—</strong>
+                <small data-members-pending-count>— da completare</small>
+              </article>
+            </div>
+
+            <div class="members-insights">
+              <article class="members-insight-card">
+                <div class="members-insight-card__head"><h3>Fasce di età</h3><span data-members-age-note>Dati disponibili: —</span></div>
+                <div class="members-bars" data-members-age-bars aria-label="Distribuzione tesserati per fascia di età"></div>
+              </article>
+              <article class="members-insight-card members-gender-card">
+                <div class="members-insight-card__head"><h3>Genere</h3><span data-members-gender-note>— profili indicati</span></div>
+                <div class="members-gender" data-members-gender-breakdown aria-label="Percentuale tesserati per genere">
+                  <div class="members-gender__ring" data-members-gender-ring aria-hidden="true"><strong data-members-gender-main-percent>—</strong></div>
+                  <ul class="members-gender__legend" data-members-gender-legend></ul>
+                </div>
+              </article>
+            </div>
+
+            <div class="admin-panel members-management" data-member-management>
+              <div class="members-list-head">
+                <div><h3>Elenco tesserati</h3><p>Seleziona una riga per vedere la scheda e gestire il rinnovo.</p></div>
+                <button class="button button-dark" type="button" data-member-add>Nuovo tesserato <span>→</span></button>
+              </div>
+              <div class="members-toolbar">
+                <label class="admin-collection-search">Cerca
+                  <input type="search" data-member-search placeholder="Nome, cognome o numero tessera…" autocomplete="off" />
+                </label>
+                <p class="members-list-summary" data-member-list-summary aria-live="polite">Caricamento tesserati…</p>
+              </div>
+              <p class="admin-feedback" data-member-feedback aria-live="polite"></p>
+              <ul class="members-list" data-member-list aria-label="Elenco tesserati"></ul>
+              <p class="members-empty" data-member-empty hidden>Nessun tesserato corrisponde alla ricerca.</p>
+              <nav class="admin-pagination" data-member-pagination aria-label="Paginazione elenco tesserati"></nav>
+            </div>
+            <p data-member-denied hidden>Non hai l'autorizzazione per gestire i tesserati.</p>
+
+            <template id="member-list-item-template">
+              <li class="members-list__item">
+                <button class="members-list__button" type="button" data-member-open>
+                  <span class="members-renewal-dot" data-member-renewal-dot aria-hidden="true"></span>
+                  <span class="members-list__identity"><strong data-member-name>—</strong><small data-member-card-number>Tessera —</small></span>
+                  <span class="members-list__status" data-member-renewal-label>Stato rinnovo —</span>
+                  <span class="members-list__open" aria-hidden="true">›</span>
+                </button>
+              </li>
+            </template>
           </section>
           <section id="news" data-admin-module="news"><p class="eyebrow">editoriale</p><h2>Gestione <em>news.</em></h2><div class="admin-panel news-management" data-news-management><form data-news-form><label>Titolo<input name="title" required maxlength="180" /></label><label>Estratto<textarea name="excerpt" maxlength="500"></textarea></label><label>Categoria<input name="category" value="Club" maxlength="80" /></label><fieldset><legend>Tipo di contenuto</legend><label><input type="radio" name="content_type" value="original" checked /> News originale</label><label><input type="radio" name="content_type" value="external" /> Articolo segnalato</label></fieldset><div data-news-original-fields><label>Testo news<textarea name="body" maxlength="20000"></textarea></label></div><div data-news-external-fields hidden><label>Link articolo<input name="external_url" type="url" /></label><label>Fonte<input name="source_name" maxlength="120" /></label><label>Etichetta fonte<input name="source_label" maxlength="120" placeholder="Leggi l'articolo" /></label></div><label>Immagine (URL HTTPS)<input name="cover_image_url" type="url" /></label><label><input name="published" type="checkbox" /> Pubblica subito</label><button class="button button-dark" type="submit"><span data-news-submit-label>Crea news</span> <span>→</span></button><button type="button" data-news-cancel hidden>Annulla</button></form><p class="admin-feedback" data-news-feedback aria-live="polite"></p><ul class="admin-list" data-news-list></ul></div></section>
           <section id="sponsor" data-admin-module="sponsors">
@@ -143,15 +216,96 @@
       </div>
     </main>
 
+    <dialog id="member-detail-modal" class="admin-edit-modal members-modal" data-member-detail-modal aria-labelledby="member-detail-modal-title">
+      <div class="admin-edit-modal__head">
+        <div><p class="members-modal__eyebrow">Scheda tesserato</p><h2 id="member-detail-modal-title" data-member-modal-title>—</h2></div>
+        <button type="button" class="admin-edit-modal__close" data-member-modal-close aria-label="Chiudi scheda">×</button>
+      </div>
+      <div class="members-modal__body">
+        <section class="members-profile-card" aria-label="Profilo tesserato">
+          <div class="members-profile-card__number"><span>Tessera</span><strong data-member-detail-card-number>—</strong></div>
+          <div><p class="members-profile-card__name" data-member-detail-name>—</p><p data-member-detail-email>—</p></div>
+          <p class="members-profile-card__since">Socio dal <strong data-member-detail-since>—</strong></p>
+        </section>
+
+        <section class="members-detail-section">
+          <div class="members-detail-section__head"><h3>Dati del socio</h3><span data-member-detail-paid-status>Pagamento —</span></div>
+          <dl class="members-details-grid" data-member-details>
+            <div><dt>Data di nascita</dt><dd data-member-detail-birth-date>—</dd></div>
+            <div><dt>Luogo di nascita</dt><dd data-member-detail-birth-place>—</dd></div>
+            <div><dt>Nazionalità</dt><dd data-member-detail-nationality>—</dd></div>
+            <div><dt>Genere</dt><dd data-member-detail-gender>—</dd></div>
+            <div><dt>Telefono</dt><dd data-member-detail-phone>—</dd></div>
+            <div><dt>Codice fiscale</dt><dd data-member-detail-tax-code>—</dd></div>
+            <div><dt>Residenza</dt><dd data-member-detail-residence>—</dd></div>
+            <div><dt>Documento</dt><dd data-member-detail-identity-document>—</dd></div>
+            <div><dt>Scadenza documento</dt><dd data-member-detail-identity-document-expiry>—</dd></div>
+            <div><dt>Esperienza</dt><dd data-member-detail-experience-feedback>—</dd></div>
+          </dl>
+          <div class="members-additional-details" data-member-additional-details hidden></div>
+        </section>
+
+        <section class="members-renewal-panel" data-member-renewal-panel>
+          <div class="members-renewal-panel__head"><div><p class="eyebrow">stagione <span data-member-renewal-season>—</span></p><h3>Rinnovo tesseramento</h3></div><span class="members-renewal-badge" data-member-renewal-badge>—</span></div>
+          <div data-member-renewal-pending>
+            <p>Registra l'importo e il metodo di pagamento. Al rinnovo verrà inviata automaticamente la comunicazione al socio.</p>
+            <form class="members-renewal-form" data-member-renewal-form>
+              <label>Importo rinnovo (€)<input name="renewal_amount" type="number" min="0" step="0.01" inputmode="decimal" required placeholder="0,00" /></label>
+              <label>Metodo di pagamento<input name="payment_method" type="text" maxlength="120" required placeholder="Es. contanti, bonifico, carta" /></label>
+              <button class="button button-dark" type="submit" data-member-renew>Rinnova tesseramento <span>→</span></button>
+            </form>
+          </div>
+          <div class="members-renewed-state" data-member-renewal-complete hidden>
+            <strong>Rinnovo già registrato</strong>
+            <p data-member-renewal-complete-note>Questo tesserato è in regola per la stagione in corso.</p>
+            <button class="link-button" type="button" data-member-resend-email>Reinvia email e tessera</button>
+          </div>
+        </section>
+      </div>
+    </dialog>
+
+    <dialog id="member-create-modal" class="admin-edit-modal members-modal" data-member-create-modal aria-labelledby="member-create-modal-title">
+      <div class="admin-edit-modal__head">
+        <div><p class="members-modal__eyebrow">Anagrafica</p><h2 id="member-create-modal-title">Nuovo tesserato</h2></div>
+        <button type="button" class="admin-edit-modal__close" data-member-create-close aria-label="Chiudi modulo">×</button>
+      </div>
+      <form class="members-create-form" data-member-create-form>
+        <p class="members-create-form__intro">Inserisci i dati disponibili: il sistema assegnerà automaticamente il primo numero tessera libero.</p>
+        <div class="members-form-grid">
+          <label>Nome<input name="first_name" type="text" required maxlength="100" autocomplete="given-name" /></label>
+          <label>Cognome<input name="last_name" type="text" required maxlength="100" autocomplete="family-name" /></label>
+          <label>Email<input name="email" type="email" maxlength="254" autocomplete="email" /></label>
+          <label>Telefono<input name="phone" type="tel" maxlength="60" autocomplete="tel" /></label>
+          <label>Data di nascita<input name="birth_date" type="date" autocomplete="bday" /></label>
+          <label>Luogo di nascita<input name="birth_place" type="text" maxlength="160" /></label>
+          <label>Nazionalità<input name="nationality" type="text" maxlength="100" /></label>
+          <label>Genere<select name="gender"><option value="">Non indicato</option><option value="M">Maschile</option><option value="F">Femminile</option><option value="other">Altro / preferisco non specificare</option></select></label>
+          <label>Codice fiscale<input name="tax_code" type="text" maxlength="32" autocapitalize="characters" /></label>
+          <label>Documento di identità<input name="identity_document" type="text" maxlength="180" /></label>
+          <label>Scadenza documento<input name="identity_document_expiry" type="date" /></label>
+          <label class="members-form-grid__wide">Residenza<input name="residence" type="text" maxlength="300" autocomplete="street-address" /></label>
+          <label class="members-form-grid__wide">Come ti sei trovato?<textarea name="experience_feedback" maxlength="2000"></textarea></label>
+        </div>
+        <fieldset class="members-create-options">
+          <legend>Primo tesseramento</legend>
+          <label>Socio dal<input name="member_since" type="date" required /></label>
+          <p>Una volta creato, puoi registrare il pagamento e completare il tesseramento dalla sua scheda.</p>
+        </fieldset>
+        <p class="admin-feedback" data-member-create-feedback aria-live="polite"></p>
+        <div class="members-create-form__actions"><button class="button button-dark" type="submit" data-member-create-submit>Crea tesserato <span>→</span></button><button class="link-button" type="button" data-member-create-cancel>Annulla</button></div>
+      </form>
+    </dialog>
+
     <script src="auth-config.js"></script>
-    <script type="module" src="auth.js?v=admin-permissions-20260729"></script>
-    <script type="module" src="admin.js?v=admin-mobile-20260727"></script>
+    <script type="module" src="auth.js?v=members-20260730"></script>
+    <script type="module" src="admin.js?v=members-20260730"></script>
     <script type="module" src="admin/dashboard.js?v=admin-permissions-20260729"></script>
-    <script type="module" src="admin/operators.js?v=operator-layout-20260728"></script>
+    <script type="module" src="admin/operators.js?v=members-permission-20260730"></script>
     <script type="module" src="admin/news.js?v=admin-permissions-20260729"></script>
     <script type="module" src="admin/sponsors.js?v=sponsor-operator-refresh-20260729"></script>
     <script type="module" src="admin/bacheca.js?v=admin-permissions-20260729"></script>
     <script type="module" src="admin/modules/players/players-admin.js?v=medical-download-20260728"></script>
+    <script type="module" src="admin/members.js?v=membership-reset-fix-20260730"></script>
     <script type="module" src="admin/merch.js?v=admin-permissions-20260729"></script>
     <script type="module" src="admin/matches.js?v=admin-permissions-20260729"></script>
   </body>

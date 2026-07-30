@@ -34,6 +34,25 @@ supabase functions deploy send-merch-request --no-verify-jwt
 Usa gli stessi secret `RESEND_API_KEY`, `MAIL_FROM` e `ALLOWED_ORIGINS`; opzionalmente
 puoi impostare `MERCH_MAIL_TO` (per default usa `MAIL_TO`).
 
+## Rinnovi gestiti dagli operatori
+
+L'area Tesserati registra il pagamento con l'RPC `renew_member` e poi chiama
+la funzione `send-member-renewal-email`. La funzione invia la conferma solo a
+un operatore autenticato con il permesso `can_members` e solo dopo che il
+record risulta rinnovato e pagato per la stagione in corso.
+
+Imposta `MEMBERSHIP_SITE_URL` con l'URL pubblico del sito, senza slash finale,
+poi distribuisci la funzione:
+
+```powershell
+supabase functions deploy send-member-renewal-email --no-verify-jwt
+```
+
+La funzione usa `RESEND_API_KEY`, `MAIL_FROM`, `ALLOWED_ORIGINS`,
+`MEMBERSHIP_SITE_URL`, `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY`. Gli ultimi
+due vengono forniti automaticamente da Supabase alle Edge Functions. L'email
+include il fac-simile fronte/retro già pubblicato e i dati della tessera.
+
 ## Campi nuovo tesserato
 
 I campi sono centralizzati in `membership-config.js` e vengono inclusi nel

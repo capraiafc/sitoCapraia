@@ -62,6 +62,7 @@ async function getCurrentAccess({ refresh = false } = {}) {
       is_super_user: true,
       can_matches: true,
       can_players: true,
+      can_members: true,
       can_news: true,
       can_sponsors: true,
       can_bacheca: true,
