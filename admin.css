@@ -18,6 +18,7 @@
 .admin-sidebar { padding:1.5rem; background:var(--admin-blue); display:grid; align-content:start; gap:.35rem; }
 .admin-sidebar a { color:#fff; padding:.75rem .8rem; font-size:.86rem; }
 .admin-sidebar a:hover,.admin-sidebar a.active { background:var(--admin-yellow); color:var(--admin-deep); }
+@media (min-width:761px) { .admin-sidebar { position:sticky; top:0; align-self:start; max-height:100vh; overflow-y:auto; } }
 .admin-content { padding:clamp(1.5rem,5vw,4rem); max-width:1200px; width:100%; }
 .admin-content > section { scroll-margin-top:1rem; margin-bottom:4rem; }
 .admin-content h2 { font-size:clamp(2rem,4vw,3.5rem); }
