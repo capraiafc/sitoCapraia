@@ -2,7 +2,7 @@ import '../auth.js?v=members-20260730';
 import { PAGE_SIZE, pageItems } from './crud-ui.js?v=member-navigation-20260730';
 import {
   createMember, listMembers, renewMember, resendRenewalEmail,
-} from './members-service.js?v=membership-reset-fix-20260730';
+} from './members-service.js?v=membership-since-20260730';
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -210,6 +210,12 @@ function genderName(value) {
       ? `Rinnovo ${member.renewed_at ? `registrato il ${formatDate(member.renewed_at.slice(0, 10))}` : 'registrato'}${member.paid ? ` · ${euro.format(Number(member.renewal_total || 0))} · ${text(member.payment_method, 'metodo non indicato')}` : ''}.`
       : '';
     detailForm.reset();
+    const sinceField = $('[data-member-since-field]', detailModal);
+    const sinceInput = detailForm.elements.member_since;
+    const missingSince = !member.member_since;
+    sinceField.hidden = !missingSince;
+    sinceInput.required = missingSince;
+    sinceInput.value = member.member_since || '';
   }
 
   async function load() {
@@ -244,6 +250,7 @@ function genderName(value) {
       const result = await renewMember(selectedMember.id, {
         amount: detailForm.elements.renewal_amount.value,
         paymentMethod: detailForm.elements.payment_method.value,
+        memberSince: detailForm.elements.member_since.value,
       });
       await load();
       const renewed = members.find((member) => member.id === selectedMember.id) || result.member;

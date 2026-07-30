@@ -250,6 +250,7 @@
           <div data-member-renewal-pending>
             <p>Registra l'importo e il metodo di pagamento. Al rinnovo verrà inviata automaticamente la comunicazione al socio.</p>
             <form class="members-renewal-form" data-member-renewal-form>
+              <label data-member-since-field hidden>Socio dal<input name="member_since" type="date" /></label>
               <label>Importo rinnovo (€)<input name="renewal_amount" type="number" min="0" step="0.01" inputmode="decimal" required placeholder="0,00" /></label>
               <label>Metodo di pagamento<input name="payment_method" type="text" maxlength="120" required placeholder="Es. contanti, bonifico, carta" /></label>
               <button class="button button-dark" type="submit" data-member-renew>Rinnova tesseramento <span>→</span></button>
@@ -305,7 +306,7 @@
     <script type="module" src="admin/sponsors.js?v=sponsor-operator-refresh-20260729"></script>
     <script type="module" src="admin/bacheca.js?v=admin-permissions-20260729"></script>
     <script type="module" src="admin/modules/players/players-admin.js?v=medical-download-20260728"></script>
-    <script type="module" src="admin/members.js?v=membership-reset-fix-20260730"></script>
+    <script type="module" src="admin/members.js?v=membership-since-20260730"></script>
     <script type="module" src="admin/merch.js?v=admin-permissions-20260729"></script>
     <script type="module" src="admin/matches.js?v=admin-permissions-20260729"></script>
   </body>

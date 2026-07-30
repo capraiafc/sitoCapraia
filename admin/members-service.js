@@ -41,6 +41,15 @@ function requiredText(value, label, maxLength = 160) {
   return normalized;
 }
 
+function optionalDate(value, label) {
+  const normalized = optionalText(value);
+  if (!normalized) return null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(normalized) || Number.isNaN(new Date(`${normalized}T00:00:00`).getTime())) {
+    throw new Error(`${label} non valida.`);
+  }
+  return normalized;
+}
+
 function uuid(value, label) {
   const normalized = String(value ?? '').trim();
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(normalized)) {
@@ -117,17 +126,19 @@ async function sendRenewalEmail(memberId, requestId) {
 }
 
 /** Registra il rinnovo prima dell'email: un errore email non perde il pagamento. */
-export async function renewMember(memberId, { amount, paymentMethod, requestId = crypto.randomUUID() } = {}) {
+export async function renewMember(memberId, { amount, paymentMethod, memberSince, requestId = crypto.randomUUID() } = {}) {
   const id = uuid(memberId, 'Tesserato');
   const total = Number(amount);
   if (!Number.isFinite(total) || total < 0 || total > 100000) throw new Error('Importo rinnovo non valido.');
   const method = requiredText(paymentMethod, 'Metodo di pagamento', 120);
+  const since = optionalDate(memberSince, 'Data socio dal');
   const operationId = uuid(requestId, 'Codice rinnovo');
   const { data, error } = await client().rpc('renew_member', {
     p_member_id: id,
     p_amount: total,
     p_payment_method: method,
     p_request_id: operationId,
+    p_member_since: since,
   });
   failIfError(error);
   const member = renewalResult(data) || { id };
