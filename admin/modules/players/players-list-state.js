@@ -1,4 +1,8 @@
 export function playerMatchesSearch(player, query) {
+  if (player.out_of_squad) {
+    return [player.display_name, player.first_name, player.last_name]
+      .join(' ').toLocaleLowerCase('it').includes(query);
+  }
   return [
     player.display_name, player.first_name, player.last_name, player.position, player.status,
     player.squad_number, player.kit_size, player.email,

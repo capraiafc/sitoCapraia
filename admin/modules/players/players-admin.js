@@ -2,12 +2,12 @@ import '../../../auth.js?v=members-20260730';
 import { createCollectionUi, moveFormToModal, PAGE_SIZE } from '../../crud-ui.js?v=player-navigation-20260728';
 import {
   createPlayer, listPlayers, removePlayer, updateOwnPlayerProfile, updatePlayer, withdrawOwnPlayer,
-} from './players-service.js?v=player-self-service-20260727';
+} from './players-service.js?v=out-of-squad-20260804';
 import { addImageUploadFields, removeImage, resolveImageChange } from '../../media.js';
 import {
   downloadMedicalDocument, removeMedicalDocument, uploadMedicalDocument, validateMedicalDocument,
 } from './medical-documents.js?v=medical-download-20260728';
-import { getPlayerListView } from './players-list-state.js?v=player-navigation-20260728';
+import { getPlayerListView } from './players-list-state.js?v=out-of-squad-20260804';
 
 const positions = { portiere: 'Portiere', difensore: 'Difensore', centrocampista: 'Centrocampista', attaccante: 'Attaccante', staff: 'Staff' };
 const statuses = { active: 'In rosa', injured: 'Infortunato', unavailable: 'Indisponibile', staff: 'Staff', former: 'Ex rosa' };
@@ -22,6 +22,7 @@ const formValues = (form) => {
     squad_number: data.get('squad_number'),
     position: data.get('position'),
     status: data.get('status'),
+    out_of_squad: data.get('out_of_squad') === 'on',
     birth_year: data.get('birth_year'),
     kit_size: data.get('kit_size'),
     email: data.get('email'),
@@ -91,7 +92,8 @@ function createBarChart(title, entries) {
 
 function renderPlayerDashboard(root, players) {
   if (!root) return;
-  const squad = players.filter((player) => activeStatuses.has(player.status));
+  const visiblePlayers = players.filter((player) => !player.out_of_squad);
+  const squad = visiblePlayers.filter((player) => activeStatuses.has(player.status));
   const currentYear = new Date().getFullYear();
   const ages = squad.map((player) => Number(player.birth_year) ? currentYear - Number(player.birth_year) : null).filter((age) => age && age > 0 && age < 100);
   const averageAge = ages.length ? (ages.reduce((total, age) => total + age, 0) / ages.length).toFixed(1).replace('.', ',') : '—';
@@ -104,7 +106,7 @@ function renderPlayerDashboard(root, players) {
 
   const kpis = document.createElement('div'); kpis.className = 'players-kpis';
   kpis.append(
-    createKpi('Calciatori in rosa', String(squad.length), `${players.length - squad.length} tra staff ed ex rosa`),
+    createKpi('Calciatori in rosa', String(squad.length), `${visiblePlayers.length - squad.length} tra staff ed ex rosa`),
     createKpi('Età media', averageAge === '—' ? averageAge : `${averageAge} anni`, `${ages.length} età disponibili`),
     createKpi('Visite da gestire', String(dueSoon), 'Scadute o entro 30 giorni'),
     createKpi('Kit assegnati', `${kitCoverage}/${squad.length}`, 'Giocatori con taglia inserita'),
@@ -164,6 +166,10 @@ function start(root) {
   const medicalCurrent = form.querySelector('[data-player-medical-current]');
   const medicalName = form.querySelector('[data-player-medical-name]');
   const downloadCurrentMedical = form.querySelector('[data-player-download-medical]');
+  const setMedicalFieldsVisibility = (outside) => {
+    form.querySelectorAll('label[data-player-medical-field]').forEach((field) => { field.hidden = outside; });
+    if (outside) medicalCurrent.hidden = true;
+  };
   const modal = moveFormToModal({ form, id: 'player-edit-modal', title: 'Inserisci nuovo giocatore' });
   const collection = createCollectionUi({ root, list, addLabel: 'Inserisci nuovo giocatore', searchPlaceholder: 'Nome, ruolo, taglia o numero…' });
   let players = [];
@@ -180,6 +186,8 @@ function start(root) {
     form.elements.position.value = 'centrocampista';
     form.elements.status.value = 'active';
     form.elements.published.checked = true;
+    form.elements.out_of_squad.checked = false;
+    setMedicalFieldsVisibility(false);
     editingId = null;
     title.textContent = 'Inserisci nuovo giocatore';
     submit.textContent = 'Aggiungi alla rosa';
@@ -214,7 +222,18 @@ function start(root) {
   const row = (player) => {
     const item = document.createElement('li'); item.className = 'players-admin__item'; item.dataset.playerId = player.id;
     const summary = document.createElement('div'); summary.className = 'players-admin__summary';
-    const name = document.createElement('strong'); name.textContent = `${player.squad_number ? `${player.squad_number} · ` : ''}${player.display_name}`;
+    const name = document.createElement('strong'); name.textContent = player.out_of_squad
+      ? player.display_name
+      : `${player.squad_number ? `${player.squad_number} · ` : ''}${player.display_name}`;
+    if (player.out_of_squad) {
+      summary.append(name);
+      const actions = document.createElement('div'); actions.className = 'players-admin__actions';
+      if (!selfService) {
+        const editButton = document.createElement('button'); editButton.type = 'button'; editButton.className = 'players-admin__button'; editButton.dataset.action = 'edit'; editButton.textContent = 'Modifica'; actions.append(editButton);
+      }
+      item.append(summary, actions);
+      return item;
+    }
     const meta = document.createElement('small');
     const expiryDays = daysUntil(player.medical_exam_expiry);
     meta.textContent = `${positions[player.position] || player.position} · ${statuses[player.status] || player.status} · Kit ${player.kit_size || '—'} · Visita: ${medicalLabel(expiryDays)}${player.published ? '' : ' · Bozza'}`;
@@ -279,17 +298,22 @@ function start(root) {
     editingId = player.id;
     Object.entries(player).forEach(([key, value]) => {
       if (!form.elements[key]) return;
-      if (key === 'published') form.elements[key].checked = value;
+      if (key === 'published' || key === 'out_of_squad') form.elements[key].checked = value;
       else form.elements[key].value = value ?? '';
     });
     title.textContent = `Modifica ${player.display_name}`;
     submit.textContent = 'Salva modifiche';
     cancel.hidden = false;
     form.dataset.initialMedicalExpiry = player.medical_exam_expiry || '';
-    medicalCurrent.hidden = !player.medical_document_path;
+    medicalCurrent.hidden = !player.medical_document_path || player.out_of_squad;
     medicalName.textContent = player.medical_document_name || 'Documento visita medica';
+    setMedicalFieldsVisibility(Boolean(player.out_of_squad));
     modal.open(`Modifica giocatore: ${player.display_name}`);
   };
+
+  form.elements.out_of_squad?.addEventListener('change', () => {
+    setMedicalFieldsVisibility(form.elements.out_of_squad.checked);
+  });
 
   collection.add.addEventListener('click', () => { reset(); modal.open('Inserisci nuovo giocatore'); });
   const updateSearch = () => { navigationLocked = false; page = 1; render(); };

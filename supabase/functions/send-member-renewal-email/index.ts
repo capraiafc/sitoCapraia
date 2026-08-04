@@ -35,9 +35,14 @@ function currentSeason() {
 }
 
 function pdfText(value: unknown) {
-  // PDF con stringhe UTF-16BE: i nomi con accenti restano leggibili.
-  let hex = 'FEFF';
-  for (const unit of String(value ?? '')) hex += unit.charCodeAt(0).toString(16).padStart(4, '0');
+  // Helvetica usa WinAnsi: evitare UTF-16, che nei lettori PDF fa comparire
+  // spazi anomali tra le lettere. Gli accenti comuni restano supportati.
+  let hex = '';
+  for (const character of String(value ?? '').normalize('NFD')) {
+    const code = character.codePointAt(0) || 0;
+    if (code >= 0x0300 && code <= 0x036f) continue;
+    hex += (code <= 0xff ? code : 0x3f).toString(16).padStart(2, '0');
+  }
   return `<${hex}>`;
 }
 
@@ -78,7 +83,7 @@ function membershipCardPdf(front: Uint8Array, back: Uint8Array, name: string, ca
   const backContents = encoder.encode([
     'q', `${PDF_WIDTH} 0 0 ${PDF_HEIGHT} 0 0 cm`, '/Back Do', 'Q',
     // Le coordinate corrispondono ai tre riquadri bianchi del template.
-    centeredPdfText(name, 316, 549, 27, 450),
+    centeredPdfText(name, 316, 536, 27, 450),
     centeredPdfText(cardNumber, 216, 178, 25, 250),
     centeredPdfText(memberSince, 482, 178, 20, 135),
   ].join('\n'));
@@ -91,7 +96,7 @@ function membershipCardPdf(front: Uint8Array, back: Uint8Array, name: string, ca
     pdfStream(6, `<< /Length ${frontContents.length} >>`, frontContents),
     pdfStream(7, `<< /Type /XObject /Subtype /Image /Width ${PDF_WIDTH} /Height ${PDF_HEIGHT} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${back.length} >>`, back),
     pdfStream(8, `<< /Length ${backContents.length} >>`, backContents),
-    pdfObject(9, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'),
+    pdfObject(9, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>'),
   ];
   const header = encoder.encode('%PDF-1.4\n%\xFF\xFF\xFF\xFF\n');
   const offsets: number[] = [0];

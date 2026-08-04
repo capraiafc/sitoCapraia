@@ -20,6 +20,9 @@
 .players-self-service-intro .button { width:max-content; max-width:100%; justify-content:space-between; }
 .players-medical-upload { display:grid; gap:.35rem; }
 .players-medical-upload small { color:#52647f; font-size:.7rem; }
+.players-out-of-squad { display:grid; gap:.35rem; align-content:center; padding:.7rem; border:1px solid var(--admin-line); background:#f5f8ff; font-weight:700; }
+.players-out-of-squad input { min-height:auto; margin-right:.35rem; }
+.players-out-of-squad small { color:#52647f; font-size:.7rem; font-weight:400; }
 .players-medical-current { display:flex; align-items:center; justify-content:space-between; gap:.8rem; padding:.75rem; border:1px solid var(--admin-line); background:#f5f8ff; }
 .players-medical-current span { overflow-wrap:anywhere; font:700 .7rem var(--mono); }
 .players-admin--self-service { max-width:720px; }

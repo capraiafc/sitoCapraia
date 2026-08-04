@@ -297,7 +297,7 @@ async function loadPublicContent() {
   const client = window.CapraiaAuth?.supabase;
   if (!client) return;
   const [players, news, merch, matches] = await Promise.all([
-    client.from('players').select('id, first_name, last_name, display_name, squad_number, position, image_url').eq('published', true).order('position').order('squad_number', { nullsFirst: false }),
+    client.from('players').select('id, first_name, last_name, display_name, squad_number, position, image_url').eq('published', true).eq('out_of_squad', false).order('position').order('squad_number', { nullsFirst: false }),
     client.from('news').select('id, title, excerpt, content_type, body, external_url, source_label, cover_image_url, category, published_at, created_at').eq('published', true).order('published_at', { ascending: false }).order('created_at', { ascending: false }),
     client.from('merch_products').select('id, name, price, description, image_url, available, size_mode, stock_s, stock_m, stock_l, stock_xl, stock_xxl, one_size_stock, merch_product_images(id, image_url, sort_order, is_primary)').eq('published', true).order('created_at', { ascending: false }),
     client.from('matches').select('id, legacy_key, season_id, match_day, home_team, away_team, kickoff_at, venue, competition, phase, status, home_score, away_score, referee, halftime_score, notes, source_url, extra_info, published').eq('published', true).order('kickoff_at', { ascending: false, nullsFirst: false }),

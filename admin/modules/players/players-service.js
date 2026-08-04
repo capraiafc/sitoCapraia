@@ -6,7 +6,7 @@
 
 const PLAYER_COLUMNS = [
   'id', 'first_name', 'last_name', 'display_name', 'squad_number', 'position',
-  'status', 'birth_year', 'bio', 'image_url', 'image_path', 'published', 'created_at', 'updated_at',
+  'status', 'out_of_squad', 'birth_year', 'bio', 'image_url', 'image_path', 'published', 'created_at', 'updated_at',
 ].join(', ');
 
 const PRIVATE_COLUMNS = [
@@ -16,7 +16,7 @@ const PRIVATE_COLUMNS = [
 ].join(', ');
 
 const EDITABLE_FIELDS = new Set([
-  'first_name', 'last_name', 'squad_number', 'position', 'status', 'birth_year',
+  'first_name', 'last_name', 'squad_number', 'position', 'status', 'out_of_squad', 'birth_year',
   'bio', 'image_url', 'image_path', 'published',
 ]);
 
@@ -48,7 +48,7 @@ export function toPlayerPayload(values) {
     if (!EDITABLE_FIELDS.has(field)) continue;
     if (field === 'squad_number' || field === 'birth_year') {
       payload[field] = value === '' || value === null ? null : Number(value);
-    } else if (field === 'published') {
+    } else if (field === 'published' || field === 'out_of_squad') {
       payload[field] = Boolean(value);
     } else if (field === 'bio' || field === 'image_url' || field === 'image_path') {
       payload[field] = normaliseOptionalText(value);

@@ -62,10 +62,11 @@ serve(async (request) => {
     const expiredStart = isoDate(addUtcDays(today, -365));
     const end = isoDate(addUtcDays(today, 30));
     const query = new URLSearchParams({
-      select: 'player_id,email,medical_exam_expiry,players!inner(first_name,last_name,status)',
+      select: 'player_id,email,medical_exam_expiry,players!inner(first_name,last_name,status,out_of_squad)',
       medical_exam_expiry: `gte.${expiredStart}`,
       and: `(medical_exam_expiry.lte.${end})`,
       'players.status': 'in.(active,injured,unavailable)',
+      'players.out_of_squad': 'eq.false',
     });
     const players = await rest(`player_private_details?${query.toString()}`) as Array<Record<string, unknown>>;
     const reminders = await rest(`player_medical_reminder_events?select=player_id,medical_exam_expiry,reminder_days&medical_exam_expiry=gte.${expiredStart}&medical_exam_expiry=lte.${end}`) as Array<Record<string, unknown>>;

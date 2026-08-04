@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="admin.css?v=sidebar-sticky-20260730" />
     <link rel="stylesheet" href="admin/operators.css?v=operator-layout-20260728" />
     <link rel="stylesheet" href="admin/news.css" />
-    <link rel="stylesheet" href="admin/modules/players/players.css?v=medical-request-download-20260729" />
+    <link rel="stylesheet" href="admin/modules/players/players.css?v=out-of-squad-20260804" />
     <link rel="stylesheet" href="admin/members.css?v=membership-ui-20260730" />
     <link rel="stylesheet" href="admin/merch.css" />
   </head>
@@ -74,12 +74,13 @@
                 <label data-player-admin-only>Numero maglia<input name="squad_number" type="number" min="1" max="99" /></label>
                 <label data-player-admin-only>Ruolo<select name="position"><option value="portiere">Portiere</option><option value="difensore">Difensore</option><option value="centrocampista">Centrocampista</option><option value="attaccante">Attaccante</option><option value="staff">Staff</option></select></label>
                 <label data-player-admin-only>Stato<select name="status"><option value="active">In rosa</option><option value="injured">Infortunato</option><option value="unavailable">Indisponibile</option><option value="staff">Staff</option><option value="former">Ex rosa</option></select></label>
+                <label data-player-admin-only class="players-out-of-squad"><input name="out_of_squad" type="checkbox" /> Fuori rosa<small>Esclude il giocatore da rosa pubblica, dashboard e rinnovi della visita medica.</small></label>
                 <label data-player-admin-only>Anno di nascita<input name="birth_year" type="number" min="1900" max="2100" /></label>
                 <label>Taglia kit<input name="kit_size" maxlength="40" placeholder="Es. M, L, XL oppure 48" /></label>
                 <label data-player-admin-only>Email giocatore<input name="email" type="email" maxlength="254" autocomplete="email" /></label>
-                <label>Scadenza visita medica<input name="medical_exam_expiry" type="date" /></label>
-                <label class="players-medical-upload">Documento visita medica<input name="medical_document_file" type="file" accept="application/pdf,image/jpeg,image/png" /><small>PDF, JPG o PNG · massimo 10 MB. Obbligatorio quando cambi la scadenza.</small></label>
-                <div class="players-medical-current" data-player-medical-current hidden><span data-player-medical-name></span><button class="link-button" type="button" data-player-download-medical>Scarica documento</button></div>
+                <label data-player-medical-field>Scadenza visita medica<input name="medical_exam_expiry" type="date" /></label>
+                <label class="players-medical-upload" data-player-medical-field>Documento visita medica<input name="medical_document_file" type="file" accept="application/pdf,image/jpeg,image/png" /><small>PDF, JPG o PNG · massimo 10 MB. Obbligatorio quando cambi la scadenza.</small></label>
+                <div class="players-medical-current" data-player-medical-current data-player-medical-field hidden><span data-player-medical-name></span><button class="link-button" type="button" data-player-download-medical>Scarica documento</button></div>
                 <label data-player-admin-only>Immagine (URL HTTPS)<input name="image_url" type="url" /></label>
                 <label data-player-admin-only>Bio<textarea name="bio" maxlength="2000"></textarea></label>
                 <label data-player-admin-only><input name="published" type="checkbox" checked /> Pubblica nella rosa</label>
@@ -305,7 +306,7 @@
     <script type="module" src="admin/news.js?v=admin-permissions-20260729"></script>
     <script type="module" src="admin/sponsors.js?v=sponsor-operator-refresh-20260729"></script>
     <script type="module" src="admin/bacheca.js?v=admin-permissions-20260729"></script>
-    <script type="module" src="admin/modules/players/players-admin.js?v=medical-download-20260728"></script>
+    <script type="module" src="admin/modules/players/players-admin.js?v=out-of-squad-20260804"></script>
     <script type="module" src="admin/members.js?v=membership-pdf-20260730"></script>
     <script type="module" src="admin/merch.js?v=admin-permissions-20260729"></script>
     <script type="module" src="admin/matches.js?v=admin-permissions-20260729"></script>
