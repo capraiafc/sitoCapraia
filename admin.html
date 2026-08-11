@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="admin.css?v=sidebar-sticky-20260730" />
     <link rel="stylesheet" href="admin/operators.css?v=operator-layout-20260728" />
     <link rel="stylesheet" href="admin/news.css" />
-    <link rel="stylesheet" href="admin/modules/players/players.css?v=player-detail-preview-20260811" />
+    <link rel="stylesheet" href="admin/modules/players/players.css?v=player-messages-20260811" />
     <link rel="stylesheet" href="admin/modules/kit/kit.css?v=kit-requests-20260811" />
     <link rel="stylesheet" href="admin/members.css?v=membership-ui-20260730" />
     <link rel="stylesheet" href="admin/merch.css" />
@@ -58,7 +58,7 @@
         </nav>
         <section class="admin-content">
           <section id="dashboard" data-admin-area="dashboard"><p class="eyebrow">area riservata</p><h1>Dashboard<br /><em>operatori.</em></h1><p>Accessi e ultime attività dell’area amministrativa.</p><div class="admin-dashboard" data-admin-dashboard></div></section>
-          <section id="operatori" data-admin-module="operators" data-admin-area="operators"><p class="eyebrow">amministrazione</p><h2>Operatori <em>abilitati.</em></h2><div class="admin-panel operator-management" data-operator-management><form data-operator-form><label>Email Google autorizzata<input type="email" data-operator-email required autocomplete="email" placeholder="nome@gmail.com" /></label><fieldset class="operator-permissions"><legend>Aree abilitate</legend><label><input name="can_matches" type="checkbox" /> Gare e risultati</label><label><input name="can_players" type="checkbox" /> Rosa</label><label><input name="can_members" type="checkbox" /> Tesserati</label><label><input name="can_news" type="checkbox" /> News</label><label><input name="can_sponsors" type="checkbox" /> Sponsor</label><label><input name="can_bacheca" type="checkbox" /> Bacheca</label><label><input name="can_merch" type="checkbox" /> Merch</label></fieldset><button class="button button-dark" type="submit">Aggiungi operatore <span>→</span></button></form><p class="admin-feedback" data-operator-feedback aria-live="polite"></p><ul class="admin-list" data-operator-list></ul></div><p data-operator-denied hidden></p></section>
+          <section id="operatori" data-admin-module="operators" data-admin-area="operators"><p class="eyebrow">amministrazione</p><h2>Operatori <em>abilitati.</em></h2><div class="admin-panel operator-management" data-operator-management><form data-operator-form><label>Email Google autorizzata<input type="email" data-operator-email required autocomplete="email" placeholder="nome@gmail.com" /></label><fieldset class="operator-permissions"><legend>Aree abilitate</legend><label><input name="can_matches" type="checkbox" /> Gare e risultati</label><label><input name="can_players" type="checkbox" /> Rosa</label><label><input name="can_kit" type="checkbox" /> Kit giocatori</label><label><input name="can_members" type="checkbox" /> Tesserati</label><label><input name="can_news" type="checkbox" /> News</label><label><input name="can_sponsors" type="checkbox" /> Sponsor</label><label><input name="can_bacheca" type="checkbox" /> Bacheca</label><label><input name="can_merch" type="checkbox" /> Merch</label></fieldset><button class="button button-dark" type="submit">Aggiungi operatore <span>→</span></button></form><p class="admin-feedback" data-operator-feedback aria-live="polite"></p><ul class="admin-list" data-operator-list></ul></div><p data-operator-denied hidden></p></section>
           <section id="gare" data-admin-module="matches" data-admin-area="matches"><p class="eyebrow">calendario</p><h2>Gare e <em>risultati.</em></h2><div class="admin-panel" data-match-management><form data-match-form><label>Stagione<input name="season_id" required placeholder="2026-27" /></label><label>Giornata / fase<input name="match_day" required placeholder="1" /></label><label>Squadra casa<input name="home_team" required /></label><label>Squadra ospite<input name="away_team" required /></label><label>Competizione<input name="competition" required placeholder="Seconda Categoria Toscana" /></label><label>Data e ora<input name="kickoff_at" type="datetime-local" /></label><label>Luogo<input name="venue" /></label><label>Stato<select name="status"><option value="scheduled">In programma</option><option value="completed">Conclusa</option><option value="postponed">Rinviata</option><option value="cancelled">Annullata</option></select></label><label>Gol casa<input name="home_score" type="number" min="0" max="99" /></label><label>Gol ospite<input name="away_score" type="number" min="0" max="99" /></label><label>Arbitro<input name="referee" /></label><label>Primo tempo<input name="halftime_score" placeholder="0 — 0" /></label><label>Link fonte/tabellino<input name="source_url" type="url" placeholder="https://…" /></label><label>Eventi e marcatori (JSON)<textarea name="events_json" placeholder='[{&quot;minute&quot;:&quot;29’&quot;,&quot;type&quot;:&quot;Gol Capraia&quot;,&quot;player&quot;:&quot;Nome giocatore&quot;}]'></textarea></label><label>Note<textarea name="notes"></textarea></label><label><input name="published" type="checkbox" checked /> Pubblica sul sito</label><button class="button button-dark" type="submit"><span data-match-submit>Salva gara</span> <span>→</span></button><button type="button" data-match-cancel hidden>Annulla</button></form><p class="admin-feedback" data-match-feedback aria-live="polite"></p><ul class="admin-list" data-match-list></ul></div></section>
           <section id="rosa" data-admin-module="players">
             <p class="eyebrow">gestione squadra</p>
@@ -67,6 +67,17 @@
               <p>Qui puoi aggiornare la tua taglia e la visita medica. Gli altri dati della rosa restano gestiti dalla società.</p>
               <a class="button button-dark" href="assets/documents/richiesta-visita-medica.pdf" download="Richiesta-visita-medica.pdf">Richiesta visita medica <span>↓</span></a>
             </div>
+            <section class="players-self-service-message" data-player-self-service-message hidden>
+              <p class="eyebrow">contatta la società</p><h3>Lasciaci un messaggio</h3>
+              <p>Per dubbi, comunicazioni o richieste non legate al materiale, scrivi qui direttamente alla società.</p>
+              <form data-player-message-form>
+                <label>Oggetto <small>facoltativo</small><input name="subject" maxlength="120" placeholder="Es. Comunicazione per la prossima gara" /></label>
+                <label>Messaggio<textarea name="body" required minlength="5" maxlength="2000" placeholder="Scrivi il tuo messaggio…"></textarea></label>
+                <button class="button button-dark" type="submit" data-player-message-submit>Invia messaggio <span>→</span></button>
+              </form>
+              <p class="admin-feedback" data-player-message-feedback aria-live="polite"></p>
+              <div class="players-self-service-message__history" data-player-message-history></div>
+            </section>
             <div class="players-insights" data-player-dashboard aria-live="polite"></div>
             <div class="admin-panel players-admin" data-player-management>
               <form data-player-form>
@@ -75,6 +86,7 @@
                   <button type="button" data-player-tab="anagraphic" class="active">Anagrafica</button>
                   <button type="button" data-player-tab="kit">Materiale</button>
                   <button type="button" data-player-tab="medical">Visita medica</button>
+                  <button type="button" data-player-tab="messages">Messaggi</button>
                 </nav>
                 <section class="player-detail-panel active" data-player-panel="anagraphic">
                   <h3 data-player-form-title>Aggiungi giocatore</h3>
@@ -104,6 +116,10 @@
                     <label class="players-medical-upload" data-player-medical-field>Documento visita medica<input name="medical_document_file" type="file" accept="application/pdf,image/jpeg,image/png" /><small>PDF, JPG o PNG · massimo 10 MB. Obbligatorio quando cambi la scadenza.</small></label>
                     <div class="players-medical-current players-admin__field--wide" data-player-medical-current data-player-medical-field hidden><span data-player-medical-name></span><button class="link-button" type="button" data-player-download-medical>Scarica documento</button></div>
                   </div>
+                </section>
+                <section class="player-detail-panel" data-player-panel="messages">
+                  <div class="player-detail-panel__heading"><div><p class="eyebrow">comunicazioni</p><h3>Messaggi alla società</h3></div></div>
+                  <div class="player-messages-list" data-player-messages>Apri la scheda di un giocatore per leggere i suoi messaggi.</div>
                 </section>
                 <div class="player-detail-actions"><button class="button button-dark" type="submit">Aggiungi alla rosa <span>→</span></button><button class="link-button" type="button" data-player-preview hidden>Anteprima vista giocatore</button><button type="button" data-player-cancel hidden>Annulla</button></div>
               </form>
@@ -376,15 +392,15 @@
     </dialog>
 
     <script src="auth-config.js"></script>
-    <script type="module" src="auth.js?v=members-20260730"></script>
-    <script type="module" src="admin.js?v=members-20260730"></script>
+    <script type="module" src="auth.js?v=kit-permissions-20260811"></script>
+    <script type="module" src="admin.js?v=kit-permissions-20260811"></script>
     <script type="module" src="admin/dashboard.js?v=admin-permissions-20260729"></script>
-    <script type="module" src="admin/operators.js?v=members-permission-20260730"></script>
+    <script type="module" src="admin/operators.js?v=kit-permissions-20260811"></script>
     <script type="module" src="admin/news.js?v=admin-permissions-20260729"></script>
     <script type="module" src="admin/sponsors.js?v=sponsor-operator-refresh-20260729"></script>
     <script type="module" src="admin/bacheca.js?v=admin-permissions-20260729"></script>
-    <script type="module" src="admin/modules/players/players-admin.js?v=kit-requests-20260811"></script>
-    <script type="module" src="admin/modules/kit/kit-admin.js?v=kit-requests-20260811"></script>
+    <script type="module" src="admin/modules/players/players-admin.js?v=player-messages-20260811"></script>
+    <script type="module" src="admin/modules/kit/kit-admin.js?v=kit-permissions-20260811"></script>
     <script type="module" src="admin/members.js?v=membership-pdf-20260730"></script>
     <script type="module" src="admin/merch.js?v=admin-permissions-20260729"></script>
     <script type="module" src="admin/matches.js?v=admin-permissions-20260729"></script>

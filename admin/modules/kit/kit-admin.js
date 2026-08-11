@@ -1,8 +1,8 @@
-import '../../../auth.js?v=members-20260730';
+import '../../../auth.js?v=kit-permissions-20260811';
 import {
   assignKitItem, listEligiblePlayers, listKitInventory, listKitRequests, listPlayerKit,
   listPlayersWithMissingKit, markKitItemMissing, resolveKitRequest, setKitStock,
-} from './kit-service.js?v=kit-requests-20260811';
+} from './kit-service.js?v=kit-permissions-20260811';
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const byCategory = (items) => items.reduce((groups, item) => {
@@ -178,7 +178,7 @@ function start(root) {
 
   (async () => {
     const access = await window.CapraiaAuth?.requireOperator?.();
-    if (!access?.isSuperUser && (!access?.permissions?.can_players || access?.permissions?.is_player_self_service)) { root.hidden = true; root.parentElement.querySelector('[data-kit-denied]')?.removeAttribute('hidden'); return; }
+    if (!access?.isSuperUser && (!access?.permissions?.can_kit || access?.permissions?.is_player_self_service)) { root.hidden = true; root.parentElement.querySelector('[data-kit-denied]')?.removeAttribute('hidden'); return; }
     try { await load(); } catch (error) { say(error.message || 'Impossibile caricare il kit giocatori.', 'error'); }
   })();
 }

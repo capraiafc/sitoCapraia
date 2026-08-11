@@ -1,5 +1,5 @@
 /* Operator management. Authentication is provided by the common auth module. */
-import '../auth.js?v=members-20260730';
+import '../auth.js?v=kit-permissions-20260811';
 import { pageItems } from './crud-ui.js';
 (function initOperatorManagement() {
   'use strict';
@@ -24,7 +24,7 @@ import { pageItems } from './crud-ui.js';
   let operators = [];
   let page = 1;
   const permissionFields = [
-    ['can_matches', 'Gare e risultati'], ['can_players', 'Rosa'], ['can_members', 'Tesserati'], ['can_news', 'News'], ['can_sponsors', 'Sponsor'], ['can_bacheca', 'Bacheca'], ['can_merch', 'Merch'],
+    ['can_matches', 'Gare e risultati'], ['can_players', 'Rosa'], ['can_kit', 'Kit giocatori'], ['can_members', 'Tesserati'], ['can_news', 'News'], ['can_sponsors', 'Sponsor'], ['can_bacheca', 'Bacheca'], ['can_merch', 'Merch'],
   ];
 
   const setFeedback = (message, state = 'info') => {
@@ -171,7 +171,7 @@ import { pageItems } from './crud-ui.js';
 
     setBusy(async () => {
       const permissions = Object.fromEntries(permissionFields.map(([key]) => [key, form.elements[key].checked]));
-      const { error } = await getClient().rpc('add_operator', { operator_email: email, p_can_matches: permissions.can_matches, p_can_players: permissions.can_players, p_can_members: permissions.can_members, p_can_news: permissions.can_news, p_can_sponsors: permissions.can_sponsors, p_can_bacheca: permissions.can_bacheca, p_can_merch: permissions.can_merch });
+      const { error } = await getClient().rpc('add_operator', { operator_email: email, p_can_matches: permissions.can_matches, p_can_players: permissions.can_players, p_can_members: permissions.can_members, p_can_news: permissions.can_news, p_can_sponsors: permissions.can_sponsors, p_can_bacheca: permissions.can_bacheca, p_can_merch: permissions.can_merch, p_can_kit: permissions.can_kit });
       if (error) throw error;
       form.reset();
       page = 1;
@@ -188,7 +188,7 @@ import { pageItems } from './crud-ui.js';
       const item = button.closest('.operator-management__item');
       const permissions = Object.fromEntries(permissionFields.map(([key]) => [key, item.querySelector(`[data-operator-permission="${key}"]`).checked]));
       setBusy(async () => {
-        const { error } = await getClient().rpc('set_operator_permissions', { operator_email: email, p_can_matches: permissions.can_matches, p_can_players: permissions.can_players, p_can_members: permissions.can_members, p_can_news: permissions.can_news, p_can_sponsors: permissions.can_sponsors, p_can_bacheca: permissions.can_bacheca, p_can_merch: permissions.can_merch });
+        const { error } = await getClient().rpc('set_operator_permissions', { operator_email: email, p_can_matches: permissions.can_matches, p_can_players: permissions.can_players, p_can_members: permissions.can_members, p_can_news: permissions.can_news, p_can_sponsors: permissions.can_sponsors, p_can_bacheca: permissions.can_bacheca, p_can_merch: permissions.can_merch, p_can_kit: permissions.can_kit });
         if (error) throw error;
         await load(); setFeedback('Diritti operatore aggiornati.', 'success');
       }).catch((error) => setFeedback(error.message || 'Non è stato possibile aggiornare i diritti.', 'error'));

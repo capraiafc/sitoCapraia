@@ -1,6 +1,6 @@
 // Importa esplicitamente l'autenticazione: gli altri moduli non devono
 // provare a leggere window.CapraiaAuth prima che sia stata inizializzata.
-import './auth.js?v=members-20260730';
+import './auth.js?v=kit-permissions-20260811';
 
 const byId = (id) => document.getElementById(id);
 let authCheckVersion = 0;
@@ -77,7 +77,7 @@ function applyAreaPermissions(access) {
   const permissionKeys = {
     matches: 'can_matches',
     players: 'can_players',
-    kit: 'can_players',
+    kit: 'can_kit',
     members: 'can_members',
     news: 'can_news',
     sponsors: 'can_sponsors',

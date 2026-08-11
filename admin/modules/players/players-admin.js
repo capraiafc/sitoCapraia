@@ -1,4 +1,4 @@
-import '../../../auth.js?v=members-20260730';
+import '../../../auth.js?v=kit-permissions-20260811';
 import { createCollectionUi, moveFormToModal, PAGE_SIZE } from '../../crud-ui.js?v=player-navigation-20260728';
 import {
   createPlayer, listPlayers, removePlayer, updateOwnPlayerProfile, updatePlayer, withdrawOwnPlayer,
@@ -8,7 +8,8 @@ import {
   downloadMedicalDocument, removeMedicalDocument, uploadMedicalDocument, validateMedicalDocument,
 } from './medical-documents.js?v=medical-download-20260728';
 import { getPlayerListView } from './players-list-state.js?v=out-of-squad-20260804';
-import { createMyKitRequest, listKitCatalog, listPlayerKit } from '../kit/kit-service.js?v=kit-requests-20260811';
+import { createMyKitRequest, listKitCatalog, listPlayerKit, listPlayerKitOverview } from '../kit/kit-service.js?v=kit-permissions-20260811';
+import { archivePlayerMessage, listPlayerMessages, markPlayerMessagesRead, sendMyPlayerMessage } from './player-messages-service.js?v=player-messages-20260811';
 
 const positions = { portiere: 'Portiere', difensore: 'Difensore', centrocampista: 'Centrocampista', attaccante: 'Attaccante', staff: 'Staff' };
 const statuses = { active: 'In rosa', injured: 'Infortunato', unavailable: 'Indisponibile', staff: 'Staff', former: 'Ex rosa' };
@@ -164,6 +165,10 @@ function start(root) {
   const empty = root.querySelector('[data-player-empty]');
   const dashboard = root.closest('#rosa')?.querySelector('[data-player-dashboard]');
   const selfServiceIntro = root.closest('#rosa')?.querySelector('[data-player-self-service-intro]');
+  const selfServiceMessage = root.closest('#rosa')?.querySelector('[data-player-self-service-message]');
+  const selfServiceMessageForm = selfServiceMessage?.querySelector('[data-player-message-form]');
+  const selfServiceMessageFeedback = selfServiceMessage?.querySelector('[data-player-message-feedback]');
+  const selfServiceMessageHistory = selfServiceMessage?.querySelector('[data-player-message-history]');
   const medicalCurrent = form.querySelector('[data-player-medical-current]');
   const medicalName = form.querySelector('[data-player-medical-name]');
   const downloadCurrentMedical = form.querySelector('[data-player-download-medical]');
@@ -177,6 +182,7 @@ function start(root) {
   const previewModal = root.closest('#rosa')?.querySelector('[data-player-preview-modal]');
   const previewContent = previewModal?.querySelector('[data-player-preview-content]');
   const previewFeedback = previewModal?.querySelector('[data-player-preview-feedback]');
+  const playerMessages = form.querySelector('[data-player-messages]');
   const setMedicalFieldsVisibility = (outside) => {
     form.querySelectorAll('label[data-player-medical-field]').forEach((field) => { field.hidden = outside; });
     if (outside) medicalCurrent.hidden = true;
@@ -203,6 +209,7 @@ function start(root) {
   const modal = moveFormToModal({ form, id: 'player-edit-modal', title: 'Inserisci nuovo giocatore' });
   const collection = createCollectionUi({ root, list, addLabel: 'Inserisci nuovo giocatore', searchPlaceholder: 'Nome, ruolo, taglia o numero…' });
   let players = [];
+  let kitOverviewByPlayerId = new Map();
   let editingId = null;
   let page = 1;
   let navigationLocked = false;
@@ -239,6 +246,7 @@ function start(root) {
     if (!selfService) return;
     if (dashboard) dashboard.hidden = true;
     if (selfServiceIntro) selfServiceIntro.hidden = false;
+    if (selfServiceMessage) selfServiceMessage.hidden = false;
     collection.add.hidden = true;
     collection.search.closest('label').hidden = true;
     form.querySelector('[data-player-kit-link]')?.setAttribute('hidden', '');
@@ -254,6 +262,42 @@ function start(root) {
       if (control.closest('label')) control.closest('label').hidden = true;
     });
     form.elements.medical_exam_expiry.required = true;
+  };
+
+  const formatMessageTime = (value) => new Intl.DateTimeFormat('it-IT', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
+  const renderMessages = async (player, target, markRead = false) => {
+    if (!player?.id || !target) return;
+    let messages = await listPlayerMessages(player.id);
+    if (markRead && messages.some((message) => message.status === 'new')) {
+      await markPlayerMessagesRead(player.id);
+      messages = await listPlayerMessages(player.id);
+    }
+    target.replaceChildren();
+    if (!messages.length) {
+      target.textContent = selfService ? 'Non hai ancora inviato messaggi alla società.' : 'Nessun messaggio ricevuto da questo giocatore.';
+      return;
+    }
+    const list = document.createElement('ul');
+    list.className = 'player-messages-list__items';
+    messages.forEach((message) => {
+      const item = document.createElement('li'); item.dataset.state = message.status;
+      const heading = document.createElement('strong'); heading.textContent = message.subject || 'Messaggio senza oggetto';
+      const body = document.createElement('p'); body.textContent = message.body;
+      const meta = document.createElement('small'); meta.textContent = `${formatMessageTime(message.created_at)} · ${message.status === 'new' ? 'Nuovo' : message.status === 'read' ? 'Letto dalla società' : 'Archiviato'}`;
+      item.append(heading, body, meta);
+      if (!selfService && message.status !== 'archived') {
+        const archive = document.createElement('button'); archive.type = 'button'; archive.className = 'link-button'; archive.textContent = 'Archivia';
+        archive.addEventListener('click', async () => {
+          archive.disabled = true;
+          try { await archivePlayerMessage(message.id); await renderMessages(player, target, false); say('Messaggio archiviato.', 'success'); }
+          catch (error) { say(error.message || 'Non è stato possibile archiviare il messaggio.', 'error'); }
+          finally { archive.disabled = false; }
+        });
+        item.append(archive);
+      }
+      list.append(item);
+    });
+    target.append(list);
   };
 
   const row = (player) => {
@@ -276,6 +320,18 @@ function start(root) {
     meta.textContent = `${positions[player.position] || player.position} · ${statuses[player.status] || player.status} · Kit ${player.kit_size || '—'} · Visita: ${medicalLabel(expiryDays)}${player.published ? '' : ' · Bozza'}`;
     const contact = document.createElement('small'); contact.textContent = player.email || 'Email non inserita';
     summary.append(name, meta, contact);
+    if (!selfService) {
+      const kitOverview = kitOverviewByPlayerId.get(player.id);
+      const missing = Number(kitOverview?.missing_count || 0);
+      const pending = Number(kitOverview?.pending_request_count || 0);
+      const kitState = document.createElement('small');
+      kitState.className = 'players-kit-indicator';
+      kitState.dataset.state = missing ? 'missing' : 'complete';
+      kitState.textContent = missing
+        ? `Kit: mancano ${missing} ${missing === 1 ? 'articolo' : 'articoli'}${pending ? ` · ${pending} richiesta in attesa` : ''}`
+        : 'Kit completo';
+      summary.append(kitState);
+    }
     if (player.medical_document_name) {
       const documentLabel = document.createElement('small');
       documentLabel.textContent = `Documento: ${player.medical_document_name}`;
@@ -328,8 +384,16 @@ function start(root) {
   };
 
   const load = async () => {
-    players = await listPlayers({ playerId: selfService ? access.permissions.player_id : null });
+    if (selfService) {
+      players = await listPlayers({ playerId: access.permissions.player_id });
+      kitOverviewByPlayerId = new Map();
+    } else {
+      const [nextPlayers, kitOverview] = await Promise.all([listPlayers(), listPlayerKitOverview()]);
+      players = nextPlayers;
+      kitOverviewByPlayerId = new Map(kitOverview.map((entry) => [entry.player_id, entry]));
+    }
     render();
+    if (selfService && players[0]) await renderMessages(players[0], selfServiceMessageHistory);
   };
   const edit = (player) => {
     editingId = player.id;
@@ -352,12 +416,19 @@ function start(root) {
     activatePanel('anagraphic');
     modal.open(`Modifica giocatore: ${player.display_name}`);
     renderKitSummary(player).catch((error) => { kitSummary.textContent = error.message || 'Materiale non disponibile.'; });
+    renderMessages(player, playerMessages, !selfService).catch((error) => { playerMessages.textContent = error.message || 'Messaggi non disponibili.'; });
   };
 
   form.elements.out_of_squad?.addEventListener('change', () => {
     setMedicalFieldsVisibility(form.elements.out_of_squad.checked);
   });
-  form.querySelectorAll('[data-player-tab]').forEach((button) => button.addEventListener('click', () => activatePanel(button.dataset.playerTab)));
+  form.querySelectorAll('[data-player-tab]').forEach((button) => button.addEventListener('click', () => {
+    activatePanel(button.dataset.playerTab);
+    if (button.dataset.playerTab === 'messages') {
+      const player = players.find((item) => item.id === editingId);
+      renderMessages(player, playerMessages, !selfService).catch((error) => { playerMessages.textContent = error.message || 'Messaggi non disponibili.'; });
+    }
+  }));
   previewButton.addEventListener('click', async () => {
     const player = players.find((item) => item.id === editingId);
     if (!player || !access?.isSuperUser || !previewModal || !previewContent) return;
@@ -426,6 +497,23 @@ function start(root) {
     finally { submit.disabled = false; }
   });
   requestKitDialog?.querySelectorAll('[data-player-kit-request-close]').forEach((button) => button.addEventListener('click', () => requestKitDialog.close()));
+
+  selfServiceMessageForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const submitMessage = selfServiceMessageForm.querySelector('[data-player-message-submit]');
+    submitMessage.disabled = true;
+    selfServiceMessageFeedback.textContent = '';
+    try {
+      await sendMyPlayerMessage({ subject: selfServiceMessageForm.elements.subject.value, body: selfServiceMessageForm.elements.body.value });
+      selfServiceMessageForm.reset();
+      if (players[0]) await renderMessages(players[0], selfServiceMessageHistory);
+      selfServiceMessageFeedback.textContent = 'Messaggio inviato alla società.';
+      selfServiceMessageFeedback.dataset.state = 'success';
+    } catch (error) {
+      selfServiceMessageFeedback.textContent = error.message || 'Non è stato possibile inviare il messaggio.';
+      selfServiceMessageFeedback.dataset.state = 'error';
+    } finally { submitMessage.disabled = false; }
+  });
 
   collection.add.addEventListener('click', () => { reset(); modal.open('Inserisci nuovo giocatore'); });
   const updateSearch = () => { navigationLocked = false; page = 1; render(); };
@@ -541,7 +629,9 @@ function start(root) {
   (async () => {
     access = await window.CapraiaAuth?.requireOperator?.();
     if (!access?.isOperator) { root.hidden = true; root.parentElement.querySelector('[data-player-denied]')?.removeAttribute('hidden'); return; }
-    try { reset(); setSelfServiceMode(); await load(); }
+    try {
+      reset(); setSelfServiceMode(); await load();
+    }
     catch (error) { say(error.message || 'Impossibile caricare la rosa.', 'error'); }
   })();
 }

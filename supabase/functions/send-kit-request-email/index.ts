@@ -50,11 +50,11 @@ serve(async (request) => {
     const kitRequest = rows[0];
     if (!kitRequest) throw new RequestError('Richiesta kit non trovata.', 404);
     const player = kitRequest.players || {}; const details = Array.isArray(player.player_private_details) ? player.player_private_details[0] : player.player_private_details;
-    const operators = await rest(`operator_allowlist?${new URLSearchParams({ select: 'role,can_players,player_id', email: `eq.${email}`, limit: '1' }).toString()}`) as Array<Record<string, unknown>>;
+    const operators = await rest(`operator_allowlist?${new URLSearchParams({ select: 'role,can_kit,player_id', email: `eq.${email}`, limit: '1' }).toString()}`) as Array<Record<string, unknown>>;
     const operator = operators[0]; const superUser = email === 'capraiafc@gmail.com';
-    const isOwnRequest = operator?.player_id === player.id && operator?.can_players === true;
-    const isRosterManager = superUser || (operator?.can_players === true && !operator?.player_id && ['operator', 'admin'].includes(String(operator?.role || '')));
-    if ((notification === 'new' && !isOwnRequest) || (notification === 'resolution' && !isRosterManager)) throw new RequestError('Accesso non autorizzato.', 403);
+    const isOwnRequest = operator?.player_id === player.id;
+    const isKitManager = superUser || (operator?.can_kit === true && !operator?.player_id && ['operator', 'admin'].includes(String(operator?.role || '')));
+    if ((notification === 'new' && !isOwnRequest) || (notification === 'resolution' && !isKitManager)) throw new RequestError('Accesso non autorizzato.', 403);
     if (notification === 'new' && kitRequest.status !== 'pending') throw new RequestError('La richiesta non è più in attesa.', 409);
     if (notification === 'resolution' && !['approved', 'rejected'].includes(String(kitRequest.status))) throw new RequestError('La richiesta non è ancora stata gestita.', 409);
 

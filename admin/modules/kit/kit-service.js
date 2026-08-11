@@ -16,12 +16,13 @@ export async function listPlayersWithMissingKit() {
   fail(error); return data || [];
 }
 
+export async function listPlayerKitOverview() {
+  const { data, error } = await client().rpc('list_player_kit_overview');
+  fail(error); return data || [];
+}
+
 export async function listEligiblePlayers() {
-  const { data, error } = await client().from('players')
-    .select('id,display_name')
-    .in('status', ['active', 'injured', 'unavailable'])
-    .eq('out_of_squad', false)
-    .order('display_name');
+  const { data, error } = await client().rpc('list_kit_eligible_players');
   fail(error); return data || [];
 }
 

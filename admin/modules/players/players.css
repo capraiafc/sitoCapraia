@@ -23,9 +23,30 @@
 .players-admin__item { display: flex; gap: 1rem; justify-content: space-between; align-items: center; padding: .9rem 0; border-bottom: 1px solid currentColor; }
 .players-admin__summary { display: grid; gap: .2rem; }
 .players-admin__summary small { opacity: .72; }
+.players-kit-indicator { width:max-content; padding:.2rem .45rem; border-radius:999px; font:700 .62rem var(--mono); opacity:1 !important; }
+.players-kit-indicator[data-state="complete"] { color:#0f6a36; background:#e9f6ee; }
+.players-kit-indicator[data-state="missing"] { color:#a41313; background:#fff0f0; }
 .players-self-service-intro { display:grid; max-width:720px; gap:.8rem; padding:.85rem 1rem; border-left:5px solid var(--admin-yellow); background:#fff; }
 .players-self-service-intro p { margin:0; }
 .players-self-service-intro .button { width:max-content; max-width:100%; justify-content:space-between; }
+.players-self-service-message { display:grid; max-width:720px; gap:.7rem; margin:1rem 0 1.5rem; padding:1rem; border:1px solid var(--admin-line); border-top:4px solid var(--admin-yellow); background:#fff; }
+.players-self-service-message h3 { margin:0; color:var(--admin-deep); font:700 1.35rem var(--serif); }
+.players-self-service-message p { margin:0; }
+.players-self-service-message form { display:grid; gap:.7rem; }
+.players-self-service-message label { display:grid; gap:.3rem; font-size:.82rem; }
+.players-self-service-message label small { color:#52647f; font-size:.7rem; }
+.players-self-service-message input,.players-self-service-message textarea { min-height:42px; padding:.6rem .7rem; border:1px solid var(--admin-line); font:inherit; }
+.players-self-service-message textarea { min-height:90px; resize:vertical; }
+.players-self-service-message .button { width:max-content; }
+.players-self-service-message__history { display:grid; gap:.6rem; }
+.player-messages-list { padding:1rem; border:1px solid var(--admin-line); background:#fff; }
+.player-messages-list__items { display:grid; gap:.6rem; margin:0; padding:0; list-style:none; }
+.player-messages-list__items li { display:grid; gap:.35rem; padding:.8rem; border-left:4px solid #52647f; background:#f5f8ff; }
+.player-messages-list__items li[data-state="new"] { border-left-color:var(--admin-yellow); background:#fff7dc; }
+.player-messages-list__items li[data-state="archived"] { opacity:.65; }
+.player-messages-list__items p { margin:0; white-space:pre-wrap; }
+.player-messages-list__items small { color:#52647f; font:.68rem var(--mono); }
+.player-messages-list__items .link-button { width:max-content; }
 .players-medical-upload { display:grid; gap:.35rem; }
 .players-medical-upload small { color:#52647f; font-size:.7rem; }
 .players-out-of-squad { display:grid; gap:.35rem; align-content:center; padding:.7rem; border:1px solid var(--admin-line); background:#f5f8ff; font-weight:700; }
