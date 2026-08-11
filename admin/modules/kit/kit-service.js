@@ -58,8 +58,16 @@ export async function markKitItemMissing(playerId, itemId) {
 
 async function sendKitEmail(requestId, notification) {
   const { data, error } = await client().functions.invoke('send-kit-request-email', { body: { requestId, notification } });
-  if (error) throw error;
+  if (error) {
+    let response = null;
+    try { response = error.context ? await error.context.json() : null; } catch { /* risposta non JSON */ }
+    throw new Error(response?.message || error.message || 'Invio email non riuscito.');
+  }
   if (!data?.ok) throw new Error(data?.message || 'Invio email non riuscito.');
+}
+
+export async function resendKitRequestEmail(requestId) {
+  await sendKitEmail(requestId, 'new');
 }
 
 export async function createMyKitRequest({ itemId, itemSizeId, reason, requestKey = crypto.randomUUID() }) {

@@ -6,3 +6,6 @@ verify_jwt = false
 
 [functions.send-member-renewal-email]
 verify_jwt = false
+
+[functions.send-kit-request-email]
+verify_jwt = false

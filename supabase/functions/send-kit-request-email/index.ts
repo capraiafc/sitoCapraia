@@ -54,7 +54,7 @@ serve(async (request) => {
     const operator = operators[0]; const superUser = email === 'capraiafc@gmail.com';
     const isOwnRequest = operator?.player_id === player.id;
     const isKitManager = superUser || (operator?.can_kit === true && !operator?.player_id && ['operator', 'admin'].includes(String(operator?.role || '')));
-    if ((notification === 'new' && !isOwnRequest) || (notification === 'resolution' && !isKitManager)) throw new RequestError('Accesso non autorizzato.', 403);
+    if ((notification === 'new' && !isOwnRequest && !isKitManager) || (notification === 'resolution' && !isKitManager)) throw new RequestError('Accesso non autorizzato.', 403);
     if (notification === 'new' && kitRequest.status !== 'pending') throw new RequestError('La richiesta non è più in attesa.', 409);
     if (notification === 'resolution' && !['approved', 'rejected'].includes(String(kitRequest.status))) throw new RequestError('La richiesta non è ancora stata gestita.', 409);
 

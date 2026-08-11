@@ -8,7 +8,7 @@ import {
   downloadMedicalDocument, removeMedicalDocument, uploadMedicalDocument, validateMedicalDocument,
 } from './medical-documents.js?v=medical-download-20260728';
 import { getPlayerListView } from './players-list-state.js?v=out-of-squad-20260804';
-import { createMyKitRequest, listKitCatalog, listPlayerKit, listPlayerKitOverview } from '../kit/kit-service.js?v=kit-permissions-20260811';
+import { createMyKitRequest, listKitCatalog, listPlayerKit, listPlayerKitOverview } from '../kit/kit-service.js?v=kit-email-20260811';
 import { archivePlayerMessage, deletePlayerMessage, listPlayerMessages, listRosterPlayerMessages, markPlayerMessagesRead, sendMyPlayerMessage } from './player-messages-service.js?v=roster-messages-20260811';
 
 const positions = { portiere: 'Portiere', difensore: 'Difensore', centrocampista: 'Centrocampista', attaccante: 'Attaccante', staff: 'Staff' };
@@ -207,6 +207,8 @@ function start(root) {
   const previewContent = previewModal?.querySelector('[data-player-preview-content]');
   const previewFeedback = previewModal?.querySelector('[data-player-preview-feedback]');
   const playerMessages = form.querySelector('[data-player-messages]');
+  const selfIdentity = form.querySelector('[data-player-self-identity]');
+  const withdrawButton = form.querySelector('[data-player-withdraw]');
   const setMedicalFieldsVisibility = (outside) => {
     form.querySelectorAll('label[data-player-medical-field]').forEach((field) => { field.hidden = outside; });
     if (outside) medicalCurrent.hidden = true;
@@ -240,6 +242,7 @@ function start(root) {
   let access = null;
   let selfService = false;
   let kitCatalog = [];
+  let selfServiceInline = false;
   let rosterMessagePage = 1;
   const ROSTER_MESSAGE_PAGE_SIZE = 10;
 
@@ -321,8 +324,13 @@ function start(root) {
     root.classList.toggle('players-admin--self-service', selfService);
     if (!selfService) return;
     if (dashboard) dashboard.hidden = true;
+    const medicalPanel = form.querySelector('[data-player-panel="medical"]');
+    const messagesPanel = form.querySelector('[data-player-panel="messages"]');
+    if (selfServiceIntro && medicalPanel && !medicalPanel.contains(selfServiceIntro)) medicalPanel.prepend(selfServiceIntro);
+    if (selfServiceMessage && messagesPanel && !messagesPanel.contains(selfServiceMessage)) messagesPanel.prepend(selfServiceMessage);
     if (selfServiceIntro) selfServiceIntro.hidden = false;
     if (selfServiceMessage) selfServiceMessage.hidden = false;
+    if (playerMessages) playerMessages.hidden = true;
     if (rosterMessagesDashboard) rosterMessagesDashboard.hidden = true;
     collection.add.hidden = true;
     collection.search.closest('label').hidden = true;
@@ -339,6 +347,45 @@ function start(root) {
       if (control.closest('label')) control.closest('label').hidden = true;
     });
     form.elements.medical_exam_expiry.required = true;
+  };
+
+  const fillPlayerForm = (player) => {
+    editingId = player.id;
+    Object.entries(player).forEach(([key, value]) => {
+      if (!form.elements[key]) return;
+      if (key === 'published' || key === 'out_of_squad') form.elements[key].checked = value;
+      else form.elements[key].value = value ?? '';
+    });
+    title.textContent = selfService ? 'La mia scheda' : `Modifica ${player.display_name}`;
+    submit.textContent = 'Salva modifiche';
+    cancel.hidden = selfService;
+    form.dataset.initialMedicalExpiry = player.medical_exam_expiry || '';
+    medicalCurrent.hidden = !player.medical_document_path || player.out_of_squad;
+    medicalName.textContent = player.medical_document_name || 'Documento visita medica';
+    setMedicalFieldsVisibility(Boolean(player.out_of_squad));
+    detailSummary.hidden = false;
+    detailSummary.textContent = `${player.squad_number ? `#${player.squad_number} · ` : ''}${player.display_name} · ${positions[player.position] || player.position} · ${statuses[player.status] || player.status}`;
+    previewButton.hidden = !access?.isSuperUser;
+    withdrawButton.hidden = !selfService || player.status === 'former';
+    requestKitButton.hidden = !selfService || Boolean(player.out_of_squad);
+    if (selfService && selfIdentity) {
+      selfIdentity.hidden = false;
+      selfIdentity.textContent = `${player.squad_number ? `#${player.squad_number} · ` : ''}${player.display_name} · ${positions[player.position] || player.position} · ${statuses[player.status] || player.status}${player.email ? ` · ${player.email}` : ''}`;
+    }
+    activatePanel('anagraphic');
+    renderKitSummary(player).catch((error) => { kitSummary.textContent = error.message || 'Materiale non disponibile.'; });
+    renderMessages(player, playerMessages, !selfService).catch((error) => { playerMessages.textContent = error.message || 'Messaggi non disponibili.'; });
+  };
+
+  const openSelfServicePage = (player) => {
+    if (!player || selfServiceInline) return;
+    selfServiceInline = true;
+    root.prepend(form);
+    form.classList.add('players-admin__self-form');
+    list.hidden = true;
+    collection.pagination.hidden = true;
+    if (empty) empty.hidden = true;
+    fillPlayerForm(player);
   };
 
   const formatMessageTime = (value) => new Intl.DateTimeFormat('it-IT', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
@@ -474,27 +521,8 @@ function start(root) {
     if (!selfService) await loadRosterMessages();
   };
   const edit = (player) => {
-    editingId = player.id;
-    Object.entries(player).forEach(([key, value]) => {
-      if (!form.elements[key]) return;
-      if (key === 'published' || key === 'out_of_squad') form.elements[key].checked = value;
-      else form.elements[key].value = value ?? '';
-    });
-    title.textContent = `Modifica ${player.display_name}`;
-    submit.textContent = 'Salva modifiche';
-    cancel.hidden = false;
-    form.dataset.initialMedicalExpiry = player.medical_exam_expiry || '';
-    medicalCurrent.hidden = !player.medical_document_path || player.out_of_squad;
-    medicalName.textContent = player.medical_document_name || 'Documento visita medica';
-    setMedicalFieldsVisibility(Boolean(player.out_of_squad));
-    detailSummary.hidden = false;
-    detailSummary.textContent = `${player.squad_number ? `#${player.squad_number} · ` : ''}${player.display_name} · ${positions[player.position] || player.position} · ${statuses[player.status] || player.status}`;
-    previewButton.hidden = !access?.isSuperUser;
-    requestKitButton.hidden = !selfService || Boolean(player.out_of_squad);
-    activatePanel('anagraphic');
+    fillPlayerForm(player);
     modal.open(`Modifica giocatore: ${player.display_name}`);
-    renderKitSummary(player).catch((error) => { kitSummary.textContent = error.message || 'Materiale non disponibile.'; });
-    renderMessages(player, playerMessages, !selfService).catch((error) => { playerMessages.textContent = error.message || 'Messaggi non disponibili.'; });
   };
 
   form.elements.out_of_squad?.addEventListener('change', () => {
@@ -592,6 +620,16 @@ function start(root) {
       selfServiceMessageFeedback.dataset.state = 'error';
     } finally { submitMessage.disabled = false; }
   });
+  withdrawButton.addEventListener('click', async () => {
+    if (!window.confirm('Vuoi davvero uscire dalla rosa? La tua scheda non sarà più visibile sul sito e non entrerai nelle statistiche della squadra.')) return;
+    busy(true);
+    try {
+      await withdrawOwnPlayer(); await load();
+      withdrawButton.hidden = true;
+      say('La tua scheda è stata rimossa dalla rosa pubblica.', 'success');
+    } catch (error) { say(error.message || 'Non è stato possibile uscire dalla rosa.', 'error'); }
+    finally { busy(false); }
+  });
   rosterMessagesSearch?.addEventListener('input', () => {
     rosterMessagePage = 1;
     window.clearTimeout(rosterMessagesSearch._searchTimer);
@@ -672,7 +710,10 @@ function start(root) {
           console.warn('Il nuovo documento è stato salvato, ma il precedente non è stato eliminato.', cleanupError);
         });
       }
-      await load(); reset(); modal.close(); say(wasEditing ? 'Giocatore aggiornato.' : 'Giocatore aggiunto alla rosa.', 'success');
+      await load();
+      if (selfService) fillPlayerForm(players[0]);
+      else { reset(); modal.close(); }
+      say(wasEditing ? 'Giocatore aggiornato.' : 'Giocatore aggiunto alla rosa.', 'success');
     } catch (error) {
       // Elimina il nuovo file soltanto se il salvataggio nel database non è
       // riuscito. Dopo la persistenza, eventuali errori di refresh non devono
@@ -716,6 +757,7 @@ function start(root) {
     if (!access?.isOperator) { root.hidden = true; root.parentElement.querySelector('[data-player-denied]')?.removeAttribute('hidden'); return; }
     try {
       reset(); setSelfServiceMode(); await load();
+      if (selfService && players[0]) openSelfServicePage(players[0]);
     }
     catch (error) { say(error.message || 'Impossibile caricare la rosa.', 'error'); }
   })();

@@ -61,6 +61,8 @@
 .players-medical-current { display:flex; align-items:center; justify-content:space-between; gap:.8rem; padding:.75rem; border:1px solid var(--admin-line); background:#f5f8ff; }
 .players-medical-current span { overflow-wrap:anywhere; font:700 .7rem var(--mono); }
 .players-admin--self-service { max-width:720px; }
+.players-admin__self-form { display:block; margin:0; padding:1.2rem; border:1px solid var(--admin-line); background:#fff; }
+.player-self-identity { margin:0 0 1rem; padding:.8rem 1rem; border-left:5px solid var(--admin-yellow); background:var(--admin-deep); color:#fff; font:700 .75rem var(--mono); }
 .players-admin--self-service .admin-collection-toolbar { justify-content:flex-end; }
 .players-admin--self-service .players-admin__item { padding:1.2rem; border:1px solid var(--admin-line); background:#fff; }
 .players-admin--self-service .players-admin__actions { margin-top:.4rem; }

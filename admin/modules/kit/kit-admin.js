@@ -1,8 +1,8 @@
 import '../../../auth.js?v=kit-permissions-20260811';
 import {
   assignKitItem, listEligiblePlayers, listKitInventory, listKitRequests, listPlayerKit,
-  listPlayersWithMissingKit, markKitItemMissing, resolveKitRequest, setKitStock,
-} from './kit-service.js?v=kit-permissions-20260811';
+  listPlayersWithMissingKit, markKitItemMissing, resendKitRequestEmail, resolveKitRequest, setKitStock,
+} from './kit-service.js?v=kit-email-20260811';
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const byCategory = (items) => items.reduce((groups, item) => {
@@ -105,7 +105,15 @@ function start(root) {
         $('[data-kit-rejection-reason]', resolutionForm).hidden = true;
         open(resolutionDialog);
       });
-      details.append(title, note); item.append(details, button); list.append(item);
+      const resend = document.createElement('button'); resend.type = 'button'; resend.className = 'link-button'; resend.textContent = 'Reinvia email';
+      resend.addEventListener('click', async () => {
+        resend.disabled = true;
+        try { await resendKitRequestEmail(request.id); say('Email della richiesta reinviata alla società.', 'success'); }
+        catch (error) { say(error.message || 'Non è stato possibile reinviare l’email.', 'error'); }
+        finally { resend.disabled = false; }
+      });
+      const actions = document.createElement('div'); actions.className = 'kit-request-actions'; actions.append(button, resend);
+      details.append(title, note); item.append(details, actions); list.append(item);
     });
     requestsRoot.append(list);
   }
