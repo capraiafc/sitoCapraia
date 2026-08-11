@@ -69,7 +69,7 @@ debugStep('Script admin caricato', {
 });
 
 const sectionIds = {
-  dashboard: 'dashboard', operators: 'operatori', matches: 'gare', players: 'rosa', members: 'tesserati', news: 'news', sponsors: 'sponsor', bacheca: 'bacheca-admin', merch: 'merch',
+  dashboard: 'dashboard', operators: 'operatori', matches: 'gare', players: 'rosa', kit: 'kit-giocatori', members: 'tesserati', news: 'news', sponsors: 'sponsor', bacheca: 'bacheca-admin', merch: 'merch',
 };
 
 function applyAreaPermissions(access) {
@@ -77,6 +77,7 @@ function applyAreaPermissions(access) {
   const permissionKeys = {
     matches: 'can_matches',
     players: 'can_players',
+    kit: 'can_players',
     members: 'can_members',
     news: 'can_news',
     sponsors: 'can_sponsors',

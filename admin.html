@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="admin/operators.css?v=operator-layout-20260728" />
     <link rel="stylesheet" href="admin/news.css" />
     <link rel="stylesheet" href="admin/modules/players/players.css?v=out-of-squad-20260804" />
+    <link rel="stylesheet" href="admin/modules/kit/kit.css?v=kit-initial-20260811" />
     <link rel="stylesheet" href="admin/members.css?v=membership-ui-20260730" />
     <link rel="stylesheet" href="admin/merch.css" />
   </head>
@@ -48,6 +49,7 @@
           <a href="#operatori" data-admin-area="operators">Operatori</a>
           <a href="#gare" data-admin-area="matches">Gare e risultati</a>
           <a href="#rosa" data-admin-area="players">Rosa</a>
+          <a href="#kit-giocatori" data-admin-area="kit">Kit giocatori</a>
           <a href="#tesserati" data-admin-area="members">Tesserati</a>
           <a href="#news" data-admin-area="news">News</a>
           <a href="#sponsor" data-admin-area="sponsors">Sponsor</a>
@@ -92,6 +94,36 @@
               <ul class="admin-list" data-player-list></ul>
             </div>
             <p data-player-denied hidden>Accesso negato.</p>
+          </section>
+          <section id="kit-giocatori" data-admin-module="kit" data-admin-area="kit">
+            <p class="eyebrow">magazzino squadra</p>
+            <h2>Kit <em>giocatori.</em></h2>
+            <p>Disponibilità di magazzino e materiale consegnato alla rosa.</p>
+            <div class="kit-dashboard" data-kit-management aria-live="polite">
+              <article class="kit-kpi"><span>Articoli kit</span><strong data-kit-item-count>—</strong></article>
+              <article class="kit-kpi"><span>Materiale mancante</span><strong data-kit-missing-count>—</strong></article>
+              <article class="kit-kpi"><span>Pezzi disponibili</span><strong data-kit-stock-count>—</strong></article>
+              <div class="kit-actions">
+                <button class="button button-dark" type="button" data-kit-open-assign>Assegna oggetto <span>→</span></button>
+                <button class="link-button" type="button" data-kit-open-player>Gestisci materiale giocatore</button>
+              </div>
+              <p class="admin-feedback" data-kit-feedback aria-live="polite"></p>
+              <div data-kit-inventory></div>
+              <article class="kit-missing"><h3>Giocatori con più mancanze</h3><div data-kit-missing-players>Caricamento…</div></article>
+            </div>
+            <p data-kit-denied hidden>Non hai l’autorizzazione per gestire il kit giocatori.</p>
+            <dialog class="admin-edit-modal" data-kit-assign-dialog>
+              <div class="admin-edit-modal__head"><h2>Assegna oggetto</h2><button class="admin-edit-modal__close" type="button" data-kit-dialog-close aria-label="Chiudi">×</button></div>
+              <form class="kit-dialog-form" data-kit-assign-form>
+                <label>Giocatore<select name="player_id" required></select></label>
+                <label>Articolo e taglia<select name="item_size_id" required></select></label>
+                <div class="kit-dialog-actions"><button class="link-button" type="button" data-kit-dialog-close>Annulla</button><button class="button button-dark" type="submit" data-kit-assign-submit>Assegna <span>→</span></button></div>
+              </form>
+            </dialog>
+            <dialog class="admin-edit-modal" data-kit-player-dialog>
+              <div class="admin-edit-modal__head"><h2>Materiale del giocatore</h2><button class="admin-edit-modal__close" type="button" data-kit-dialog-close aria-label="Chiudi">×</button></div>
+              <div class="kit-dialog-form"><label>Giocatore<select data-kit-player-select></select></label><div class="kit-player-items" data-kit-player-items></div><div class="kit-dialog-actions"><button class="link-button" type="button" data-kit-dialog-close>Chiudi</button></div></div>
+            </dialog>
           </section>
           <section id="tesserati" data-admin-module="members" data-admin-area="members">
             <div class="members-heading">
@@ -307,6 +339,7 @@
     <script type="module" src="admin/sponsors.js?v=sponsor-operator-refresh-20260729"></script>
     <script type="module" src="admin/bacheca.js?v=admin-permissions-20260729"></script>
     <script type="module" src="admin/modules/players/players-admin.js?v=out-of-squad-20260804"></script>
+    <script type="module" src="admin/modules/kit/kit-admin.js?v=kit-initial-20260811"></script>
     <script type="module" src="admin/members.js?v=membership-pdf-20260730"></script>
     <script type="module" src="admin/merch.js?v=admin-permissions-20260729"></script>
     <script type="module" src="admin/matches.js?v=admin-permissions-20260729"></script>
