@@ -24,6 +24,11 @@ import { addImageUploadFields, removeImage, resolveImageChange } from './media.j
       <button type="button" class="admin-edit-modal__close" data-sponsor-detail-close aria-label="Chiudi">×</button>
     </div>
     <div class="sponsor-detail-modal__body">
+      <section class="sponsor-detail-overview">
+        <div class="sponsor-detail-overview__logo"><img data-sponsor-detail-logo alt="" hidden /><span data-sponsor-detail-logo-fallback>SP</span></div>
+        <div><p class="eyebrow">scheda partnership</p><h3 data-sponsor-detail-name>Sponsor</h3><p data-sponsor-detail-status></p></div>
+        <div class="sponsor-detail-overview__total"><span>Incasso stagione</span><strong data-sponsor-detail-season-total>—</strong></div>
+      </section>
       <section class="sponsor-detail-contact">
         <div class="sponsor-detail-contact__head">
           <h3>Contatto</h3>
@@ -59,6 +64,11 @@ import { addImageUploadFields, removeImage, resolveImageChange } from './media.j
   const paymentSeasons = detailModal.querySelector('[data-sponsor-payment-seasons]');
   const detailFeedback = detailModal.querySelector('[data-sponsor-detail-feedback]');
   const logoDownload = detailModal.querySelector('[data-sponsor-logo-download]');
+  const detailLogo = detailModal.querySelector('[data-sponsor-detail-logo]');
+  const detailLogoFallback = detailModal.querySelector('[data-sponsor-detail-logo-fallback]');
+  const detailName = detailModal.querySelector('[data-sponsor-detail-name]');
+  const detailStatus = detailModal.querySelector('[data-sponsor-detail-status]');
+  const detailSeasonTotal = detailModal.querySelector('[data-sponsor-detail-season-total]');
   let sponsors = [];
   let payments = [];
   let sponsorOperators = [];
@@ -220,16 +230,29 @@ import { addImageUploadFields, removeImage, resolveImageChange } from './media.j
     list.replaceChildren();
     if (!view.items.length) { const empty = document.createElement('li'); empty.textContent = 'Nessuno sponsor trovato.'; list.append(empty); }
     view.items.forEach((sponsor) => {
-      const item = document.createElement('li'); item.dataset.sponsorId = sponsor.id;
-      const description = document.createElement('div');
+      const item = document.createElement('li'); item.className = 'sponsor-management__item'; item.dataset.sponsorId = sponsor.id;
+      const description = document.createElement('div'); description.className = 'sponsor-management__summary';
+      const identity = document.createElement('div'); identity.className = 'sponsor-management__identity';
+      const logo = document.createElement('div'); logo.className = 'sponsor-management__logo';
+      const logoUrl = String(sponsor.logo_url || '').trim();
+      if (logoUrl) {
+        const image = document.createElement('img'); image.src = logoUrl; image.alt = `Logo ${sponsor.name}`;
+        image.addEventListener('error', () => { image.remove(); logo.textContent = sponsor.name.slice(0, 2).toUpperCase(); }); logo.append(image);
+      } else logo.textContent = sponsor.name.slice(0, 2).toUpperCase();
+      const heading = document.createElement('div');
       const title = document.createElement('strong'); title.textContent = sponsor.name;
+      const badge = document.createElement('span'); badge.className = 'sponsor-management__status'; badge.dataset.state = sponsor.active ? 'active' : 'hidden'; badge.textContent = sponsor.active ? 'Attivo' : 'Nascosto';
       const meta = document.createElement('small');
-      meta.textContent = `${euro.format(seasonSum(sponsor.id, activeSeason.key))} incassati nel ${activeSeason.label} · Previsto ${euro.format(Number(sponsor.annual_amount || 0))} · ${sponsor.active ? 'Attivo sul sito' : 'Nascosto dal sito'}`;
-      const actions = document.createElement('div');
-      [['Dettaglio', 'detail'], ['Modifica', 'edit'], ['Rimuovi', 'delete']].forEach(([label, action]) => {
-        const button = document.createElement('button'); button.type = 'button'; button.textContent = label; button.dataset.sponsorAction = action; actions.append(button);
+      meta.textContent = `Stagione ${activeSeason.label}: ${euro.format(seasonSum(sponsor.id, activeSeason.key))} incassati · Previsto ${euro.format(Number(sponsor.annual_amount || 0))}`;
+      heading.append(title, badge, meta); identity.append(logo, heading);
+      const actions = document.createElement('div'); actions.className = 'sponsor-management__actions';
+      [['Apri scheda', 'detail'], ['Modifica', 'edit'], ['Rimuovi', 'delete']].forEach(([label, action]) => {
+        const button = document.createElement('button'); button.type = 'button'; button.textContent = label; button.dataset.sponsorAction = action;
+        if (action === 'detail') button.className = 'button button-dark';
+        else if (action === 'delete') button.className = 'sponsor-management__delete';
+        actions.append(button);
       });
-      description.append(title, meta); item.append(description, actions); list.append(item);
+      description.append(identity); item.append(description, actions); list.append(item);
     });
     collection.renderPagination({ page, totalItems: view.filtered.length, onPageChange(next) { page = next; render(); } });
   };
@@ -315,6 +338,15 @@ import { addImageUploadFields, removeImage, resolveImageChange } from './media.j
   const openDetail = (sponsor, message = '') => {
     detailId = sponsor.id;
     detailModal.querySelector('[data-sponsor-detail-title]').textContent = sponsor.name;
+    detailName.textContent = sponsor.name;
+    detailStatus.textContent = sponsor.active ? 'Partnership attiva e visibile sul sito.' : 'Partnership salvata, ma non visibile sul sito.';
+    detailStatus.dataset.state = sponsor.active ? 'active' : 'hidden';
+    detailSeasonTotal.textContent = euro.format(seasonSum(sponsor.id, currentSeason().key));
+    const logoUrl = String(sponsor.logo_url || '').trim();
+    detailLogo.hidden = !logoUrl;
+    detailLogoFallback.hidden = Boolean(logoUrl);
+    detailLogoFallback.textContent = sponsor.name.slice(0, 2).toUpperCase();
+    if (logoUrl) { detailLogo.src = logoUrl; detailLogo.alt = `Logo ${sponsor.name}`; }
     contactForm.elements.contact_email.value = sponsor.contact_email || '';
     renderOperatorOptions(sponsor.assigned_operator_email);
     logoDownload.hidden = !String(sponsor.logo_url || '').trim();

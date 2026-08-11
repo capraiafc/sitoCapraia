@@ -61,11 +61,46 @@
 .players-medical-current { display:flex; align-items:center; justify-content:space-between; gap:.8rem; padding:.75rem; border:1px solid var(--admin-line); background:#f5f8ff; }
 .players-medical-current span { overflow-wrap:anywhere; font:700 .7rem var(--mono); }
 .players-admin--self-service { max-width:720px; }
-.players-admin__self-form { display:block; margin:0; padding:1.2rem; border:1px solid var(--admin-line); background:#fff; }
-.player-self-identity { margin:0 0 1rem; padding:.8rem 1rem; border-left:5px solid var(--admin-yellow); background:var(--admin-deep); color:#fff; font:700 .75rem var(--mono); }
+.players-admin__self-form { display:block; margin:0; padding:clamp(1rem,3vw,1.6rem); border:1px solid var(--admin-line); border-top:5px solid var(--admin-yellow); background:#fff; box-shadow:0 12px 28px rgba(1,30,82,.08); }
+.player-self-identity { margin:0 0 1.1rem; padding:.8rem 1rem; border-left:5px solid var(--admin-yellow); background:var(--admin-deep); color:#fff; font:700 .75rem var(--mono); line-height:1.55; }
 .players-admin--self-service .admin-collection-toolbar { justify-content:flex-end; }
 .players-admin--self-service .players-admin__item { padding:1.2rem; border:1px solid var(--admin-line); background:#fff; }
 .players-admin--self-service .players-admin__actions { margin-top:.4rem; }
+.player-private-page > h2 { margin-bottom:1.6rem; }
+.player-private-layout { grid-template-columns:minmax(0,1fr); }
+.player-private-layout .admin-sidebar { display:none; }
+.player-private-layout .admin-content { max-width:920px; margin:0 auto; }
+.player-private-page .players-admin--self-service { max-width:760px; }
+.players-admin--self-service .player-detail-summary { display:none; }
+.players-admin--self-service .player-detail-tabs { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; margin:-.15rem 0 1.45rem; border:1px solid var(--admin-line); background:#f5f8ff; }
+.players-admin--self-service .player-detail-tabs button { min-height:48px; padding:.65rem .45rem; border:0; border-bottom:3px solid transparent; font-size:.64rem; line-height:1.15; }
+.players-admin--self-service .player-detail-tabs button.active { background:#fff; border-bottom-color:var(--admin-yellow); }
+.players-admin--self-service .player-detail-panel h3 { margin:0 0 .35rem; font-size:clamp(1.45rem,5vw,2rem); }
+.players-admin--self-service .player-detail-panel__heading { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:end; padding-bottom:1rem; border-bottom:1px solid var(--admin-line); }
+.players-admin--self-service .player-detail-panel__heading .eyebrow { margin-bottom:.35rem; }
+.players-admin--self-service .player-detail-panel__heading > div:last-child { align-self:center; }
+.players-admin--self-service .player-detail-panel__heading .button { min-height:46px; }
+.players-admin--self-service .players-admin__form { margin:.8rem 0 0; }
+.players-admin--self-service .players-admin__form label:not([hidden]) { padding:.8rem; border:1px solid var(--admin-line); background:#f8faff; }
+.players-admin--self-service .players-admin__form label:not([hidden]) input { border-color:var(--admin-line); background:#fff; }
+.players-admin--self-service .player-detail-actions { position:sticky; bottom:0; z-index:2; margin:1.3rem -1rem -1rem; padding:1rem; border-top:1px solid var(--admin-line); background:rgba(255,255,255,.96); box-shadow:0 -8px 18px rgba(1,30,82,.07); }
+.players-admin--self-service .player-detail-actions .button { min-height:48px; }
+.player-private-leave { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-top:1.25rem; padding:1rem; border:1px solid #e7b5b5; border-left:5px solid #b32222; background:#fff7f7; }
+.player-private-leave strong { color:#861414; }
+.player-private-leave p { max-width:490px; margin:.3rem 0 0; color:#6f3737; font-size:.82rem; line-height:1.45; }
+.players-admin--self-service .players-self-service-intro { max-width:none; gap:.75rem; margin:0 0 1rem; padding:1rem; border:1px solid var(--admin-line); border-left:5px solid var(--admin-yellow); background:#fff9e7; }
+.players-admin--self-service .players-self-service-intro p { max-width:560px; font-size:.9rem; line-height:1.45; }
+.players-admin--self-service .players-self-service-intro .button { min-height:46px; }
+.players-admin--self-service .players-self-service-message { max-width:none; margin:0; padding:0; border:0; border-top:0; background:transparent; }
+.players-admin--self-service .players-self-service-message > p:not(.eyebrow) { max-width:570px; line-height:1.45; }
+.players-admin--self-service .players-self-service-message form { margin-top:.9rem; padding:1rem; border:1px solid var(--admin-line); background:#f8faff; }
+.players-admin--self-service .players-self-service-message label { font-size:.82rem; font-weight:700; }
+.players-admin--self-service .players-self-service-message input,.players-admin--self-service .players-self-service-message textarea { border-color:var(--admin-line); background:#fff; }
+.players-admin--self-service .players-self-service-message .button { min-height:46px; }
+.players-admin--self-service .player-kit-summary { padding:0; border:0; background:transparent; }
+.players-admin--self-service .player-kit-summary__list { gap:.65rem; }
+.players-admin--self-service .player-kit-summary__list li { min-height:48px; padding:.75rem; border:1px solid transparent; background:#edf7f0; }
+.players-admin--self-service .player-kit-summary__list li[data-state="missing"] { border-color:#f1cbcb; background:#fff4f4; }
 .players-insights { display:grid; gap:1rem; margin:1.5rem 0; }
 .players-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.8rem; }
 .players-kpi,.players-insights__card { padding:1rem; border:1px solid var(--admin-line); background:#fff; }
@@ -91,4 +126,24 @@
 .players-bars__row i { display:block; width:var(--bar-size); min-width:0; height:.7rem; background:linear-gradient(90deg,var(--admin-blue),var(--admin-yellow)); }
 .players-bars__row b { font:700 .75rem var(--mono); }
 @media (max-width: 900px) { .players-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); }.players-insights__grid { grid-template-columns:1fr 1fr; }.players-medical { grid-column:1 / -1; } }
-@media (max-width: 620px) { .players-admin__form,.player-kit-summary__list { grid-template-columns:1fr; }.players-admin__item { align-items:flex-start; flex-direction:column; }.players-medical-current { align-items:flex-start; flex-direction:column; }.players-kpis,.players-insights__grid { grid-template-columns:1fr; }.players-medical { grid-column:auto; }.players-medical li { grid-template-columns:1fr auto; }.players-medical li i,.players-medical li span { grid-column:1 / -1; justify-self:start; }.players-medical li i { min-width:6%; }.player-detail-panel__heading { display:grid; } }
+@media (max-width: 620px) {
+  .players-admin__form,.player-kit-summary__list { grid-template-columns:1fr; }
+  .players-admin__item { align-items:flex-start; flex-direction:column; }
+  .players-medical-current { align-items:flex-start; flex-direction:column; }
+  .players-kpis,.players-insights__grid { grid-template-columns:1fr; }
+  .players-medical { grid-column:auto; }
+  .players-medical li { grid-template-columns:1fr auto; }
+  .players-medical li i,.players-medical li span { grid-column:1 / -1; justify-self:start; }
+  .players-medical li i { min-width:6%; }
+  .player-detail-panel__heading { display:grid; }
+  .players-admin--self-service .player-detail-tabs { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .players-admin--self-service .player-detail-tabs button { min-height:52px; font-size:.68rem; }
+  .players-admin--self-service .player-detail-panel__heading { grid-template-columns:1fr; gap:.9rem; align-items:start; }
+  .players-admin--self-service .player-detail-panel__heading > div:last-child { justify-self:stretch; }
+  .players-admin--self-service .player-detail-panel__heading .button { width:100%; justify-content:space-between; }
+  .players-admin--self-service .player-detail-actions { display:grid; grid-template-columns:1fr; margin:1.2rem -1rem -1rem; }
+  .players-admin--self-service .player-detail-actions .button { width:100%; justify-content:space-between; }
+  .player-private-leave { align-items:stretch; flex-direction:column; }
+  .player-private-leave .players-admin__button { width:100%; min-height:46px; }
+  .players-admin--self-service .players-self-service-intro .button,.players-admin--self-service .players-self-service-message .button { width:100%; justify-content:space-between; }
+}

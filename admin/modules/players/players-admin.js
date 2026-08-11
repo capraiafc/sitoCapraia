@@ -209,6 +209,7 @@ function start(root) {
   const playerMessages = form.querySelector('[data-player-messages]');
   const selfIdentity = form.querySelector('[data-player-self-identity]');
   const withdrawButton = form.querySelector('[data-player-withdraw]');
+  const selfServiceLeave = form.querySelector('[data-player-self-service-leave]');
   const setMedicalFieldsVisibility = (outside) => {
     form.querySelectorAll('label[data-player-medical-field]').forEach((field) => { field.hidden = outside; });
     if (outside) medicalCurrent.hidden = true;
@@ -323,6 +324,11 @@ function start(root) {
     selfService = Boolean(access?.permissions?.is_player_self_service && access?.permissions?.player_id);
     root.classList.toggle('players-admin--self-service', selfService);
     if (!selfService) return;
+    const playerArea = root.closest('#rosa');
+    playerArea?.classList.add('player-private-page');
+    playerArea?.querySelector('[data-player-area-label]')?.setAttribute('hidden', '');
+    playerArea?.closest('.admin-layout')?.classList.add('player-private-layout');
+    document.querySelector('.admin-header .brand b')?.replaceChildren('GIOCATORE');
     if (dashboard) dashboard.hidden = true;
     const medicalPanel = form.querySelector('[data-player-panel="medical"]');
     const messagesPanel = form.querySelector('[data-player-panel="messages"]');
@@ -335,7 +341,17 @@ function start(root) {
     collection.add.hidden = true;
     collection.search.closest('label').hidden = true;
     form.querySelector('[data-player-kit-link]')?.setAttribute('hidden', '');
-    root.closest('#rosa')?.querySelector('h2')?.replaceChildren('La mia ', Object.assign(document.createElement('em'), { textContent: 'scheda.' }));
+    playerArea?.querySelector('h2')?.replaceChildren('La mia ', Object.assign(document.createElement('em'), { textContent: 'scheda.' }));
+    const tabLabels = {
+      anagraphic: 'I miei dati',
+      kit: 'Il mio kit',
+      medical: 'Visita medica',
+      messages: 'Messaggi',
+    };
+    form.querySelectorAll('[data-player-tab]').forEach((button) => {
+      button.textContent = tabLabels[button.dataset.playerTab] || button.textContent;
+    });
+    requestKitButton?.replaceChildren('Richiedi un articolo', Object.assign(document.createElement('span'), { textContent: '→' }));
     form.querySelectorAll('[data-player-admin-only]').forEach((field) => {
       field.hidden = true;
       field.querySelectorAll('input, select, textarea').forEach((control) => { control.disabled = true; });
@@ -356,7 +372,7 @@ function start(root) {
       if (key === 'published' || key === 'out_of_squad') form.elements[key].checked = value;
       else form.elements[key].value = value ?? '';
     });
-    title.textContent = selfService ? 'La mia scheda' : `Modifica ${player.display_name}`;
+    title.textContent = selfService ? `Ciao, ${player.first_name || player.display_name}.` : `Modifica ${player.display_name}`;
     submit.textContent = 'Salva modifiche';
     cancel.hidden = selfService;
     form.dataset.initialMedicalExpiry = player.medical_exam_expiry || '';
@@ -367,10 +383,11 @@ function start(root) {
     detailSummary.textContent = `${player.squad_number ? `#${player.squad_number} · ` : ''}${player.display_name} · ${positions[player.position] || player.position} · ${statuses[player.status] || player.status}`;
     previewButton.hidden = !access?.isSuperUser;
     withdrawButton.hidden = !selfService || player.status === 'former';
+    if (selfServiceLeave) selfServiceLeave.hidden = !selfService || player.status === 'former';
     requestKitButton.hidden = !selfService || Boolean(player.out_of_squad);
     if (selfService && selfIdentity) {
       selfIdentity.hidden = false;
-      selfIdentity.textContent = `${player.squad_number ? `#${player.squad_number} · ` : ''}${player.display_name} · ${positions[player.position] || player.position} · ${statuses[player.status] || player.status}${player.email ? ` · ${player.email}` : ''}`;
+      selfIdentity.textContent = `${player.squad_number ? `#${player.squad_number} · ` : ''}${player.display_name} · ${positions[player.position] || player.position}${player.email ? ` · ${player.email}` : ''}`;
     }
     activatePanel('anagraphic');
     renderKitSummary(player).catch((error) => { kitSummary.textContent = error.message || 'Materiale non disponibile.'; });
