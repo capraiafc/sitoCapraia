@@ -9,7 +9,7 @@ import {
 } from './medical-documents.js?v=medical-download-20260728';
 import { getPlayerListView } from './players-list-state.js?v=out-of-squad-20260804';
 import { createMyKitRequest, listKitCatalog, listPlayerKit, listPlayerKitOverview } from '../kit/kit-service.js?v=kit-permissions-20260811';
-import { archivePlayerMessage, listPlayerMessages, markPlayerMessagesRead, sendMyPlayerMessage } from './player-messages-service.js?v=player-messages-20260811';
+import { archivePlayerMessage, deletePlayerMessage, listPlayerMessages, listRosterPlayerMessages, markPlayerMessagesRead, sendMyPlayerMessage } from './player-messages-service.js?v=roster-messages-20260811';
 
 const positions = { portiere: 'Portiere', difensore: 'Difensore', centrocampista: 'Centrocampista', attaccante: 'Attaccante', staff: 'Staff' };
 const statuses = { active: 'In rosa', injured: 'Infortunato', unavailable: 'Indisponibile', staff: 'Staff', former: 'Ex rosa' };
@@ -92,7 +92,7 @@ function createBarChart(title, entries) {
   return card;
 }
 
-function renderPlayerDashboard(root, players) {
+function renderPlayerDashboard(root, players, kitOverviewByPlayerId) {
   if (!root) return;
   const visiblePlayers = players.filter((player) => !player.out_of_squad);
   const squad = visiblePlayers.filter((player) => activeStatuses.has(player.status));
@@ -104,14 +104,18 @@ function renderPlayerDashboard(root, players) {
     .filter((item) => item.days !== null)
     .sort((a, b) => a.days - b.days);
   const dueSoon = expiring.filter((item) => item.days <= 30).length;
-  const kitCoverage = squad.filter((player) => player.kit_size).length;
+  const kitMissing = squad.map((player) => ({
+    player,
+    missing: Number(kitOverviewByPlayerId.get(player.id)?.missing_count || 0),
+  })).filter((entry) => entry.missing > 0).sort((left, right) => right.missing - left.missing || left.player.display_name.localeCompare(right.player.display_name));
+  const missingKitItems = kitMissing.reduce((total, entry) => total + entry.missing, 0);
 
   const kpis = document.createElement('div'); kpis.className = 'players-kpis';
   kpis.append(
     createKpi('Calciatori in rosa', String(squad.length), `${visiblePlayers.length - squad.length} tra staff ed ex rosa`),
     createKpi('Età media', averageAge === '—' ? averageAge : `${averageAge} anni`, `${ages.length} età disponibili`),
     createKpi('Visite da gestire', String(dueSoon), 'Scadute o entro 30 giorni'),
-    createKpi('Kit assegnati', `${kitCoverage}/${squad.length}`, 'Giocatori con taglia inserita'),
+    createKpi('Kit mancanti', String(missingKitItems), `${kitMissing.length} giocatori da completare`),
   );
 
   const medicalCard = document.createElement('article'); medicalCard.className = 'players-insights__card players-medical';
@@ -138,6 +142,20 @@ function renderPlayerDashboard(root, players) {
   });
   medicalCard.append(medicalTitle, medicalList);
 
+  const kitCard = document.createElement('article'); kitCard.className = 'players-insights__card players-kit-missing';
+  const kitTitle = document.createElement('h3'); kitTitle.textContent = 'Materiale kit da consegnare';
+  const kitList = document.createElement('ol');
+  if (!kitMissing.length) {
+    const empty = document.createElement('li'); empty.textContent = 'Tutti i giocatori hanno il kit completo.'; kitList.append(empty);
+  }
+  kitMissing.slice(0, 8).forEach(({ player, missing }) => {
+    const item = document.createElement('li');
+    const name = document.createElement('strong'); name.textContent = player.display_name;
+    const count = document.createElement('span'); count.textContent = `${missing} ${missing === 1 ? 'articolo mancante' : 'articoli mancanti'}`;
+    item.append(name, count); kitList.append(item);
+  });
+  kitCard.append(kitTitle, kitList);
+
   const ageEntries = [
     ['Under 20', (age) => age < 20],
     ['20–24', (age) => age >= 20 && age <= 24],
@@ -150,7 +168,7 @@ function renderPlayerDashboard(root, players) {
     .map((position) => ({ label: positions[position], value: squad.filter((player) => player.position === position).length }));
 
   const charts = document.createElement('div'); charts.className = 'players-insights__grid';
-  charts.append(medicalCard, createBarChart('Fasce di età', ageEntries), createBarChart('Distribuzione per ruolo', roleEntries));
+  charts.append(medicalCard, kitCard, createBarChart('Fasce di età', ageEntries), createBarChart('Distribuzione per ruolo', roleEntries));
   root.replaceChildren(kpis, charts);
 }
 
@@ -169,6 +187,12 @@ function start(root) {
   const selfServiceMessageForm = selfServiceMessage?.querySelector('[data-player-message-form]');
   const selfServiceMessageFeedback = selfServiceMessage?.querySelector('[data-player-message-feedback]');
   const selfServiceMessageHistory = selfServiceMessage?.querySelector('[data-player-message-history]');
+  const rosterMessagesDashboard = root.closest('#rosa')?.querySelector('[data-roster-messages-dashboard]');
+  const rosterMessagesList = rosterMessagesDashboard?.querySelector('[data-roster-messages-list]');
+  const rosterMessagesSearch = rosterMessagesDashboard?.querySelector('[data-roster-messages-search]');
+  const rosterMessagesCount = rosterMessagesDashboard?.querySelector('[data-roster-messages-count]');
+  const rosterMessagesPagination = rosterMessagesDashboard?.querySelector('[data-roster-messages-pagination]');
+  const rosterMessagesFeedback = rosterMessagesDashboard?.querySelector('[data-roster-messages-feedback]');
   const medicalCurrent = form.querySelector('[data-player-medical-current]');
   const medicalName = form.querySelector('[data-player-medical-name]');
   const downloadCurrentMedical = form.querySelector('[data-player-download-medical]');
@@ -216,9 +240,61 @@ function start(root) {
   let access = null;
   let selfService = false;
   let kitCatalog = [];
+  let rosterMessagePage = 1;
+  const ROSTER_MESSAGE_PAGE_SIZE = 10;
 
   const say = (text, state = 'info') => { feedback.textContent = text; feedback.dataset.state = state; };
   const busy = (on) => { submit.disabled = on; root.toggleAttribute('aria-busy', on); };
+  const sayRosterMessages = (text, state = 'info') => {
+    if (!rosterMessagesFeedback) return;
+    rosterMessagesFeedback.textContent = text;
+    rosterMessagesFeedback.dataset.state = state;
+  };
+  const loadRosterMessages = async () => {
+    if (selfService || !rosterMessagesList) return;
+    rosterMessagesList.textContent = 'Caricamento…';
+    const entries = await listRosterPlayerMessages({
+      limit: ROSTER_MESSAGE_PAGE_SIZE,
+      offset: (rosterMessagePage - 1) * ROSTER_MESSAGE_PAGE_SIZE,
+      query: rosterMessagesSearch?.value,
+    });
+    const total = Number(entries[0]?.total_count || 0);
+    const totalPages = Math.max(1, Math.ceil(total / ROSTER_MESSAGE_PAGE_SIZE));
+    if (rosterMessagePage > totalPages) { rosterMessagePage = totalPages; return loadRosterMessages(); }
+    if (rosterMessagesCount) rosterMessagesCount.textContent = `${total} ${total === 1 ? 'messaggio' : 'messaggi'}`;
+    rosterMessagesList.replaceChildren();
+    if (!entries.length) { rosterMessagesList.textContent = 'Nessun messaggio trovato.'; }
+    else {
+      const list = document.createElement('ul'); list.className = 'player-messages-list__items';
+      entries.forEach((message) => {
+        const item = document.createElement('li'); item.dataset.state = message.status;
+        const heading = document.createElement('strong'); heading.textContent = `${message.player_name} · ${message.subject || 'Messaggio senza oggetto'}`;
+        const body = document.createElement('p'); body.textContent = message.body;
+        const meta = document.createElement('small'); meta.textContent = `${formatMessageTime(message.created_at)} · ${message.status === 'new' ? 'Nuovo' : message.status === 'read' ? 'Letto' : 'Archiviato'}`;
+        const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'link-button'; remove.textContent = 'Elimina';
+        remove.addEventListener('click', async () => {
+          if (!window.confirm(`Eliminare il messaggio di ${message.player_name}?`)) return;
+          remove.disabled = true;
+          try { await deletePlayerMessage(message.id); await loadRosterMessages(); sayRosterMessages('Messaggio eliminato.', 'success'); }
+          catch (error) { sayRosterMessages(error.message || 'Non è stato possibile eliminare il messaggio.', 'error'); }
+          finally { remove.disabled = false; }
+        });
+        item.append(heading, body, meta, remove); list.append(item);
+      });
+      rosterMessagesList.append(list);
+    }
+    if (rosterMessagesPagination) {
+      rosterMessagesPagination.replaceChildren();
+      if (total > ROSTER_MESSAGE_PAGE_SIZE) {
+        const previous = document.createElement('button'); previous.type = 'button'; previous.textContent = '← Precedente'; previous.disabled = rosterMessagePage === 1;
+        const label = document.createElement('span'); label.textContent = `Pagina ${rosterMessagePage} di ${totalPages}`;
+        const next = document.createElement('button'); next.type = 'button'; next.textContent = 'Successiva →'; next.disabled = rosterMessagePage === totalPages;
+        previous.addEventListener('click', () => { rosterMessagePage -= 1; loadRosterMessages().catch((error) => sayRosterMessages(error.message, 'error')); });
+        next.addEventListener('click', () => { rosterMessagePage += 1; loadRosterMessages().catch((error) => sayRosterMessages(error.message, 'error')); });
+        rosterMessagesPagination.append(previous, label, next);
+      }
+    }
+  };
   const reset = () => {
     form.reset();
     form.elements.position.value = 'centrocampista';
@@ -247,6 +323,7 @@ function start(root) {
     if (dashboard) dashboard.hidden = true;
     if (selfServiceIntro) selfServiceIntro.hidden = false;
     if (selfServiceMessage) selfServiceMessage.hidden = false;
+    if (rosterMessagesDashboard) rosterMessagesDashboard.hidden = true;
     collection.add.hidden = true;
     collection.search.closest('label').hidden = true;
     form.querySelector('[data-player-kit-link]')?.setAttribute('hidden', '');
@@ -374,7 +451,7 @@ function start(root) {
   };
 
   const render = () => {
-    if (!selfService) renderPlayerDashboard(dashboard, players);
+    if (!selfService) renderPlayerDashboard(dashboard, players, kitOverviewByPlayerId);
     const view = getPlayerListView(players, collection.search.value, page, PAGE_SIZE);
     page = view.page;
     list.replaceChildren(...view.items.map(row));
@@ -394,6 +471,7 @@ function start(root) {
     }
     render();
     if (selfService && players[0]) await renderMessages(players[0], selfServiceMessageHistory);
+    if (!selfService) await loadRosterMessages();
   };
   const edit = (player) => {
     editingId = player.id;
@@ -513,6 +591,13 @@ function start(root) {
       selfServiceMessageFeedback.textContent = error.message || 'Non è stato possibile inviare il messaggio.';
       selfServiceMessageFeedback.dataset.state = 'error';
     } finally { submitMessage.disabled = false; }
+  });
+  rosterMessagesSearch?.addEventListener('input', () => {
+    rosterMessagePage = 1;
+    window.clearTimeout(rosterMessagesSearch._searchTimer);
+    rosterMessagesSearch._searchTimer = window.setTimeout(() => {
+      loadRosterMessages().catch((error) => sayRosterMessages(error.message || 'Messaggi non disponibili.', 'error'));
+    }, 220);
   });
 
   collection.add.addEventListener('click', () => { reset(); modal.open('Inserisci nuovo giocatore'); });

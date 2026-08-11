@@ -39,6 +39,12 @@
 .players-self-service-message textarea { min-height:90px; resize:vertical; }
 .players-self-service-message .button { width:max-content; }
 .players-self-service-message__history { display:grid; gap:.6rem; }
+.players-roster-messages { display:grid; gap:.8rem; margin:1.5rem 0; padding:1rem; border:1px solid var(--admin-line); background:#fff; }
+.players-roster-messages__heading { display:flex; align-items:start; justify-content:space-between; gap:1rem; }
+.players-roster-messages__heading h3 { margin:.1rem 0 0; color:var(--admin-deep); font:700 1.4rem var(--serif); }
+.players-roster-messages__heading .eyebrow { margin:0; }
+.players-roster-messages__heading span { padding:.3rem .5rem; background:var(--admin-deep); color:#fff; font:700 .68rem var(--mono); white-space:nowrap; }
+.players-roster-messages__list { display:grid; gap:.6rem; }
 .player-messages-list { padding:1rem; border:1px solid var(--admin-line); background:#fff; }
 .player-messages-list__items { display:grid; gap:.6rem; margin:0; padding:0; list-style:none; }
 .player-messages-list__items li { display:grid; gap:.35rem; padding:.8rem; border-left:4px solid #52647f; background:#f5f8ff; }
@@ -71,6 +77,9 @@
 .players-medical li { display:grid; grid-template-columns:minmax(110px,1fr) auto minmax(70px,.8fr) auto; align-items:center; gap:.65rem; padding:.55rem .65rem; border-left:5px solid #2f7d53; background:#f5f8ff; font-size:.72rem; }
 .players-medical li[data-state="warning"] { border-left-color:#e8a600; }
 .players-medical li[data-state="critical"],.players-medical li[data-state="expired"] { border-left-color:#b32222; }
+.players-kit-missing ol { display:grid; gap:.55rem; margin:0; padding:0; list-style:none; }
+.players-kit-missing li { display:flex; align-items:center; justify-content:space-between; gap:.8rem; padding:.55rem .65rem; border-left:5px solid #b32222; background:#fff1f1; font-size:.72rem; }
+.players-kit-missing li span { color:#a41313; font:700 .65rem var(--mono); text-align:right; }
 .players-medical li i { display:block; width:var(--medical-urgency); height:.65rem; background:#2f7d53; }
 .players-medical li[data-state="warning"] i { background:#e8a600; }
 .players-medical li[data-state="critical"] i,.players-medical li[data-state="expired"] i { background:#b32222; }

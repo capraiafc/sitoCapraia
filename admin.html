@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="admin.css?v=sidebar-sticky-20260730" />
     <link rel="stylesheet" href="admin/operators.css?v=operator-layout-20260728" />
     <link rel="stylesheet" href="admin/news.css" />
-    <link rel="stylesheet" href="admin/modules/players/players.css?v=player-messages-20260811" />
+    <link rel="stylesheet" href="admin/modules/players/players.css?v=roster-messages-20260811" />
     <link rel="stylesheet" href="admin/modules/kit/kit.css?v=kit-requests-20260811" />
     <link rel="stylesheet" href="admin/members.css?v=membership-ui-20260730" />
     <link rel="stylesheet" href="admin/merch.css" />
@@ -79,6 +79,13 @@
               <div class="players-self-service-message__history" data-player-message-history></div>
             </section>
             <div class="players-insights" data-player-dashboard aria-live="polite"></div>
+            <section class="players-roster-messages" data-roster-messages-dashboard>
+              <div class="players-roster-messages__heading"><div><p class="eyebrow">comunicazioni ricevute</p><h3>Messaggi dei giocatori</h3></div><span data-roster-messages-count>—</span></div>
+              <label class="admin-collection-search">Cerca messaggio o giocatore<input type="search" data-roster-messages-search placeholder="Nome, oggetto o testo…" autocomplete="off" /></label>
+              <div class="players-roster-messages__list" data-roster-messages-list>Caricamento…</div>
+              <nav class="admin-pagination" data-roster-messages-pagination aria-label="Paginazione messaggi giocatori"></nav>
+              <p class="admin-feedback" data-roster-messages-feedback aria-live="polite"></p>
+            </section>
             <div class="admin-panel players-admin" data-player-management>
               <form data-player-form>
                 <div class="player-detail-summary" data-player-detail-summary hidden></div>
@@ -399,7 +406,7 @@
     <script type="module" src="admin/news.js?v=admin-permissions-20260729"></script>
     <script type="module" src="admin/sponsors.js?v=sponsor-operator-refresh-20260729"></script>
     <script type="module" src="admin/bacheca.js?v=admin-permissions-20260729"></script>
-    <script type="module" src="admin/modules/players/players-admin.js?v=player-messages-20260811"></script>
+    <script type="module" src="admin/modules/players/players-admin.js?v=roster-messages-20260811"></script>
     <script type="module" src="admin/modules/kit/kit-admin.js?v=kit-permissions-20260811"></script>
     <script type="module" src="admin/members.js?v=membership-pdf-20260730"></script>
     <script type="module" src="admin/merch.js?v=admin-permissions-20260729"></script>

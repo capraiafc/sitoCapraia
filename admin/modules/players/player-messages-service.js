@@ -29,3 +29,15 @@ export async function archivePlayerMessage(messageId) {
   const { data, error } = await client().rpc('archive_player_message', { p_message_id: messageId });
   fail(error); return Array.isArray(data) ? data[0] : data;
 }
+
+export async function listRosterPlayerMessages({ limit = 10, offset = 0, query = null } = {}) {
+  const { data, error } = await client().rpc('list_roster_player_messages', {
+    p_limit: limit, p_offset: offset, p_query: query || null,
+  });
+  fail(error); return data || [];
+}
+
+export async function deletePlayerMessage(messageId) {
+  const { data, error } = await client().rpc('delete_player_message', { p_message_id: messageId });
+  fail(error); return Array.isArray(data) ? data[0] : data;
+}
