@@ -10,8 +10,8 @@
     <link rel="stylesheet" href="admin.css?v=sidebar-sticky-20260730" />
     <link rel="stylesheet" href="admin/operators.css?v=operator-layout-20260728" />
     <link rel="stylesheet" href="admin/news.css" />
-    <link rel="stylesheet" href="admin/modules/players/players.css?v=out-of-squad-20260804" />
-    <link rel="stylesheet" href="admin/modules/kit/kit.css?v=kit-initial-20260811" />
+    <link rel="stylesheet" href="admin/modules/players/players.css?v=player-detail-preview-20260811" />
+    <link rel="stylesheet" href="admin/modules/kit/kit.css?v=kit-requests-20260811" />
     <link rel="stylesheet" href="admin/members.css?v=membership-ui-20260730" />
     <link rel="stylesheet" href="admin/merch.css" />
   </head>
@@ -70,30 +70,65 @@
             <div class="players-insights" data-player-dashboard aria-live="polite"></div>
             <div class="admin-panel players-admin" data-player-management>
               <form data-player-form>
-                <h3 data-player-form-title>Aggiungi giocatore</h3>
-                <label data-player-admin-only>Nome<input name="first_name" required maxlength="80" /></label>
-                <label data-player-admin-only>Cognome<input name="last_name" required maxlength="80" /></label>
-                <label data-player-admin-only>Numero maglia<input name="squad_number" type="number" min="1" max="99" /></label>
-                <label data-player-admin-only>Ruolo<select name="position"><option value="portiere">Portiere</option><option value="difensore">Difensore</option><option value="centrocampista">Centrocampista</option><option value="attaccante">Attaccante</option><option value="staff">Staff</option></select></label>
-                <label data-player-admin-only>Stato<select name="status"><option value="active">In rosa</option><option value="injured">Infortunato</option><option value="unavailable">Indisponibile</option><option value="staff">Staff</option><option value="former">Ex rosa</option></select></label>
-                <label data-player-admin-only class="players-out-of-squad"><input name="out_of_squad" type="checkbox" /> Fuori rosa<small>Esclude il giocatore da rosa pubblica, dashboard e rinnovi della visita medica.</small></label>
-                <label data-player-admin-only>Anno di nascita<input name="birth_year" type="number" min="1900" max="2100" /></label>
-                <label>Taglia kit<input name="kit_size" maxlength="40" placeholder="Es. M, L, XL oppure 48" /></label>
-                <label data-player-admin-only>Email giocatore<input name="email" type="email" maxlength="254" autocomplete="email" /></label>
-                <label data-player-medical-field>Scadenza visita medica<input name="medical_exam_expiry" type="date" /></label>
-                <label class="players-medical-upload" data-player-medical-field>Documento visita medica<input name="medical_document_file" type="file" accept="application/pdf,image/jpeg,image/png" /><small>PDF, JPG o PNG · massimo 10 MB. Obbligatorio quando cambi la scadenza.</small></label>
-                <div class="players-medical-current" data-player-medical-current data-player-medical-field hidden><span data-player-medical-name></span><button class="link-button" type="button" data-player-download-medical>Scarica documento</button></div>
-                <label data-player-admin-only>Immagine (URL HTTPS)<input name="image_url" type="url" /></label>
-                <label data-player-admin-only>Bio<textarea name="bio" maxlength="2000"></textarea></label>
-                <label data-player-admin-only><input name="published" type="checkbox" checked /> Pubblica nella rosa</label>
-                <button class="button button-dark" type="submit">Aggiungi alla rosa <span>→</span></button>
-                <button type="button" data-player-cancel hidden>Annulla</button>
+                <div class="player-detail-summary" data-player-detail-summary hidden></div>
+                <nav class="player-detail-tabs" aria-label="Sezioni scheda giocatore">
+                  <button type="button" data-player-tab="anagraphic" class="active">Anagrafica</button>
+                  <button type="button" data-player-tab="kit">Materiale</button>
+                  <button type="button" data-player-tab="medical">Visita medica</button>
+                </nav>
+                <section class="player-detail-panel active" data-player-panel="anagraphic">
+                  <h3 data-player-form-title>Aggiungi giocatore</h3>
+                  <div class="players-admin__form">
+                    <label data-player-admin-only>Nome<input name="first_name" required maxlength="80" /></label>
+                    <label data-player-admin-only>Cognome<input name="last_name" required maxlength="80" /></label>
+                    <label data-player-admin-only>Numero maglia<input name="squad_number" type="number" min="1" max="99" /></label>
+                    <label data-player-admin-only>Ruolo<select name="position"><option value="portiere">Portiere</option><option value="difensore">Difensore</option><option value="centrocampista">Centrocampista</option><option value="attaccante">Attaccante</option><option value="staff">Staff</option></select></label>
+                    <label data-player-admin-only>Stato<select name="status"><option value="active">In rosa</option><option value="injured">Infortunato</option><option value="unavailable">Indisponibile</option><option value="staff">Staff</option><option value="former">Ex rosa</option></select></label>
+                    <label data-player-admin-only class="players-out-of-squad"><input name="out_of_squad" type="checkbox" /> Fuori rosa<small>Esclude il giocatore da dashboard, rosa pubblica, kit e visite.</small></label>
+                    <label data-player-admin-only>Anno di nascita<input name="birth_year" type="number" min="1900" max="2100" /></label>
+                    <label>Taglia kit<input name="kit_size" maxlength="40" placeholder="Es. M, L, XL oppure 48" /></label>
+                    <label data-player-admin-only>Email giocatore<input name="email" type="email" maxlength="254" autocomplete="email" /></label>
+                    <label data-player-admin-only>Immagine (URL HTTPS)<input name="image_url" type="url" /></label>
+                    <label data-player-admin-only class="players-admin__field--wide">Bio<textarea name="bio" maxlength="2000"></textarea></label>
+                    <label data-player-admin-only><input name="published" type="checkbox" checked /> Pubblica nella rosa</label>
+                  </div>
+                </section>
+                <section class="player-detail-panel" data-player-panel="kit">
+                  <div class="player-detail-panel__heading"><div><p class="eyebrow">kit personale</p><h3>Materiale assegnato</h3></div><div><a href="#kit-giocatori" class="link-button" data-player-kit-link>Gestisci nel magazzino</a><button type="button" class="button button-dark" data-player-request-kit hidden>Richiedi nuovo <span>→</span></button></div></div>
+                  <div class="player-kit-summary" data-player-kit-summary>Apri la scheda di un giocatore per vedere il suo materiale.</div>
+                </section>
+                <section class="player-detail-panel" data-player-panel="medical">
+                  <div class="player-detail-panel__heading"><div><p class="eyebrow">documentazione</p><h3>Visita medica</h3></div></div>
+                  <div class="players-admin__form" data-player-medical-fields>
+                    <label data-player-medical-field>Scadenza visita medica<input name="medical_exam_expiry" type="date" /></label>
+                    <label class="players-medical-upload" data-player-medical-field>Documento visita medica<input name="medical_document_file" type="file" accept="application/pdf,image/jpeg,image/png" /><small>PDF, JPG o PNG · massimo 10 MB. Obbligatorio quando cambi la scadenza.</small></label>
+                    <div class="players-medical-current players-admin__field--wide" data-player-medical-current data-player-medical-field hidden><span data-player-medical-name></span><button class="link-button" type="button" data-player-download-medical>Scarica documento</button></div>
+                  </div>
+                </section>
+                <div class="player-detail-actions"><button class="button button-dark" type="submit">Aggiungi alla rosa <span>→</span></button><button class="link-button" type="button" data-player-preview hidden>Anteprima vista giocatore</button><button type="button" data-player-cancel hidden>Annulla</button></div>
               </form>
               <p class="admin-feedback" data-player-feedback aria-live="polite"></p>
               <p data-player-empty>Nessun giocatore inserito.</p>
               <ul class="admin-list" data-player-list></ul>
             </div>
             <p data-player-denied hidden>Accesso negato.</p>
+            <dialog class="admin-edit-modal player-preview-modal" data-player-preview-modal>
+              <div class="admin-edit-modal__head"><div><p class="eyebrow">superadmin · simulazione</p><h2>Vista giocatore</h2></div><button class="admin-edit-modal__close" type="button" data-player-preview-close aria-label="Chiudi">×</button></div>
+              <p class="player-preview-notice">Stai vedendo un fac-simile in sola lettura: le azioni mostrate qui non modificano dati e non inviano email.</p>
+              <div data-player-preview-content></div>
+              <div class="player-detail-actions"><button class="link-button" type="button" data-player-preview-action="request">Richiedi oggetto · simulazione</button><button class="button button-dark" type="button" data-player-preview-action="message">Invia messaggio · simulazione</button></div>
+              <p class="admin-feedback" data-player-preview-feedback aria-live="polite"></p>
+            </dialog>
+            <dialog class="admin-edit-modal" data-player-kit-request-dialog>
+              <div class="admin-edit-modal__head"><div><p class="eyebrow">materiale personale</p><h2>Richiedi nuovo</h2></div><button class="admin-edit-modal__close" type="button" data-player-kit-request-close aria-label="Chiudi">×</button></div>
+              <form class="kit-dialog-form" data-player-kit-request-form>
+                <label>Oggetto<select name="item_id" required></select></label>
+                <label>Taglia richiesta<select name="item_size_id" required><option value="">Seleziona taglia</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="UNICA">Taglia unica</option></select></label>
+                <label>Motivazione<textarea name="reason" required minlength="5" maxlength="1500" placeholder="Spiega di cosa hai bisogno…"></textarea></label>
+                <div class="kit-dialog-actions"><button class="link-button" type="button" data-player-kit-request-close>Annulla</button><button class="button button-dark" type="submit" data-player-kit-request-submit>Invia richiesta <span>→</span></button></div>
+              </form>
+              <p class="admin-feedback" data-player-kit-request-feedback aria-live="polite"></p>
+            </dialog>
           </section>
           <section id="kit-giocatori" data-admin-module="kit" data-admin-area="kit">
             <p class="eyebrow">magazzino squadra</p>
@@ -110,6 +145,7 @@
               <p class="admin-feedback" data-kit-feedback aria-live="polite"></p>
               <div data-kit-inventory></div>
               <article class="kit-missing"><h3>Giocatori con più mancanze</h3><div data-kit-missing-players>Caricamento…</div></article>
+              <article class="kit-missing kit-requests"><h3>Richieste materiale in attesa <span data-kit-request-count>—</span></h3><div data-kit-requests>Caricamento…</div></article>
             </div>
             <p data-kit-denied hidden>Non hai l’autorizzazione per gestire il kit giocatori.</p>
             <dialog class="admin-edit-modal" data-kit-assign-dialog>
@@ -123,6 +159,15 @@
             <dialog class="admin-edit-modal" data-kit-player-dialog>
               <div class="admin-edit-modal__head"><h2>Materiale del giocatore</h2><button class="admin-edit-modal__close" type="button" data-kit-dialog-close aria-label="Chiudi">×</button></div>
               <div class="kit-dialog-form"><label>Giocatore<select data-kit-player-select></select></label><div class="kit-player-items" data-kit-player-items></div><div class="kit-dialog-actions"><button class="link-button" type="button" data-kit-dialog-close>Chiudi</button></div></div>
+            </dialog>
+            <dialog class="admin-edit-modal" data-kit-resolution-dialog>
+              <div class="admin-edit-modal__head"><h2>Gestisci richiesta</h2><button class="admin-edit-modal__close" type="button" data-kit-dialog-close aria-label="Chiudi">×</button></div>
+              <form class="kit-dialog-form" data-kit-resolution-form>
+                <p data-kit-resolution-detail></p>
+                <label>Esito<select name="outcome"><option value="approved">Accetta e assegna</option><option value="rejected">Rifiuta</option></select></label>
+                <label data-kit-rejection-reason hidden>Motivazione del rifiuto<textarea name="rejection_reason" minlength="5" maxlength="1500" placeholder="Spiega il motivo…"></textarea></label>
+                <div class="kit-dialog-actions"><button class="link-button" type="button" data-kit-dialog-close>Annulla</button><button class="button button-dark" type="submit" data-kit-resolution-submit>Conferma <span>→</span></button></div>
+              </form>
             </dialog>
           </section>
           <section id="tesserati" data-admin-module="members" data-admin-area="members">
@@ -338,8 +383,8 @@
     <script type="module" src="admin/news.js?v=admin-permissions-20260729"></script>
     <script type="module" src="admin/sponsors.js?v=sponsor-operator-refresh-20260729"></script>
     <script type="module" src="admin/bacheca.js?v=admin-permissions-20260729"></script>
-    <script type="module" src="admin/modules/players/players-admin.js?v=out-of-squad-20260804"></script>
-    <script type="module" src="admin/modules/kit/kit-admin.js?v=kit-initial-20260811"></script>
+    <script type="module" src="admin/modules/players/players-admin.js?v=kit-requests-20260811"></script>
+    <script type="module" src="admin/modules/kit/kit-admin.js?v=kit-requests-20260811"></script>
     <script type="module" src="admin/members.js?v=membership-pdf-20260730"></script>
     <script type="module" src="admin/merch.js?v=admin-permissions-20260729"></script>
     <script type="module" src="admin/matches.js?v=admin-permissions-20260729"></script>

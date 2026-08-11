@@ -1,8 +1,8 @@
 import '../../../auth.js?v=members-20260730';
 import {
-  assignKitItem, listEligiblePlayers, listKitInventory, listPlayerKit,
-  listPlayersWithMissingKit, markKitItemMissing, setKitStock,
-} from './kit-service.js?v=kit-initial-20260811';
+  assignKitItem, listEligiblePlayers, listKitInventory, listKitRequests, listPlayerKit,
+  listPlayersWithMissingKit, markKitItemMissing, resolveKitRequest, setKitStock,
+} from './kit-service.js?v=kit-requests-20260811';
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const byCategory = (items) => items.reduce((groups, item) => {
@@ -26,8 +26,15 @@ function start(root) {
   const kpiItems = $('[data-kit-item-count]', root);
   const kpiMissing = $('[data-kit-missing-count]', root);
   const kpiStock = $('[data-kit-stock-count]', root);
+  const requestsRoot = $('[data-kit-requests]', root);
+  const requestCount = $('[data-kit-request-count]', root);
+  const resolutionDialog = $('[data-kit-resolution-dialog]');
+  const resolutionForm = $('[data-kit-resolution-form]', resolutionDialog);
+  const resolutionDetail = $('[data-kit-resolution-detail]', resolutionDialog);
   let inventory = [];
   let players = [];
+  let requests = [];
+  let selectedRequestId = null;
 
   const say = (message, state = 'info') => { feedback.textContent = message; feedback.dataset.state = state; };
   const close = (dialog) => { if (dialog.open) dialog.close(); };
@@ -80,6 +87,29 @@ function start(root) {
     kpiStock.textContent = String(inventory.reduce((total, item) => total + Number(item.quantity || 0), 0));
   }
 
+  function renderRequests() {
+    requestCount.textContent = String(requests.length);
+    requestsRoot.replaceChildren();
+    if (!requests.length) { requestsRoot.textContent = 'Nessuna richiesta in attesa.'; return; }
+    const list = document.createElement('ul'); list.className = 'kit-request-list';
+    requests.forEach((request) => {
+      const item = document.createElement('li');
+      const details = document.createElement('div');
+      const title = document.createElement('strong'); title.textContent = `${request.player_name} · ${request.item_name} · ${request.size}`;
+      const note = document.createElement('small'); note.textContent = request.reason;
+      const button = document.createElement('button'); button.type = 'button'; button.className = 'link-button'; button.textContent = 'Apri';
+      button.addEventListener('click', () => {
+        selectedRequestId = request.id;
+        resolutionDetail.textContent = `${request.player_name} richiede ${request.item_name}, taglia ${request.size}. Motivazione: ${request.reason}`;
+        resolutionForm.reset(); resolutionForm.elements.outcome.value = 'approved';
+        $('[data-kit-rejection-reason]', resolutionForm).hidden = true;
+        open(resolutionDialog);
+      });
+      details.append(title, note); item.append(details, button); list.append(item);
+    });
+    requestsRoot.append(list);
+  }
+
   function fillAssignmentSelects() {
     const player = assignForm.elements.player_id;
     const itemSize = assignForm.elements.item_size_id;
@@ -114,9 +144,9 @@ function start(root) {
   }
 
   async function load() {
-    const [nextInventory, nextPlayers, missing] = await Promise.all([listKitInventory(), listEligiblePlayers(), listPlayersWithMissingKit()]);
-    inventory = nextInventory; players = nextPlayers;
-    renderInventory(); renderMissing(missing); updateKpis(missing); fillAssignmentSelects();
+    const [nextInventory, nextPlayers, missing, nextRequests] = await Promise.all([listKitInventory(), listEligiblePlayers(), listPlayersWithMissingKit(), listKitRequests()]);
+    inventory = nextInventory; players = nextPlayers; requests = nextRequests;
+    renderInventory(); renderMissing(missing); renderRequests(); updateKpis(missing); fillAssignmentSelects();
     const selected = playerSelect.value;
     playerSelect.replaceChildren(option('', 'Seleziona giocatore'), ...players.map((entry) => option(entry.id, entry.display_name)));
     if (players.some((entry) => entry.id === selected)) playerSelect.value = selected;
@@ -130,6 +160,19 @@ function start(root) {
     event.preventDefault(); const submit = $('[data-kit-assign-submit]', assignForm); submit.disabled = true;
     try { await assignKitItem(assignForm.elements.player_id.value, assignForm.elements.item_size_id.value); close(assignDialog); await load(); say('Materiale assegnato e magazzino aggiornato.', 'success'); }
     catch (error) { say(error.message || 'Non è stato possibile assegnare il materiale.', 'error'); }
+    finally { submit.disabled = false; }
+  });
+  resolutionForm.elements.outcome.addEventListener('change', () => {
+    const rejected = resolutionForm.elements.outcome.value === 'rejected';
+    const reason = $('[data-kit-rejection-reason]', resolutionForm); reason.hidden = !rejected; reason.querySelector('textarea').required = rejected;
+  });
+  resolutionForm.addEventListener('submit', async (event) => {
+    event.preventDefault(); if (!selectedRequestId) return;
+    const submit = $('[data-kit-resolution-submit]', resolutionForm); submit.disabled = true;
+    try {
+      const result = await resolveKitRequest(selectedRequestId, resolutionForm.elements.outcome.value, resolutionForm.elements.rejection_reason.value);
+      close(resolutionDialog); await load(); say(result.emailSent ? 'Richiesta gestita ed email inviata al giocatore.' : 'Richiesta gestita, ma email non inviata.', result.emailSent ? 'success' : 'error');
+    } catch (error) { say(error.message || 'Non è stato possibile gestire la richiesta.', 'error'); }
     finally { submit.disabled = false; }
   });
 

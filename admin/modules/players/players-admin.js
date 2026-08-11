@@ -8,6 +8,7 @@ import {
   downloadMedicalDocument, removeMedicalDocument, uploadMedicalDocument, validateMedicalDocument,
 } from './medical-documents.js?v=medical-download-20260728';
 import { getPlayerListView } from './players-list-state.js?v=out-of-squad-20260804';
+import { createMyKitRequest, listKitCatalog, listPlayerKit } from '../kit/kit-service.js?v=kit-requests-20260811';
 
 const positions = { portiere: 'Portiere', difensore: 'Difensore', centrocampista: 'Centrocampista', attaccante: 'Attaccante', staff: 'Staff' };
 const statuses = { active: 'In rosa', injured: 'Infortunato', unavailable: 'Indisponibile', staff: 'Staff', former: 'Ex rosa' };
@@ -166,9 +167,38 @@ function start(root) {
   const medicalCurrent = form.querySelector('[data-player-medical-current]');
   const medicalName = form.querySelector('[data-player-medical-name]');
   const downloadCurrentMedical = form.querySelector('[data-player-download-medical]');
+  const detailSummary = form.querySelector('[data-player-detail-summary]');
+  const kitSummary = form.querySelector('[data-player-kit-summary]');
+  const previewButton = form.querySelector('[data-player-preview]');
+  const requestKitButton = form.querySelector('[data-player-request-kit]');
+  const requestKitDialog = root.closest('#rosa')?.querySelector('[data-player-kit-request-dialog]');
+  const requestKitForm = requestKitDialog?.querySelector('[data-player-kit-request-form]');
+  const requestKitFeedback = requestKitDialog?.querySelector('[data-player-kit-request-feedback]');
+  const previewModal = root.closest('#rosa')?.querySelector('[data-player-preview-modal]');
+  const previewContent = previewModal?.querySelector('[data-player-preview-content]');
+  const previewFeedback = previewModal?.querySelector('[data-player-preview-feedback]');
   const setMedicalFieldsVisibility = (outside) => {
     form.querySelectorAll('label[data-player-medical-field]').forEach((field) => { field.hidden = outside; });
     if (outside) medicalCurrent.hidden = true;
+  };
+  const activatePanel = (name) => {
+    form.querySelectorAll('[data-player-tab]').forEach((button) => button.classList.toggle('active', button.dataset.playerTab === name));
+    form.querySelectorAll('[data-player-panel]').forEach((panel) => panel.classList.toggle('active', panel.dataset.playerPanel === name));
+  };
+  const renderKitSummary = async (player) => {
+    if (!player?.id) { kitSummary.textContent = 'Il materiale sarà disponibile dopo la creazione della scheda.'; return; }
+    if (player.out_of_squad) { kitSummary.textContent = 'Giocatore fuori rosa: il kit non rientra nelle logiche operative.'; return; }
+    kitSummary.textContent = 'Caricamento materiale…';
+    const assignments = await listPlayerKit(player.id);
+    const list = document.createElement('ul'); list.className = 'player-kit-summary__list';
+    assignments.forEach((entry) => {
+      const item = document.createElement('li'); item.dataset.state = entry.status;
+      const dot = document.createElement('span'); dot.className = 'player-kit-summary__dot'; dot.setAttribute('aria-hidden', 'true');
+      const label = document.createElement('span'); label.textContent = `${entry.item_name}${entry.size ? ` · ${entry.size}` : ''}`;
+      const status = document.createElement('strong'); status.textContent = entry.status === 'assigned' ? 'Consegnato' : 'Mancante';
+      item.append(dot, label, status); list.append(item);
+    });
+    kitSummary.replaceChildren(list);
   };
   const modal = moveFormToModal({ form, id: 'player-edit-modal', title: 'Inserisci nuovo giocatore' });
   const collection = createCollectionUi({ root, list, addLabel: 'Inserisci nuovo giocatore', searchPlaceholder: 'Nome, ruolo, taglia o numero…' });
@@ -178,6 +208,7 @@ function start(root) {
   let navigationLocked = false;
   let access = null;
   let selfService = false;
+  let kitCatalog = [];
 
   const say = (text, state = 'info') => { feedback.textContent = text; feedback.dataset.state = state; };
   const busy = (on) => { submit.disabled = on; root.toggleAttribute('aria-busy', on); };
@@ -188,6 +219,11 @@ function start(root) {
     form.elements.published.checked = true;
     form.elements.out_of_squad.checked = false;
     setMedicalFieldsVisibility(false);
+    detailSummary.hidden = true;
+    kitSummary.textContent = 'Il materiale sarà disponibile dopo la creazione della scheda.';
+    previewButton.hidden = true;
+    requestKitButton.hidden = true;
+    activatePanel('anagraphic');
     editingId = null;
     title.textContent = 'Inserisci nuovo giocatore';
     submit.textContent = 'Aggiungi alla rosa';
@@ -205,6 +241,7 @@ function start(root) {
     if (selfServiceIntro) selfServiceIntro.hidden = false;
     collection.add.hidden = true;
     collection.search.closest('label').hidden = true;
+    form.querySelector('[data-player-kit-link]')?.setAttribute('hidden', '');
     root.closest('#rosa')?.querySelector('h2')?.replaceChildren('La mia ', Object.assign(document.createElement('em'), { textContent: 'scheda.' }));
     form.querySelectorAll('[data-player-admin-only]').forEach((field) => {
       field.hidden = true;
@@ -308,12 +345,87 @@ function start(root) {
     medicalCurrent.hidden = !player.medical_document_path || player.out_of_squad;
     medicalName.textContent = player.medical_document_name || 'Documento visita medica';
     setMedicalFieldsVisibility(Boolean(player.out_of_squad));
+    detailSummary.hidden = false;
+    detailSummary.textContent = `${player.squad_number ? `#${player.squad_number} · ` : ''}${player.display_name} · ${positions[player.position] || player.position} · ${statuses[player.status] || player.status}`;
+    previewButton.hidden = !access?.isSuperUser;
+    requestKitButton.hidden = !selfService || Boolean(player.out_of_squad);
+    activatePanel('anagraphic');
     modal.open(`Modifica giocatore: ${player.display_name}`);
+    renderKitSummary(player).catch((error) => { kitSummary.textContent = error.message || 'Materiale non disponibile.'; });
   };
 
   form.elements.out_of_squad?.addEventListener('change', () => {
     setMedicalFieldsVisibility(form.elements.out_of_squad.checked);
   });
+  form.querySelectorAll('[data-player-tab]').forEach((button) => button.addEventListener('click', () => activatePanel(button.dataset.playerTab)));
+  previewButton.addEventListener('click', async () => {
+    const player = players.find((item) => item.id === editingId);
+    if (!player || !access?.isSuperUser || !previewModal || !previewContent) return;
+    previewFeedback.textContent = '';
+    previewContent.replaceChildren();
+    const title = document.createElement('h3'); title.textContent = `Ciao, ${player.first_name || player.display_name}.`;
+    const description = document.createElement('p'); description.textContent = 'La tua scheda personale';
+    const material = document.createElement('section'); material.className = 'player-preview-card';
+    const heading = document.createElement('h3'); heading.textContent = 'Il mio materiale'; material.append(heading);
+    try {
+      const assignments = await listPlayerKit(player.id);
+      const list = document.createElement('ul');
+      assignments.forEach((entry) => {
+        const item = document.createElement('li'); item.dataset.state = entry.status;
+        item.textContent = `${entry.status === 'assigned' ? '✓' : '!'} ${entry.item_name}${entry.size ? ` · ${entry.size}` : ''} · ${entry.status === 'assigned' ? 'Consegnato' : 'Da consegnare'}`;
+        list.append(item);
+      });
+      material.append(list);
+    } catch { material.append(Object.assign(document.createElement('p'), { textContent: 'Materiale non disponibile.' })); }
+    const medical = document.createElement('section'); medical.className = 'player-preview-card';
+    const medicalHeading = document.createElement('h3'); medicalHeading.textContent = 'Visita medica';
+    const medicalStatus = document.createElement('p'); medicalStatus.textContent = player.out_of_squad ? 'Non richiesta per un giocatore fuori rosa.' : (player.medical_exam_expiry ? `Scadenza: ${dateFormatter.format(new Date(`${player.medical_exam_expiry}T00:00:00`))}` : 'Scadenza non inserita.');
+    medical.append(medicalHeading, medicalStatus);
+    const messages = document.createElement('section'); messages.className = 'player-preview-card'; messages.innerHTML = '<h3>Messaggi alla società</h3><p>Qui il giocatore potrà inviare un messaggio alla società.</p>';
+    previewContent.append(title, description, material, medical, messages);
+    previewModal.showModal();
+  });
+  previewModal?.querySelectorAll('[data-player-preview-close]').forEach((button) => button.addEventListener('click', () => previewModal.close()));
+  previewModal?.querySelectorAll('[data-player-preview-action]').forEach((button) => button.addEventListener('click', () => {
+    previewFeedback.textContent = button.dataset.playerPreviewAction === 'request'
+      ? 'Simulazione completata: nessuna richiesta è stata salvata e nessuna email è stata inviata.'
+      : 'Simulazione completata: nessun messaggio è stato salvato e nessuna email è stata inviata.';
+    previewFeedback.dataset.state = 'success';
+  }));
+  const fillRequestSizes = () => {
+    if (!requestKitForm) return;
+    const item = kitCatalog.find((entry) => entry.id === requestKitForm.elements.item_id.value);
+    const size = requestKitForm.elements.item_size_id;
+    size.replaceChildren(Object.assign(document.createElement('option'), { value: '', textContent: 'Seleziona taglia' }));
+    (item?.kit_item_sizes || []).sort((left, right) => left.size.localeCompare(right.size)).forEach((entry) => {
+      const option = document.createElement('option'); option.value = entry.id; option.textContent = entry.size === 'UNICA' ? 'Taglia unica' : entry.size; size.append(option);
+    });
+  };
+  requestKitButton.addEventListener('click', async () => {
+    if (!requestKitDialog || !requestKitForm) return;
+    requestKitFeedback.textContent = '';
+    requestKitForm.reset();
+    try {
+      if (!kitCatalog.length) kitCatalog = await listKitCatalog();
+      const item = requestKitForm.elements.item_id;
+      item.replaceChildren(Object.assign(document.createElement('option'), { value: '', textContent: 'Seleziona oggetto' }));
+      kitCatalog.forEach((entry) => {
+        const option = document.createElement('option'); option.value = entry.id; option.textContent = `${entry.category === 'training' ? 'Allenamento' : 'Passeggio'} · ${entry.name}`; item.append(option);
+      });
+      fillRequestSizes(); requestKitDialog.showModal();
+    } catch (error) { say(error.message || 'Non è stato possibile preparare la richiesta.', 'error'); }
+  });
+  requestKitForm?.elements.item_id.addEventListener('change', fillRequestSizes);
+  requestKitForm?.addEventListener('submit', async (event) => {
+    event.preventDefault(); const submit = requestKitForm.querySelector('[data-player-kit-request-submit]'); submit.disabled = true;
+    try {
+      const result = await createMyKitRequest({ itemId: requestKitForm.elements.item_id.value, itemSizeId: requestKitForm.elements.item_size_id.value, reason: requestKitForm.elements.reason.value });
+      requestKitDialog.close();
+      say(result.emailSent ? 'Richiesta materiale inviata alla società.' : 'Richiesta salvata; email alla società non inviata.', result.emailSent ? 'success' : 'error');
+    } catch (error) { requestKitFeedback.textContent = error.message || 'Non è stato possibile inviare la richiesta.'; requestKitFeedback.dataset.state = 'error'; }
+    finally { submit.disabled = false; }
+  });
+  requestKitDialog?.querySelectorAll('[data-player-kit-request-close]').forEach((button) => button.addEventListener('click', () => requestKitDialog.close()));
 
   collection.add.addEventListener('click', () => { reset(); modal.open('Inserisci nuovo giocatore'); });
   const updateSearch = () => { navigationLocked = false; page = 1; render(); };

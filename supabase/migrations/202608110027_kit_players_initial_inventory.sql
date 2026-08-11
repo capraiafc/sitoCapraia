@@ -93,7 +93,7 @@ values
   ('leisure_bermuda', 'Bermuda', 'leisure')
 on conflict (code) do update set name = excluded.name, category = excluded.category, active = true;
 
--- Borsa: taglia unica. Tutto l'abbigliamento: M 10, L 15, XL 5.
+-- Borsa: taglia unica. Tutto l'abbigliamento: M 15, L 10, XL 5.
 insert into public.kit_item_sizes (kit_item_id, size)
 select item.id, size.value
 from public.kit_items as item
@@ -107,7 +107,7 @@ on conflict (kit_item_id, size) do nothing;
 
 insert into public.kit_stock (kit_item_size_id, quantity)
 select size.id,
-  case size.size when 'M' then 10 when 'L' then 15 when 'XL' then 5 else 30 end
+  case size.size when 'M' then 15 when 'L' then 10 when 'XL' then 5 else 30 end
 from public.kit_item_sizes as size
 on conflict (kit_item_size_id) do nothing;
 
@@ -123,6 +123,7 @@ with eligible_players as (
   where p.status in ('active', 'injured', 'unavailable')
     and p.position <> 'staff'
     and p.out_of_squad = false
+    and lower(trim(p.last_name)) not in ('marchiani', 'mannini', 'marrazzo', 'bellucci')
 ), assignment_seed as (
   select player.id as player_id, item.id as kit_item_id, size.id as kit_item_size_id
   from eligible_players as player
@@ -135,6 +136,21 @@ insert into public.kit_assignments (player_id, kit_item_id, kit_item_size_id, st
 select player_id, kit_item_id, kit_item_size_id, 'assigned', now()
 from assignment_seed
 on conflict (player_id, kit_item_id) do nothing;
+
+-- Il conteggio iniziale è fisico: dopo avere registrato il materiale già
+-- consegnato, dal magazzino resta soltanto ciò che non è stato assegnato.
+update public.kit_stock as stock
+set quantity = greatest(0,
+  case size.size when 'M' then 15 when 'L' then 10 when 'XL' then 5 else 30 end
+  - coalesce(assigned.total, 0)
+)
+from public.kit_item_sizes as size
+left join lateral (
+  select count(*)::integer as total
+  from public.kit_assignments as assignment
+  where assignment.kit_item_size_id = size.id and assignment.status = 'assigned'
+) as assigned on true
+where stock.kit_item_size_id = size.id;
 
 alter table public.kit_items enable row level security;
 alter table public.kit_item_sizes enable row level security;

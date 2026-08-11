@@ -25,6 +25,14 @@ export async function listEligiblePlayers() {
   fail(error); return data || [];
 }
 
+export async function listKitCatalog() {
+  const { data, error } = await client().from('kit_items')
+    .select('id,name,category,kit_item_sizes(id,size)')
+    .eq('active', true)
+    .order('category').order('name');
+  fail(error); return data || [];
+}
+
 export async function listPlayerKit(playerId) {
   const { data, error } = await client().rpc('list_kit_player_assignments', { p_player_id: playerId });
   fail(error); return data || [];
@@ -45,4 +53,35 @@ export async function assignKitItem(playerId, itemSizeId) {
 export async function markKitItemMissing(playerId, itemId) {
   const { data, error } = await client().rpc('mark_kit_item_missing', { p_player_id: playerId, p_item_id: itemId });
   fail(error); return data;
+}
+
+async function sendKitEmail(requestId, notification) {
+  const { data, error } = await client().functions.invoke('send-kit-request-email', { body: { requestId, notification } });
+  if (error) throw error;
+  if (!data?.ok) throw new Error(data?.message || 'Invio email non riuscito.');
+}
+
+export async function createMyKitRequest({ itemId, itemSizeId, reason, requestKey = crypto.randomUUID() }) {
+  const { data, error } = await client().rpc('create_my_kit_request', {
+    p_kit_item_id: itemId, p_kit_item_size_id: itemSizeId, p_reason: reason, p_request_key: requestKey,
+  });
+  fail(error);
+  const request = Array.isArray(data) ? data[0] : data;
+  try { await sendKitEmail(request.id, 'new'); return { request, emailSent: true }; }
+  catch (emailError) { console.error('Richiesta salvata ma email non inviata.', emailError); return { request, emailSent: false, emailError }; }
+}
+
+export async function listKitRequests(status = 'pending') {
+  const { data, error } = await client().rpc('list_kit_requests', { p_status: status });
+  fail(error); return data || [];
+}
+
+export async function resolveKitRequest(requestId, outcome, rejectionReason = null) {
+  const { data, error } = await client().rpc('resolve_kit_request', {
+    p_request_id: requestId, p_outcome: outcome, p_rejection_reason: rejectionReason,
+  });
+  fail(error);
+  const request = Array.isArray(data) ? data[0] : data;
+  try { await sendKitEmail(request.id, 'resolution'); return { request, emailSent: true }; }
+  catch (emailError) { console.error('Richiesta gestita ma email non inviata.', emailError); return { request, emailSent: false, emailError }; }
 }
