@@ -11,8 +11,11 @@
 .ticker-sponsor-logo { display:grid; width:clamp(110px,12vw,170px); height:58px; place-items:center; padding:4px 7px; line-height:0; overflow:hidden; border:1px solid transparent; }
 .ticker-sponsor-logo img { display:block; width:100%; max-width:100%; height:auto; max-height:52px; object-fit:contain; object-position:center; }
 .ticker-sponsor-logo--yellow-white { background:var(--yellow); border-color:#fff; }.ticker-sponsor-logo--blue-yellow { background:var(--deep); border-color:var(--yellow); }
-.footer-sponsors { grid-column:1/-1; margin-top:.4rem; padding-top:1.7rem; border-top:1px solid #365c4c; }
-.footer-sponsors h3 { margin-bottom:1rem; }
+.footer-sponsors { grid-column:1/-1; scroll-margin-top:96px; margin-top:.8rem; padding:clamp(1.4rem,3vw,2.2rem); border:1px solid #365c4c; background:#06245f; }
+.footer-sponsors__head { display:flex; align-items:end; justify-content:space-between; gap:1.5rem; margin-bottom:1.4rem; }
+.footer-sponsors__head .eyebrow { margin:0 0 .35rem; color:var(--yellow); }
+.footer-sponsors h3 { margin:0; color:var(--cream); font:700 clamp(2rem,4vw,3.4rem)/.95 var(--serif); letter-spacing:-.055em; }
+.footer-sponsors__head p:not(.eyebrow) { max-width:380px; margin:0; color:#c6d5ff; font-size:.86rem; }
 .sponsor-logo-grid { display:flex; align-items:center; gap:clamp(1.8rem,3vw,3.5rem); flex-wrap:wrap; }
 .sponsor-logo { position:relative; display:grid; flex:1 1 175px; min-width:150px; min-height:150px; place-items:center; padding:.65rem; border:2px solid transparent; }
 .sponsor-logo:not(:last-child)::after { content:""; position:absolute; top:50%; right:calc(-1 * clamp(1rem,1.5vw,1.75rem)); width:8px; height:8px; border-radius:50%; background:var(--yellow); transform:translateY(-50%); }
@@ -23,5 +26,5 @@
 .comment-form input { display:block; width:100%; padding:.8rem 0; border:0; border-bottom:1px solid var(--green); color:var(--green); background:transparent; outline-offset:5px; }
 .comment-form label + label { margin-top:1rem; }
 .comment-form input::placeholder { color:#6f682b; }
-@media (max-width:850px) { .ticker,.ticker__track,.ticker__entry { height:94px; }.ticker__track { animation-duration:40s; }.ticker__entry { padding:0 1.2rem; }.ticker-sponsor-logo { width:128px; height:54px; }.ticker-sponsor-logo img { max-height:48px; }.sponsor-logo { flex-basis:150px; min-height:124px; }.sponsor-logo img { height:116px; } }
-@media (max-width:520px) { .ticker,.ticker__track,.ticker__entry { height:82px; }.ticker__track { animation-duration:34s; }.ticker__entry { gap:.85rem; padding:0 .8rem; }.ticker__entry p { font-size:.58rem; }.ticker__entry strong { font-size:.76rem; }.ticker-sponsor-logo { width:104px; height:46px; }.ticker-sponsor-logo img { max-height:42px; }.sponsor-logo-grid { gap:1.6rem; }.sponsor-logo { flex-basis:calc(50% - 1rem); min-width:0; }.sponsor-logo img { height:82px; }.sponsor-logo:not(:last-child)::after { right:-.95rem; } }
+@media (max-width:850px) { .ticker,.ticker__track,.ticker__entry { height:94px; }.ticker__track { animation-duration:40s; }.ticker__entry { padding:0 1.2rem; }.ticker-sponsor-logo { width:128px; height:54px; }.ticker-sponsor-logo img { max-height:48px; }.footer-sponsors__head { align-items:flex-start; flex-direction:column; }.sponsor-logo { flex-basis:150px; min-height:124px; }.sponsor-logo img { height:116px; } }
+@media (max-width:520px) { .ticker,.ticker__track,.ticker__entry { height:82px; }.ticker__track { animation-duration:34s; }.ticker__entry { gap:.85rem; padding:0 .8rem; }.ticker__entry p { font-size:.58rem; }.ticker__entry strong { font-size:.76rem; }.ticker-sponsor-logo { width:104px; height:46px; }.ticker-sponsor-logo img { max-height:42px; }.footer-sponsors { padding:1rem; }.sponsor-logo-grid { gap:1.6rem; }.sponsor-logo { flex-basis:calc(50% - 1rem); min-width:0; }.sponsor-logo img { height:82px; }.sponsor-logo:not(:last-child)::after { right:-.95rem; } }

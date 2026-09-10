@@ -50,7 +50,7 @@ function sponsorTickerItem(sponsor) {
   const visual = logo
     ? `<strong class="ticker-sponsor-logo${sponsor.logo_background === 'yellow-white' ? ' ticker-sponsor-logo--yellow-white' : ' ticker-sponsor-logo--blue-yellow'}"><img src="${escapeHtml(logo)}" alt="${escapeHtml(sponsor.name)}" /></strong>`
     : `<strong>${escapeHtml(sponsor.name)}</strong>`;
-  return { href: '#contatti', label: `Vai agli sponsor: ${sponsor.name}`, content: `<p>🤝 &nbsp; CON IL SUPPORTO DI ${escapeHtml(sponsor.name)}</p>${visual}` };
+  return { href: '#sponsor', label: `Vai agli sponsor: ${sponsor.name}`, content: `<p>🤝 &nbsp; CON IL SUPPORTO DI ${escapeHtml(sponsor.name)}</p>${visual}` };
 }
 
 function newsUrl(item) {

@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="merch-order-confirm.css" />
     <link rel="stylesheet" href="membership.css" />
     <link rel="stylesheet" href="club.css" />
-    <link rel="stylesheet" href="sponsors.css?v=ticker-logo-fit-20260723" />
+    <link rel="stylesheet" href="sponsors.css?v=footer-sponsor-area-20260910" />
     <style>
       /* Palette ricavata dallo stemma Capraia Football Club. */
       #toast:empty { display:none; }
@@ -69,7 +69,7 @@
       </a>
       <button class="menu-toggle" aria-expanded="false" aria-controls="main-nav"><span></span><span></span><span></span><span class="sr-only">Apri menu</span></button>
       <nav id="main-nav" aria-label="Navigazione principale">
-        <a href="#partite">Risultati</a><a href="#tessera">Tessera</a><a href="#merch">Merch</a><a href="#squadra">Squadra</a><a href="#news">News</a><a href="#club">Il Club</a><a href="#contatti">Contatti</a>
+        <a href="#partite">Risultati</a><a href="#tessera">Tessera</a><a href="#merch">Merch</a><a href="#squadra">Squadra</a><a href="#news">News</a><a href="#club">Il Club</a><a href="#sponsor">Contatti e Sponsor</a>
       </nav>
       <a class="operator-link" href="admin.html" data-operator-login><span>●</span> Accedi come operatore</a>
     </header>
@@ -148,7 +148,7 @@
 
     </main>
 
-    <footer id="contatti"><div class="footer-brand"><a class="brand" href="#top"><img src="assets/images/capraia-logo.png" alt="" /><span>CAPRAIA <b>FOOTBALL CLUB</b></span></a><p>Calcio dilettantistico, comunità e passione.</p></div><div><h3>Esplora</h3><a href="#club">Il Club</a><a href="#partite">Risultati</a><a href="#news">News</a><a href="#merch">Merch</a></div><div><h3>Società</h3><p>CAPRAIA Associazione Sportiva Dilettantistica</p><p>Via S. Allende, 152<br />50050 Capraia e Limite</p><p>C.F. 91055360480<br />P.IVA 07266480487</p></div><div><h3>Contatti</h3><a href="mailto:capraiafc@gmail.com">capraiafc@gmail.com</a><a href="https://www.instagram.com/capraiafc/" target="_blank" rel="noopener">Instagram ↗</a></div><div class="footer-news"><h3>Resta con noi</h3><form id="newsletter-form"><label class="sr-only" for="newsletter-email">La tua email</label><input id="newsletter-email" required type="email" placeholder="La tua email" /><button aria-label="Iscriviti alla newsletter">→</button></form></div><section class="footer-sponsors" data-public-sponsors hidden><h3>I nostri sponsor</h3><div class="sponsor-logo-grid"></div></section><div class="footer-bottom"><p>© 2026 CAPRAIA Associazione Sportiva Dilettantistica · C.F. 91055360480 · P.IVA 07266480487</p><button class="footer-privacy-link" type="button" data-open-privacy>Privacy</button><a href="#cookie">Cookie</a></div></footer>
+    <footer id="contatti"><div class="footer-brand"><a class="brand" href="#top"><img src="assets/images/capraia-logo.png" alt="" /><span>CAPRAIA <b>FOOTBALL CLUB</b></span></a><p>Calcio dilettantistico, comunità e passione.</p></div><div><h3>Esplora</h3><a href="#club">Il Club</a><a href="#partite">Risultati</a><a href="#news">News</a><a href="#merch">Merch</a></div><div><h3>Società</h3><p>CAPRAIA Associazione Sportiva Dilettantistica</p><p>Via S. Allende, 152<br />50050 Capraia e Limite</p><p>C.F. 91055360480<br />P.IVA 07266480487</p></div><div><h3>Contatti</h3><a href="mailto:capraiafc@gmail.com">capraiafc@gmail.com</a><a href="https://www.instagram.com/capraiafc/" target="_blank" rel="noopener">Instagram ↗</a></div><div class="footer-news"><h3>Resta con noi</h3><form id="newsletter-form"><label class="sr-only" for="newsletter-email">La tua email</label><input id="newsletter-email" required type="email" placeholder="La tua email" /><button aria-label="Iscriviti alla newsletter">→</button></form></div><section class="footer-sponsors" id="sponsor" data-public-sponsors hidden><div class="footer-sponsors__head"><div><p class="eyebrow">partner gialloblù</p><h3>I nostri sponsor</h3></div><p>Le realtà che scelgono di sostenere il Capraia Football Club, dentro e fuori dal campo.</p></div><div class="sponsor-logo-grid"></div></section><div class="footer-bottom"><p>© 2026 CAPRAIA Associazione Sportiva Dilettantistica · C.F. 91055360480 · P.IVA 07266480487</p><button class="footer-privacy-link" type="button" data-open-privacy>Privacy</button><a href="#cookie">Cookie</a></div></footer>
     <dialog class="history-modal" id="history-dialog" aria-labelledby="history-dialog-title"><div class="history-modal-shell"><div class="history-modal-top"><p class="eyebrow">capraia football club</p><button class="history-close" type="button" data-close-history aria-label="Chiudi storico">×</button></div><div id="history-dialog-content"></div></div></dialog>
     <dialog class="match-modal" id="match-dialog" aria-labelledby="match-dialog-title"><div class="match-modal-shell"><button class="history-close" type="button" data-close-match aria-label="Chiudi dettaglio partita">×</button><div id="match-dialog-content"></div></div></dialog>
     <dialog class="news-modal" id="news-dialog" aria-labelledby="news-dialog-title"><div class="news-modal__shell"><button class="history-close" type="button" data-close-news aria-label="Chiudi articolo">×</button><div id="news-dialog-content"></div></div></dialog>
@@ -195,7 +195,7 @@
     <script src="auth-config.js"></script>
     <script src="membership-config.js?v=shared-email-20260721"></script>
     <script type="module" src="auth.js"></script>
-    <script type="module" src="public-data.js?v=results-20260910"></script>
+    <script type="module" src="public-data.js?v=footer-sponsor-area-20260910"></script>
     <script type="module" src="results-data.js?v=20260910-team-logos"></script>
     <script type="module" src="player-carousel.js"></script>
     <script type="module" src="membership.js?v=shared-email-20260721"></script>
