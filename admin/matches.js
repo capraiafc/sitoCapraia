@@ -1,6 +1,7 @@
 /* Operator match editor. Writes are enforced again by Supabase RLS. */
 import '../auth.js?v=members-20260730';
 import { createCollectionUi, moveFormToModal, pageItems } from './crud-ui.js';
+import { removeImage, uploadImage } from './media.js';
 import { normalizeSeason, romeDateTimeInput, romeLocalToIso } from '../data/calendar-logic.js';
 
 (() => {
@@ -41,6 +42,7 @@ import { normalizeSeason, romeDateTimeInput, romeLocalToIso } from '../data/cale
   let editingId = null;
   let editingMetadata = {};
   let matches = [];
+  let teamLogos = [];
   let page = 1;
   let busy = false;
 
@@ -49,6 +51,8 @@ import { normalizeSeason, romeDateTimeInput, romeLocalToIso } from '../data/cale
     [feedback, modalFeedback].forEach((element) => { element.textContent = text; element.dataset.state = state; });
   };
   const inputDate = romeDateTimeInput;
+  const teamSlug = (name) => String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('it')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   const reset = () => {
     editingId = null;
     editingMetadata = {};
@@ -56,6 +60,73 @@ import { normalizeSeason, romeDateTimeInput, romeLocalToIso } from '../data/cale
     form.elements.season_id.value = '2026-27';
     modalFeedback.textContent = '';
     form.querySelector('[data-match-submit]').textContent = 'Salva gara'; cancel.hidden = true;
+  };
+  const logoPanel = document.createElement('section');
+  logoPanel.className = 'team-logo-panel';
+  logoPanel.innerHTML = `
+    <div class="team-logo-panel__heading">
+      <div><p class="eyebrow">calendario</p><h3>Loghi squadre</h3><p>Carica uno stemma una volta: il sito lo userà in tutte le gare con quel nome squadra.</p></div>
+      <span data-team-logo-count>—</span>
+    </div>
+    <form class="team-logo-form" data-team-logo-form>
+      <label>Nome squadra<input name="team_name" required maxlength="120" placeholder="Es. Isolotto" /></label>
+      <label>Alias <small>facoltativi, separati da virgola</small><input name="aliases" maxlength="500" placeholder="Es. A.S.D. Isolotto, Isolotto Calcio" /></label>
+      <label>Logo già online <small>facoltativo</small><input name="logo_url" maxlength="500" placeholder="https://… oppure assets/teams/…" /></label>
+      <label>Carica logo<input name="logo_file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml" /></label>
+      <div class="team-logo-form__actions"><button class="button button-dark" type="submit"><span data-team-logo-submit>Salva logo</span> <span>→</span></button><button class="link-button" type="button" data-team-logo-cancel hidden>Annulla</button></div>
+    </form>
+    <p class="admin-feedback" data-team-logo-feedback aria-live="polite"></p>
+    <ul class="team-logo-list" data-team-logo-list></ul>`;
+  list.before(logoPanel);
+  const logoForm = logoPanel.querySelector('[data-team-logo-form]');
+  const logoList = logoPanel.querySelector('[data-team-logo-list]');
+  const logoFeedback = logoPanel.querySelector('[data-team-logo-feedback]');
+  const logoCount = logoPanel.querySelector('[data-team-logo-count]');
+  const logoSubmit = logoPanel.querySelector('[data-team-logo-submit]');
+  const logoCancel = logoPanel.querySelector('[data-team-logo-cancel]');
+  let editingLogoId = null;
+  let editingLogoPath = null;
+  const safeLogoUrl = (value) => {
+    const raw = String(value || '').trim();
+    if (!raw) return null;
+    if (/^assets\/[A-Za-z0-9_./%-]+$/.test(raw) && !raw.split('/').includes('..')) return raw;
+    if (/^\/(?!\/)/.test(raw) && !/[\\\u0000-\u001f]/.test(raw)) return raw;
+    let url; try { url = new URL(raw); } catch { throw new Error('Per il logo usa un file caricato, un URL https:// o un percorso assets/.'); }
+    if (!['https:', 'http:'].includes(url.protocol)) throw new Error('L’indirizzo del logo deve usare https:// o http://.');
+    return raw;
+  };
+  const logoSay = (text, state = 'info') => { logoFeedback.textContent = text; logoFeedback.dataset.state = state; };
+  const resetLogoForm = () => {
+    editingLogoId = null; editingLogoPath = null; logoForm.reset(); logoSubmit.textContent = 'Salva logo'; logoCancel.hidden = true;
+  };
+  const renderTeamLogos = () => {
+    logoCount.textContent = `${teamLogos.length} loghi`;
+    logoList.replaceChildren();
+    if (!teamLogos.length) {
+      const empty = document.createElement('li'); empty.textContent = 'Nessun logo caricato.'; logoList.append(empty); return;
+    }
+    teamLogos.forEach((logo) => {
+      const item = document.createElement('li'); item.dataset.teamLogoId = logo.id;
+      const figure = document.createElement('span'); figure.className = 'team-logo-list__mark';
+      if (logo.logo_url) {
+        const image = document.createElement('img'); image.src = logo.logo_url; image.alt = ''; figure.append(image);
+      } else figure.textContent = logo.team_name.slice(0, 2).toUpperCase();
+      const detail = document.createElement('div');
+      const name = document.createElement('strong'); name.textContent = logo.team_name;
+      const aliases = document.createElement('small'); aliases.textContent = logo.aliases?.length ? `Alias: ${logo.aliases.join(', ')}` : 'Nessun alias';
+      detail.append(name, aliases);
+      const actions = document.createElement('div');
+      [['Modifica', 'edit'], ['Elimina', 'delete']].forEach(([label, action]) => {
+        const button = document.createElement('button'); button.type = 'button'; button.textContent = label; button.dataset.logoAction = action; actions.append(button);
+      });
+      item.append(figure, detail, actions); logoList.append(item);
+    });
+  };
+  const loadTeamLogos = async () => {
+    const { data, error } = await client().from('team_logos').select('*').order('team_name', { ascending: true });
+    if (error && error.code !== 'PGRST205' && error.code !== '42P01') throw error;
+    teamLogos = data || [];
+    renderTeamLogos();
   };
   const events = () => {
     const raw = form.elements.events_json.value.trim();
@@ -162,6 +233,45 @@ import { normalizeSeason, romeDateTimeInput, romeLocalToIso } from '../data/cale
 
   collection.add.addEventListener('click', () => { reset(); modal.open('Inserisci nuova gara'); });
   collection.search.addEventListener('input', () => { page = 1; render(); });
+  logoForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    setBusy(async () => {
+      const teamName = logoForm.elements.team_name.value.trim();
+      const aliases = logoForm.elements.aliases.value.split(',').map((item) => item.trim()).filter(Boolean);
+      const file = logoForm.elements.logo_file.files?.[0];
+      const uploaded = file ? await uploadImage(file, 'teams') : null;
+      const logoUrl = uploaded?.url || safeLogoUrl(logoForm.elements.logo_url.value);
+      if (!logoUrl) throw new Error('Carica un logo oppure inserisci un URL/percorso del logo.');
+      const payload = { team_name: teamName, slug: teamSlug(teamName), aliases, logo_url: logoUrl, logo_path: uploaded?.path || editingLogoPath, published: true };
+      const query = editingLogoId ? client().from('team_logos').update(payload).eq('id', editingLogoId) : client().from('team_logos').insert(payload);
+      const { error } = await query;
+      if (error) throw error;
+      if (uploaded?.path && editingLogoPath && editingLogoPath !== uploaded.path) await removeImage(editingLogoPath).catch(() => {});
+      resetLogoForm(); await loadTeamLogos(); logoSay('Logo salvato. Il calendario lo userà automaticamente.', 'success');
+    }).catch((error) => logoSay(error.message || 'Non è stato possibile salvare il logo.', 'error'));
+  });
+  logoCancel.addEventListener('click', resetLogoForm);
+  logoList.addEventListener('click', (event) => {
+    const button = event.target.closest('button[data-logo-action]');
+    const logo = teamLogos.find((item) => item.id === button?.closest('[data-team-logo-id]')?.dataset.teamLogoId);
+    if (!button || !logo) return;
+    if (button.dataset.logoAction === 'edit') {
+      editingLogoId = logo.id; editingLogoPath = logo.logo_path || null;
+      logoForm.elements.team_name.value = logo.team_name || '';
+      logoForm.elements.aliases.value = (logo.aliases || []).join(', ');
+      logoForm.elements.logo_url.value = logo.logo_url || '';
+      logoForm.elements.logo_file.value = '';
+      logoSubmit.textContent = 'Salva modifiche'; logoCancel.hidden = false; logoForm.elements.team_name.focus();
+      return;
+    }
+    if (!window.confirm(`Rimuovere il logo di ${logo.team_name}?`)) return;
+    setBusy(async () => {
+      const { error } = await client().from('team_logos').delete().eq('id', logo.id);
+      if (error) throw error;
+      await removeImage(logo.logo_path).catch(() => {});
+      await loadTeamLogos(); logoSay('Logo rimosso.', 'success');
+    }).catch((error) => logoSay(error.message || 'Non è stato possibile rimuovere il logo.', 'error'));
+  });
   form.addEventListener('submit', (event) => {
     event.preventDefault();
     setBusy(async () => {
@@ -177,5 +287,5 @@ import { normalizeSeason, romeDateTimeInput, romeLocalToIso } from '../data/cale
     if (!window.confirm(`Rimuovere la gara ${match.home_team} - ${match.away_team}?`)) return;
     setBusy(async () => { const { error } = await client().from('matches').delete().eq('id', match.id); if (error) throw error; await load(); say('Gara rimossa.', 'success'); }).catch((error) => say(error.message || 'Non è stato possibile rimuovere la gara.', 'error'));
   });
-  (async () => { const access = await window.CapraiaAuth?.requireOperator?.(); if (!access?.isOperator || (!access.isSuperUser && !access.permissions?.can_matches)) { root.hidden = true; return; } try { reset(); await load(); } catch (error) { say(error.message || 'Impossibile caricare le gare.', 'error'); } })();
+  (async () => { const access = await window.CapraiaAuth?.requireOperator?.(); if (!access?.isOperator || (!access.isSuperUser && !access.permissions?.can_matches)) { root.hidden = true; return; } try { reset(); await Promise.all([load(), loadTeamLogos()]); } catch (error) { say(error.message || 'Impossibile caricare le gare.', 'error'); } })();
 })();

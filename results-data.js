@@ -17,6 +17,27 @@ let loading = false;
 let loaded = false;
 let previousSnapshot = '';
 
+function teamSlug(name) {
+  return String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('it')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
+function withTeamLogos(matches, logos) {
+  const logoMap = new Map();
+  (logos || []).forEach((logo) => {
+    if (logo?.slug && logo.logo_url) logoMap.set(logo.slug, logo.logo_url);
+    (logo?.aliases || []).forEach((alias) => { if (logo.logo_url) logoMap.set(teamSlug(alias), logo.logo_url); });
+  });
+  return matches.map((match) => {
+    const extraInfo = match.extra_info && typeof match.extra_info === 'object' && !Array.isArray(match.extra_info) ? { ...match.extra_info } : {};
+    const homeLogo = extraInfo.home_logo || logoMap.get(teamSlug(match.home_team));
+    const awayLogo = extraInfo.away_logo || logoMap.get(teamSlug(match.away_team));
+    if (homeLogo) extraInfo.home_logo = homeLogo;
+    if (awayLogo) extraInfo.away_logo = awayLogo;
+    return { ...match, extra_info: extraInfo };
+  });
+}
+
 // Only match data is polled. A failure in news/merch must not hide the calendar.
 export async function refreshResults() {
   if (!view || loading) return;
@@ -36,9 +57,12 @@ export async function refreshResults() {
       rows.push(...data);
       if (data.length < 500) break;
     }
-    const snapshot = JSON.stringify(rows);
+    const { data: logos, error: logosError } = await client.from('team_logos').select('team_name,slug,logo_url,aliases').eq('published', true);
+    if (logosError && logosError.code !== 'PGRST205' && logosError.code !== '42P01') throw logosError;
+    const enrichedRows = withTeamLogos(rows, logos || []);
+    const snapshot = JSON.stringify(enrichedRows);
     // Recompute featured matches even when time, but not the data, changed.
-    view.update(rows);
+    view.update(enrichedRows);
     root.append(status, retry);
     loaded = true;
     view.setNotice('');
@@ -47,10 +71,10 @@ export async function refreshResults() {
       previousSnapshot = snapshot;
       // The existing archive is a results-only view, not a future schedule.
       document.dispatchEvent(new CustomEvent('capraia:public-matches', {
-        detail: rows.filter((row) => isCapraiaMatch(row) && row.status === 'completed' && Number.isInteger(row.home_score) && Number.isInteger(row.away_score)),
+        detail: enrichedRows.filter((row) => isCapraiaMatch(row) && row.status === 'completed' && Number.isInteger(row.home_score) && Number.isInteger(row.away_score)),
       }));
     }
-    document.dispatchEvent(new CustomEvent('capraia:results-updated', { detail: { rows, ...selectFeaturedMatches(rows) } }));
+    document.dispatchEvent(new CustomEvent('capraia:results-updated', { detail: { rows: enrichedRows, ...selectFeaturedMatches(enrichedRows) } }));
   } catch (error) {
     status.textContent = loaded ? 'Aggiornamento non riuscito. Mostriamo le ultime partite caricate.' : 'Non riusciamo a caricare le partite. Riprova tra poco.';
     view.setNotice(status.textContent);
