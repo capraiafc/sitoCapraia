@@ -44,6 +44,7 @@ import { normalizeSeason, romeDateTimeInput, romeLocalToIso } from '../data/cale
   let matches = [];
   let teamLogos = [];
   let page = 1;
+  let logoQuery = '';
   let busy = false;
 
   const client = () => window.CapraiaAuth?.supabase;
@@ -61,29 +62,45 @@ import { normalizeSeason, romeDateTimeInput, romeLocalToIso } from '../data/cale
     modalFeedback.textContent = '';
     form.querySelector('[data-match-submit]').textContent = 'Salva gara'; cancel.hidden = true;
   };
-  const logoPanel = document.createElement('section');
-  logoPanel.className = 'team-logo-panel';
-  logoPanel.innerHTML = `
-    <div class="team-logo-panel__heading">
-      <div><p class="eyebrow">calendario</p><h3>Loghi squadre</h3><p>Carica uno stemma una volta: il sito lo userà in tutte le gare con quel nome squadra.</p></div>
-      <span data-team-logo-count>—</span>
+  const logoButton = document.createElement('button');
+  logoButton.type = 'button';
+  logoButton.className = 'button button-dark team-logo-open-button';
+  logoButton.innerHTML = 'Loghi squadre <span>→</span>';
+  collection.add.after(logoButton);
+  const logoDialog = document.createElement('dialog');
+  logoDialog.className = 'admin-edit-modal team-logo-modal';
+  logoDialog.innerHTML = `
+    <div class="admin-edit-modal__head team-logo-modal__head">
+      <div><p class="eyebrow">calendario</p><h2>Loghi squadre</h2></div>
+      <button class="admin-edit-modal__close" type="button" data-team-logo-close aria-label="Chiudi">×</button>
     </div>
-    <form class="team-logo-form" data-team-logo-form>
-      <label>Nome squadra<input name="team_name" required maxlength="120" placeholder="Es. Isolotto" /></label>
-      <label>Alias <small>facoltativi, separati da virgola</small><input name="aliases" maxlength="500" placeholder="Es. A.S.D. Isolotto, Isolotto Calcio" /></label>
-      <label>Logo già online <small>facoltativo</small><input name="logo_url" maxlength="500" placeholder="https://… oppure assets/teams/…" /></label>
-      <label>Carica logo<input name="logo_file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml" /></label>
-      <div class="team-logo-form__actions"><button class="button button-dark" type="submit"><span data-team-logo-submit>Salva logo</span> <span>→</span></button><button class="link-button" type="button" data-team-logo-cancel hidden>Annulla</button></div>
-    </form>
-    <p class="admin-feedback" data-team-logo-feedback aria-live="polite"></p>
-    <ul class="team-logo-list" data-team-logo-list></ul>`;
-  list.before(logoPanel);
+    <div class="team-logo-panel">
+      <section class="team-logo-intro">
+        <div><h3>Una libreria, tutto il calendario.</h3><p>Carica lo stemma una volta sola: ogni gara che usa quel nome squadra lo mostrerà automaticamente sul sito.</p></div>
+        <strong data-team-logo-count>—</strong>
+      </section>
+      <form class="team-logo-form" data-team-logo-form>
+        <label>Nome squadra<input name="team_name" required maxlength="120" placeholder="Es. Isolotto" /></label>
+        <label>Alias <small>facoltativi, separati da virgola</small><input name="aliases" maxlength="500" placeholder="Es. A.S.D. Isolotto, Isolotto Calcio" /></label>
+        <label>Logo già online <small>facoltativo</small><input name="logo_url" maxlength="500" placeholder="https://… oppure assets/teams/…" /></label>
+        <label>Carica logo<input name="logo_file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml" /></label>
+        <div class="team-logo-form__actions"><button class="button button-dark" type="submit"><span data-team-logo-submit>Salva logo</span> <span>→</span></button><button class="link-button" type="button" data-team-logo-cancel hidden>Annulla modifica</button></div>
+      </form>
+      <p class="admin-feedback" data-team-logo-feedback aria-live="polite"></p>
+      <div class="team-logo-tools">
+        <label class="admin-collection-search">Cerca squadra o alias<input type="search" data-team-logo-search placeholder="Nome squadra, alias…" autocomplete="off" /></label>
+      </div>
+      <ul class="team-logo-list" data-team-logo-list></ul>
+    </div>`;
+  document.body.append(logoDialog);
+  const logoPanel = logoDialog.querySelector('.team-logo-panel');
   const logoForm = logoPanel.querySelector('[data-team-logo-form]');
   const logoList = logoPanel.querySelector('[data-team-logo-list]');
   const logoFeedback = logoPanel.querySelector('[data-team-logo-feedback]');
   const logoCount = logoPanel.querySelector('[data-team-logo-count]');
   const logoSubmit = logoPanel.querySelector('[data-team-logo-submit]');
   const logoCancel = logoPanel.querySelector('[data-team-logo-cancel]');
+  const logoSearch = logoPanel.querySelector('[data-team-logo-search]');
   let editingLogoId = null;
   let editingLogoPath = null;
   const safeLogoUrl = (value) => {
@@ -102,20 +119,24 @@ import { normalizeSeason, romeDateTimeInput, romeLocalToIso } from '../data/cale
   const renderTeamLogos = () => {
     logoCount.textContent = `${teamLogos.length} loghi`;
     logoList.replaceChildren();
-    if (!teamLogos.length) {
-      const empty = document.createElement('li'); empty.textContent = 'Nessun logo caricato.'; logoList.append(empty); return;
+    const query = logoQuery.trim().toLocaleLowerCase('it');
+    const visibleLogos = query
+      ? teamLogos.filter((logo) => [logo.team_name, ...(logo.aliases || [])].join(' ').toLocaleLowerCase('it').includes(query))
+      : teamLogos;
+    if (!visibleLogos.length) {
+      const empty = document.createElement('li'); empty.className = 'team-logo-empty'; empty.textContent = teamLogos.length ? 'Nessun logo corrisponde alla ricerca.' : 'Nessun logo caricato.'; logoList.append(empty); return;
     }
-    teamLogos.forEach((logo) => {
+    visibleLogos.forEach((logo) => {
       const item = document.createElement('li'); item.dataset.teamLogoId = logo.id;
       const figure = document.createElement('span'); figure.className = 'team-logo-list__mark';
       if (logo.logo_url) {
         const image = document.createElement('img'); image.src = logo.logo_url; image.alt = ''; figure.append(image);
       } else figure.textContent = logo.team_name.slice(0, 2).toUpperCase();
-      const detail = document.createElement('div');
+      const detail = document.createElement('div'); detail.className = 'team-logo-list__detail';
       const name = document.createElement('strong'); name.textContent = logo.team_name;
       const aliases = document.createElement('small'); aliases.textContent = logo.aliases?.length ? `Alias: ${logo.aliases.join(', ')}` : 'Nessun alias';
       detail.append(name, aliases);
-      const actions = document.createElement('div');
+      const actions = document.createElement('div'); actions.className = 'team-logo-list__actions';
       [['Modifica', 'edit'], ['Elimina', 'delete']].forEach(([label, action]) => {
         const button = document.createElement('button'); button.type = 'button'; button.textContent = label; button.dataset.logoAction = action; actions.append(button);
       });
@@ -233,6 +254,9 @@ import { normalizeSeason, romeDateTimeInput, romeLocalToIso } from '../data/cale
 
   collection.add.addEventListener('click', () => { reset(); modal.open('Inserisci nuova gara'); });
   collection.search.addEventListener('input', () => { page = 1; render(); });
+  logoButton.addEventListener('click', () => { logoSay(''); renderTeamLogos(); if (!logoDialog.open) logoDialog.showModal(); });
+  logoDialog.querySelector('[data-team-logo-close]').addEventListener('click', () => logoDialog.close());
+  logoSearch.addEventListener('input', () => { logoQuery = logoSearch.value; renderTeamLogos(); });
   logoForm.addEventListener('submit', (event) => {
     event.preventDefault();
     setBusy(async () => {
@@ -261,7 +285,7 @@ import { normalizeSeason, romeDateTimeInput, romeLocalToIso } from '../data/cale
       logoForm.elements.aliases.value = (logo.aliases || []).join(', ');
       logoForm.elements.logo_url.value = logo.logo_url || '';
       logoForm.elements.logo_file.value = '';
-      logoSubmit.textContent = 'Salva modifiche'; logoCancel.hidden = false; logoForm.elements.team_name.focus();
+      logoSubmit.textContent = 'Salva modifiche'; logoCancel.hidden = false; logoForm.elements.team_name.focus(); logoSay(`Stai modificando ${logo.team_name}.`, 'info');
       return;
     }
     if (!window.confirm(`Rimuovere il logo di ${logo.team_name}?`)) return;
