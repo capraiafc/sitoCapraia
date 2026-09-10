@@ -10,6 +10,14 @@ let visibleNews = new Map();
 let activeNews = null;
 let visibleMerch = new Map();
 let upcomingHomeMatch = null;
+let latestMatchTicker = { href: '#partite', label: 'Vai al calendario', content: '<p>⚽ &nbsp; CALENDARIO E RISULTATI</p><strong>SEGUI IL CAPRAIA</strong>' };
+let otherTickerItems = [];
+document.addEventListener('capraia:results-updated', ({ detail }) => {
+  upcomingHomeMatch = detail.rows.filter((match) => match.status === 'scheduled' && isCapraia(match.home_team) && match.kickoff_at && new Date(match.kickoff_at).getTime() >= Date.now()).sort((a, b) => new Date(a.kickoff_at) - new Date(b.kickoff_at))[0] || null;
+  const match = detail.lastMatch || detail.nextMatch;
+  latestMatchTicker = match ? { href: '#partite', label: 'Vai ai risultati', content: `<p>⚽ &nbsp; ${detail.lastMatch ? 'ULTIMO MATCH' : 'PROSSIMO MATCH'}</p><strong>${escapeHtml(match.home_team)} <span>${detail.lastMatch ? `${match.home_score} — ${match.away_score}` : '—'}</span> ${escapeHtml(match.away_team)}</strong>` } : { href: '#partite', label: 'Vai al calendario', content: '<p>⚽ &nbsp; CALENDARIO</p><strong>PARTITE IN AGGIORNAMENTO</strong>' };
+  renderTicker([latestMatchTicker, ...otherTickerItems]);
+});
 
 const safeSponsorLogo = (value) => {
   const url = String(value ?? '').trim();
@@ -296,24 +304,17 @@ function renderMerch(products) {
 async function loadPublicContent() {
   const client = window.CapraiaAuth?.supabase;
   if (!client) return;
-  const [players, news, merch, matches] = await Promise.all([
+  const [players, news, merch] = await Promise.all([
     client.from('players').select('id, first_name, last_name, display_name, squad_number, position, image_url').eq('published', true).eq('out_of_squad', false).order('position').order('squad_number', { nullsFirst: false }),
     client.from('news').select('id, title, excerpt, content_type, body, external_url, source_label, cover_image_url, category, published_at, created_at').eq('published', true).order('published_at', { ascending: false }).order('created_at', { ascending: false }),
     client.from('merch_products').select('id, name, price, description, image_url, available, size_mode, stock_s, stock_m, stock_l, stock_xl, stock_xxl, one_size_stock, merch_product_images(id, image_url, sort_order, is_primary)').eq('published', true).order('created_at', { ascending: false }),
-    client.from('matches').select('id, legacy_key, season_id, match_day, home_team, away_team, kickoff_at, venue, competition, phase, status, home_score, away_score, referee, halftime_score, notes, source_url, extra_info, published').eq('published', true).order('kickoff_at', { ascending: false, nullsFirst: false }),
   ]);
-  const responses = [players, news, merch, matches];
+  const responses = [players, news, merch];
   const failed = responses.find((response) => response.error);
   if (failed) throw failed.error;
   renderPlayers(players.data || []);
   renderNews(news.data || []);
   renderMerch(merch.data || []);
-  const rows = matches.data || [];
-  upcomingHomeMatch = rows
-    .filter((match) => match.kickoff_at && new Date(match.kickoff_at).getTime() >= Date.now() && isCapraia(match.home_team) && match.status !== 'cancelled')
-    .sort((left, right) => new Date(left.kickoff_at) - new Date(right.kickoff_at))[0] || null;
-  const latest = rows.find((match) => match.status === 'completed') || rows[0] || null;
-  const latestTicker = renderLatestMatch(latest);
   const [sponsors, messages] = await Promise.all([
     client.from('sponsors').select('id, name, logo_url, logo_background, sort_order').eq('active', true).order('sort_order').order('name'),
     client.from('bacheca_messages').select('id, display_name, message, created_at').eq('published', true).order('created_at', { ascending: false }).limit(5),
@@ -321,13 +322,12 @@ async function loadPublicContent() {
   const activeSponsors = sponsors.error ? [] : (sponsors.data || []);
   const publishedMessages = messages.error ? [] : (messages.data || []);
   renderSponsors(activeSponsors);
-  renderTicker([
-    latestTicker,
+  otherTickerItems = [
     ...publishedMessages.map((item) => ({ href: '#bacheca', label: 'Vai alla bacheca', content: `<p>✦ &nbsp; DALLA BACHECA · ${escapeHtml(item.display_name)}</p><strong>“${escapeHtml(item.message)}”</strong>` })),
     ...(news.data?.[0] ? [{ href: '#news', label: 'Vai all’ultima news', content: `<p>📰 &nbsp; ULTIMA NEWS · ${escapeHtml(news.data[0].category)}</p><strong>${escapeHtml(news.data[0].title)}</strong>` }] : []),
     ...activeSponsors.map(sponsorTickerItem),
-  ]);
-  document.dispatchEvent(new CustomEvent('capraia:public-matches', { detail: rows }));
+  ];
+  renderTicker([latestMatchTicker, ...otherTickerItems]);
 }
 
 loadPublicContent().catch((error) => {
