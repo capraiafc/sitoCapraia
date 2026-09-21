@@ -16,6 +16,10 @@ function imageUrl(value) {
   } catch { return ''; }
 }
 
+function webUrl(value) {
+  return imageUrl(value);
+}
+
 function crest(name, source, className = '') {
   const initials = String(name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
   const url = imageUrl(source || (isCapraia(name) ? 'assets/images/capraia-logo.png' : ''));
@@ -98,14 +102,14 @@ function featuredCard(match, next) {
   const title = next ? 'Prossimo match' : 'Ultimo match';
   const className = `results-feature ${next ? 'results-feature--next' : 'results-feature--last'}`;
   if (!match) return `<article class="${className} results-feature--empty"><div class="results-feature-top"><h3>${title}</h3><span class="results-feature-dot" aria-hidden="true"></span></div><div class="results-empty-feature"><strong>${next ? 'Il prossimo appuntamento' : 'La stagione è tutta da scrivere.'}</strong><p>${next ? 'Nessuna nuova gara con data confermata. Trovi qui sotto gli eventuali recuperi da programmare.' : 'Non ci sono ancora risultati finali registrati per questa stagione.'}</p></div></article>`;
-  const tag = played(match) ? 'button' : 'article';
-  const attributes = played(match) ? ` type="button" data-match-detail="${escapeHtml(detailKey(match))}" aria-label="Apri il tabellino di ${escapeHtml(match.home_team)} ${Number(match.home_score)} a ${Number(match.away_score)} ${escapeHtml(match.away_team)}"` : '';
+  const tag = 'article';
+  const attributes = played(match) ? ` role="button" tabindex="0" data-match-detail="${escapeHtml(detailKey(match))}" aria-label="Apri il tabellino di ${escapeHtml(match.home_team)} ${Number(match.home_score)} a ${Number(match.away_score)} ${escapeHtml(match.away_team)}"` : '';
   return `<${tag} class="${className}${played(match) ? ' results-match-trigger' : ''}"${attributes}><div class="results-feature-top"><h3>${title}</h3><span class="results-venue-tag">${location(match)}</span></div>${competition(match)}<div class="results-feature-date">${dateMarkup(match)}</div><div class="results-scoreboard">${team(match, 'home')}<div class="results-score"><b>${score(match)}</b><small>${escapeHtml(statusLabels[match.status] || 'Da confermare')}</small>${penalties(match)}</div>${team(match, 'away')}</div><div class="results-feature-bottom"><span class="results-place">${escapeHtml(match.venue || 'Campo da confermare')}</span><span>${escapeHtml(match.phase || (match.match_day ? `Giornata ${match.match_day}` : ''))}</span></div>${played(match) ? '<span class="results-detail-cta">Vedi tabellino <span aria-hidden="true">→</span></span>' : ''}</${tag}>`;
 }
 
 function matchRow(match) {
-  const tag = played(match) ? 'button' : 'article';
-  const attributes = played(match) ? ` type="button" data-match-detail="${escapeHtml(detailKey(match))}" aria-label="Apri il tabellino di ${escapeHtml(match.home_team)} ${Number(match.home_score)} a ${Number(match.away_score)} ${escapeHtml(match.away_team)}"` : '';
+  const tag = 'article';
+  const attributes = played(match) ? ` role="button" tabindex="0" data-match-detail="${escapeHtml(detailKey(match))}" aria-label="Apri il tabellino di ${escapeHtml(match.home_team)} ${Number(match.home_score)} a ${Number(match.away_score)} ${escapeHtml(match.away_team)}"` : '';
   return `<${tag} class="results-row${played(match) ? ' results-row--clickable results-match-trigger' : ''}" data-status="${escapeHtml(match.status)}"${attributes}><div class="results-row-meta">${competition(match)}<span class="results-status">${escapeHtml(statusLabels[match.status] || 'Da confermare')}</span></div><div class="results-row-main"><div class="results-row-date">${dateMarkup(match)}<span>${location(match)}</span></div><div class="results-row-teams">${team(match, 'home', true)}<div class="results-row-score"><b>${score(match)}</b>${penalties(match)}</div>${team(match, 'away', true)}</div></div><div class="results-row-detail"><span>${escapeHtml(match.venue || 'Campo da confermare')}</span><span>${escapeHtml(match.phase || (match.match_day ? `Giornata ${match.match_day}` : ''))}</span>${match.notes ? `<p>${escapeHtml(match.notes)}</p>` : ''}</div>${played(match) ? '<span class="results-row-action">Tabellino e marcatori</span>' : ''}</${tag}>`;
 }
 
@@ -203,6 +207,13 @@ export function initResults({ root, matches = [], onOpenHistory, now } = {}) {
     if (onOpenHistory && event.target.closest('[data-open-history]')) { event.preventDefault(); onOpenHistory(); }
   }
 
+  function onKeydown(event) {
+    const matchTrigger = event.target.closest('[data-match-detail]');
+    if (!matchTrigger || !['Enter', ' '].includes(event.key)) return;
+    event.preventDefault();
+    matchTrigger.click();
+  }
+
   function openMatchDetail(match) {
     const modal = document.querySelector('#match-dialog');
     const content = document.querySelector('#match-dialog-content');
@@ -211,8 +222,10 @@ export function initResults({ root, matches = [], onOpenHistory, now } = {}) {
     const events = details.events.length
       ? `<ul class="match-events-list">${details.events.map((event) => `<li><time>${escapeHtml(event.minute || '—')}</time><div><b>${escapeHtml(event.type || 'Evento')}</b><strong>${escapeHtml(event.player || 'Giocatore non indicato')}</strong>${event.assist || event.team ? `<small>${escapeHtml([event.assist ? `Assist: ${event.assist}` : '', event.team || ''].filter(Boolean).join(' · '))}</small>` : ''}</div></li>`).join('')}</ul>`
       : '<p>Marcatori, minuti ed eventi non sono ancora stati pubblicati per questa gara.</p>';
-    const sourceLabel = details.source?.includes('instagram.com') ? 'Apri la fonte su Instagram →' : 'Apri il tabellino completo →';
-    const source = details.source ? `<a class="match-source" href="${escapeHtml(details.source)}" target="_blank" rel="noopener">${sourceLabel}</a>` : '';
+    const sourceText = String(details.source || '');
+    const sourceLabel = sourceText.includes('instagram.com') ? 'Apri la fonte su Instagram →' : 'Apri il tabellino completo →';
+    const sourceHref = webUrl(details.source);
+    const source = sourceHref ? `<a class="match-source" href="${escapeHtml(sourceHref)}" target="_blank" rel="noopener">${sourceLabel}</a>` : '';
     content.innerHTML = `<div class="match-detail-hero"><p class="eyebrow">${escapeHtml(match.competition || 'Risultato ufficiale')}</p><h2 id="match-dialog-title">${escapeHtml(matchOutcome(match))}</h2><div class="match-detail-score">${detailTeam(match, 'home')}<b>${Number(match.home_score)} <span>—</span> ${Number(match.away_score)}</b>${detailTeam(match, 'away')}</div>${penalties(match) ? `<p class="match-detail-outcome">${penalties(match).replace(/<\/?small[^>]*>/g, '')}</p>` : ''}</div><div class="match-detail-grid"><div><span>Data</span><b>${escapeHtml(details.kickoff || 'Non pubblicata')}</b></div><div><span>Fase</span><b>${escapeHtml(match.phase || (match.match_day ? `Giornata ${match.match_day}` : 'Campionato'))}</b></div><div><span>Campo</span><b>${escapeHtml(details.venue || 'Non pubblicato')}</b></div><div><span>Arbitro</span><b>${escapeHtml(details.referee || 'Non pubblicato')}</b></div>${details.halftime ? `<div class="match-detail-wide"><span>Primo tempo</span><b>${escapeHtml(details.halftime)}</b></div>` : ''}${match.notes ? `<div class="match-detail-wide"><span>Note</span><b>${escapeHtml(match.notes)}</b></div>` : ''}</div><section class="match-events"><div class="match-events-heading"><span aria-hidden="true">⚽</span><h3>Marcatori ed eventi</h3></div>${events}${source}</section>`;
     modal.showModal();
   }
@@ -223,11 +236,12 @@ export function initResults({ root, matches = [], onOpenHistory, now } = {}) {
   }
   root.addEventListener('change', onChange);
   root.addEventListener('click', onClick);
+  root.addEventListener('keydown', onKeydown);
   root.addEventListener('error', onImageError, true);
   render();
   return {
     update(nextMatches) { records = Array.isArray(nextMatches) ? nextMatches : []; render(); },
     setNotice(message = '') { const notice = query('[data-results-notice]'); notice.textContent = message; notice.hidden = !message; },
-    destroy() { destroyed = true; root.removeEventListener('change', onChange); root.removeEventListener('click', onClick); root.removeEventListener('error', onImageError, true); },
+    destroy() { destroyed = true; root.removeEventListener('change', onChange); root.removeEventListener('click', onClick); root.removeEventListener('keydown', onKeydown); root.removeEventListener('error', onImageError, true); },
   };
 }
