@@ -98,13 +98,21 @@ function matchOutcome(match) {
   return won ? 'Vittoria Capraia' : 'Sconfitta Capraia';
 }
 
+function matchRoundLabel(match) {
+  const competitionName = match.competition || 'Competizione';
+  const rawPhase = String(match.phase || '').trim();
+  const hasMatchDay = match.match_day !== null && match.match_day !== undefined && match.match_day !== '';
+  const phase = rawPhase || (hasMatchDay ? `Giornata ${match.match_day}` : 'Gara');
+  return `${competitionName} · ${phase}`;
+}
+
 function featuredCard(match, next) {
   const title = next ? 'Prossimo match' : 'Ultimo match';
   const className = `results-feature ${next ? 'results-feature--next' : 'results-feature--last'}`;
   if (!match) return `<article class="${className} results-feature--empty"><div class="results-feature-top"><h3>${title}</h3><span class="results-feature-dot" aria-hidden="true"></span></div><div class="results-empty-feature"><strong>${next ? 'Il prossimo appuntamento' : 'La stagione è tutta da scrivere.'}</strong><p>${next ? 'Nessuna nuova gara con data confermata. Trovi qui sotto gli eventuali recuperi da programmare.' : 'Non ci sono ancora risultati finali registrati per questa stagione.'}</p></div></article>`;
   const tag = 'article';
   const attributes = played(match) ? ` role="button" tabindex="0" data-match-detail="${escapeHtml(detailKey(match))}" aria-label="Apri il tabellino di ${escapeHtml(match.home_team)} ${Number(match.home_score)} a ${Number(match.away_score)} ${escapeHtml(match.away_team)}"` : '';
-  return `<${tag} class="${className}${played(match) ? ' results-match-trigger' : ''}"${attributes}><div class="results-feature-top"><h3>${title}</h3><span class="results-venue-tag">${location(match)}</span></div>${competition(match)}<div class="results-feature-date">${dateMarkup(match)}</div><div class="results-scoreboard">${team(match, 'home')}<div class="results-score"><b>${score(match)}</b><small>${escapeHtml(statusLabels[match.status] || 'Da confermare')}</small>${penalties(match)}</div>${team(match, 'away')}</div><div class="results-feature-bottom"><span class="results-place">${escapeHtml(match.venue || 'Campo da confermare')}</span><span>${escapeHtml(match.phase || (match.match_day ? `Giornata ${match.match_day}` : ''))}</span></div>${played(match) ? '<span class="results-detail-cta">Vedi tabellino <span aria-hidden="true">→</span></span>' : ''}</${tag}>`;
+  return `<${tag} class="${className}${played(match) ? ' results-match-trigger' : ''}"${attributes}><div class="results-feature-top"><h3>${title}</h3><span class="results-venue-tag">${location(match)}</span></div>${competition(match)}<div class="results-feature-date">${dateMarkup(match)}</div><div class="results-scoreboard">${team(match, 'home')}<div class="results-score"><b>${score(match)}</b><small>${escapeHtml(statusLabels[match.status] || 'Da confermare')}</small>${penalties(match)}</div>${team(match, 'away')}</div><div class="results-feature-bottom"><span class="results-place">${escapeHtml(match.venue || 'Campo da confermare')}</span><span>${escapeHtml(match.phase || (match.match_day ? `Giornata ${match.match_day}` : ''))}</span></div></${tag}>`;
 }
 
 function matchRow(match) {
@@ -226,7 +234,7 @@ export function initResults({ root, matches = [], onOpenHistory, now } = {}) {
     const sourceLabel = sourceText.includes('instagram.com') ? 'Apri la fonte su Instagram →' : 'Apri il tabellino completo →';
     const sourceHref = webUrl(details.source);
     const source = sourceHref ? `<a class="match-source" href="${escapeHtml(sourceHref)}" target="_blank" rel="noopener">${sourceLabel}</a>` : '';
-    content.innerHTML = `<div class="match-detail-hero"><p class="eyebrow">${escapeHtml(match.competition || 'Risultato ufficiale')}</p><h2 id="match-dialog-title">${escapeHtml(matchOutcome(match))}</h2><div class="match-detail-score">${detailTeam(match, 'home')}<b>${Number(match.home_score)} <span>—</span> ${Number(match.away_score)}</b>${detailTeam(match, 'away')}</div>${penalties(match) ? `<p class="match-detail-outcome">${penalties(match).replace(/<\/?small[^>]*>/g, '')}</p>` : ''}</div><div class="match-detail-grid"><div><span>Data</span><b>${escapeHtml(details.kickoff || 'Non pubblicata')}</b></div><div><span>Fase</span><b>${escapeHtml(match.phase || (match.match_day ? `Giornata ${match.match_day}` : 'Campionato'))}</b></div><div><span>Campo</span><b>${escapeHtml(details.venue || 'Non pubblicato')}</b></div><div><span>Arbitro</span><b>${escapeHtml(details.referee || 'Non pubblicato')}</b></div>${details.halftime ? `<div class="match-detail-wide"><span>Primo tempo</span><b>${escapeHtml(details.halftime)}</b></div>` : ''}${match.notes ? `<div class="match-detail-wide"><span>Note</span><b>${escapeHtml(match.notes)}</b></div>` : ''}</div><section class="match-events"><div class="match-events-heading"><span aria-hidden="true">⚽</span><h3>Marcatori ed eventi</h3></div>${events}${source}</section>`;
+    content.innerHTML = `<div class="match-detail-hero"><p class="eyebrow">Tabellino partita</p><h2 id="match-dialog-title">${escapeHtml(matchOutcome(match))}</h2><p class="match-detail-meta">${escapeHtml(matchRoundLabel(match))}</p><div class="match-detail-score">${detailTeam(match, 'home')}<b>${Number(match.home_score)} <span>—</span> ${Number(match.away_score)}</b>${detailTeam(match, 'away')}</div>${penalties(match) ? `<p class="match-detail-outcome">${penalties(match).replace(/<\/?small[^>]*>/g, '')}</p>` : ''}</div><div class="match-detail-grid"><div><span>Data</span><b>${escapeHtml(details.kickoff || 'Non pubblicata')}</b></div><div><span>Gara</span><b>${escapeHtml(matchRoundLabel(match))}</b></div><div><span>Campo</span><b>${escapeHtml(details.venue || 'Non pubblicato')}</b></div><div><span>Arbitro</span><b>${escapeHtml(details.referee || 'Non pubblicato')}</b></div>${details.halftime ? `<div class="match-detail-wide"><span>Primo tempo</span><b>${escapeHtml(details.halftime)}</b></div>` : ''}${match.notes ? `<div class="match-detail-wide"><span>Note</span><b>${escapeHtml(match.notes)}</b></div>` : ''}</div><section class="match-events"><div class="match-events-heading"><span aria-hidden="true">⚽</span><h3>Marcatori ed eventi</h3></div>${events}${source}</section>`;
     modal.showModal();
   }
 

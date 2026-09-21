@@ -1,5 +1,5 @@
 import './auth.js';
-import { initResults } from './results.js?v=20260921-match-detail';
+import { initResults } from './results.js?v=20260921-match-detail-v2';
 import { selectFeaturedMatches, isCapraiaMatch } from './data/calendar-logic.js';
 
 const root = document.querySelector('#partite');
